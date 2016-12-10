@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AnalyzeMapper">  
+	<select id="findProvinceAndCityTurnOver" parameterType="map" resultType="map">
+		SELECT
+			o.account_id AS accountId,
+			o.real_price AS realPrice,
+			p.`name` AS provinceName,
+			c.`name` AS cityName
+		FROM
+			`order` o,
+			order_receive_address ora,
+			province p,
+			city c
+		WHERE
+			o.receive_address_id = ora.id
+		AND ora.province = p.province_id
+		AND ora.city = c.city_id
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>		
+	</select>
+	
+	<select id="findProductTurnOverAnalyze" parameterType="map" resultType="map">
+		SELECT
+			a.id AS accountId,
+			a.`name` AS accountName,
+			op.product_count AS productCount,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.type AS type,
+			p.id AS productId,
+			op.sales_price AS salesPrice,
+			o.pay_time AS payTime
+		FROM
+			`order` o,
+			order_product op,
+			product p,
+			account a
+		WHERE
+			o.id = op.order_id
+		AND op.product_id = p.id
+		AND o.account_id=a.id
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>		
+	</select>
+	
+	<select id="findAllFullCategoryProduct" parameterType="map" resultType="map">
+		SELECT
+			p.id AS productId,
+			op.product_count AS productCount,
+			p.type AS type,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			o.pay_time AS payTime,
+			cf.`name` AS categoryFirstName,
+			cs.`name` AS categorySecondName,
+			ct.`name` AS categorythirdName,
+			o.account_id AS accountId
+		FROM
+			`order` o,
+			order_product op,
+			product p,
+			product_base pb,
+			relation_category_and_product_base rcpb,
+			category_first cf,
+			category_second cs,
+			category_third ct
+		WHERE
+			o.id = op.order_id
+		AND op.product_id = p.id
+		AND p.product_base_id = pb.id
+		AND pb.id = rcpb.product_base_id
+		AND rcpb.category_first_id = cf.id
+		AND rcpb.category_second_id = cs.id
+		AND rcpb.category_third_id = ct.id
+		AND <![CDATA[rcpb.category_third_id > 0]]>
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>		
+	</select>
+	
+	<select id="finSecondCategoryProduct" parameterType="map" resultType="map">
+		SELECT
+			p.id AS productId,
+			op.product_count AS productCount,
+			p.type AS type,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			o.pay_time AS payTime,
+			cf.`name` AS categoryFirstName,
+			cs.`name` AS categorySecondName,
+			o.account_id AS accountId
+		FROM
+			`order` o,
+			order_product op,
+			product p,
+			product_base pb,
+			relation_category_and_product_base rcpb,
+			category_first cf,
+			category_second cs
+		WHERE
+			o.id = op.order_id
+		AND op.product_id = p.id
+		AND p.product_base_id = pb.id
+		AND pb.id = rcpb.product_base_id
+		AND rcpb.category_first_id = cf.id
+		AND rcpb.category_second_id = cs.id
+		AND <![CDATA[rcpb.category_third_id = 0]]>
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>		
+	</select>
+	
+	<select id="findNoCategoryProduct" parameterType="map" resultType="map">
+		SELECT
+			op.product_count AS productCount,
+			o.id AS orderId,
+			p.type AS type,
+			p.id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			o.pay_time AS payTime,
+			o.account_id AS accountId
+		FROM
+			`order` o,
+			order_product op,
+			product p
+		WHERE
+			o.id = op.order_id
+		AND op.product_id = p.id
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>
+		AND p.product_base_id not in(
+			SELECT product_base_id FROM relation_category_and_product_base
+		)	
+	</select>
+	
+	<select id="findAllFirstCategoryProduct" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			cf.`name` AS categoryFirstName
+		FROM
+			`order` o,
+			order_product op,
+			product p,
+			product_base pb,
+			relation_category_and_product_base rcpb,
+			category_first cf
+		WHERE
+			o.id = op.order_id
+		AND op.product_id = p.id
+		AND p.product_base_id = pb.id
+		AND pb.id = rcpb.product_base_id
+		AND rcpb.category_first_id = cf.id
+		AND <![CDATA[o.pay_time>=#{payTimeBegin}]]>
+		AND <![CDATA[o.pay_time<#{payTimeEnd}]]>		
+	</select>
+
+	<select id="findUserStatisticByChannel" parameterType="map" resultType="UserStatisticView">
+		SELECT
+			a.type as type,
+			o.app_channel as appChannel,
+			count(a.id) as userCount,
+			sum(o.real_price) as totalPrice
+		from `ygg_sale_platform`.`account` a,`ygg_sale_platform`.`order` o
+		where o.`account_id` = a.`id` and o.status in (2,3,4)
+		<if test="startTime != null"><![CDATA[AND a.create_time>=#{startTime}]]></if>
+		<if test="endTime != null"><![CDATA[AND a.create_time<=#{endTime}]]></if>
+		group by o.app_channel,a.type
+		order by a.type;
+	</select>
+	
+	<select id="findUserStatisticDetail" parameterType="map" resultType="map">
+		SELECT
+			a.type as type,
+			o.app_channel as appChannel,
+			count(a.id) as userCount,
+			o.create_time as createTime,
+			sum(o.real_price) as totalPrice
+		from `ygg_sale_platform`.`account` a,`ygg_sale_platform`.`order` o
+		where o.`account_id` = a.`id` and o.status in (2,3,4)
+		<if test="startTime != null"><![CDATA[AND a.create_time>=#{startTime}]]></if>
+		<if test="endTime != null"><![CDATA[AND a.create_time<=#{endTime}]]></if>
+		<if test="typeList != null">AND  a.type in
+				<foreach collection="typeList" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+		</if>	
+		<if test="appChannel != null"><![CDATA[AND a.channel=#{appChannel}]]></if>
+		group by o.create_time
+		order by o.create_time;
+	</select>
+	
+	
+	<select id="findRegistUserStatisticByChannel" parameterType="map" resultType="UserStatisticView">
+		SELECT
+			count(DISTINCT(a.`id`)) AS registUserCount,
+			NULL AS orderUserCount,
+			a.type AS type,
+			a.channel AS appChannel,
+			NULL AS totalPrice
+		FROM
+			`account` a
+		<if test="startTime != null"><![CDATA[ where a.create_time>=#{startTime}]]></if>
+		<if test="endTime != null"><![CDATA[ AND a.create_time<=#{endTime}]]></if>	
+		GROUP BY a.channel,a.type
+		order by a.type,a.channel
+	</select>
+	
+	<select id="findOrderUserStatisticByChannel" parameterType="map" resultType="UserStatisticView">
+		SELECT
+			NULL AS registUserCount,
+			count(DISTINCT(o.`account_id`)) AS orderUserCount,
+			a.type AS type,
+			a.channel AS appChannel,
+			sum(o.real_price) AS totalPrice
+		FROM
+			`account` a,
+			`order` o
+		WHERE
+			a.`id` = o.`account_id`  and o.`status` in (2,3,4)
+		<if test="startTime != null"><![CDATA[ AND a.create_time>=#{startTime}]]></if>
+		<if test="endTime != null"><![CDATA[ AND a.create_time<=#{endTime}]]></if>
+		GROUP BY a.channel,a.type
+		order by a.type,a.channel
+	</select>
+	
+</mapper>  

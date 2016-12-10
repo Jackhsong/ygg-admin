@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LogisticsTimeoutMapper">  
+	<select id="findAllLogisticsTimeoutOrders" parameterType="map" resultType="map">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			order_id AS orderId,
+			send_time AS sendTime,
+			expire_time AS expireTime,
+			logistics_time AS logisticsTime,
+			logistics_number AS logisticsNumber,
+			logistics_company AS logisticsCompany,
+			is_timeout AS isTimeout
+		FROM
+			logistics_timeout
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="sendTimeBegin != null"><![CDATA[AND send_time>=#{sendTimeBegin}]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[AND send_time<=#{sendTimeEnd}]]></if>
+			<if test="orderType != null">and `order_type` =#{orderType}</if>
+			<if test="sellerId != null">AND seller_id=#{sellerId}</if>
+			<if test="sellerIdList != null">AND seller_id in
+			<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</if>
+		</trim>		
+	</select>
+	
+	<select id="findLogisticsTimeoutOrders" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.`number` AS number,
+			o.`status` AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.adjust_price AS adjustPrice,
+			o.real_price AS realPrice,
+			o.app_channel AS appChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId,
+			o.receive_address_id AS receiveAddressId,
+			o.seller_id AS sellerId,
+			o.type AS orderType,
+			lt.expire_time AS expireTime,
+			lt.is_timeout AS isTimeout,
+			lt.logistics_timeout_reason_id AS reasonId,
+			lt.complain_status as complainStatus
+		FROM
+			`order` o,logistics_timeout lt
+		WHERE
+			o.id=lt.order_id
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+			<if test="complainStatus != null">AND lt.complain_status=#{complainStatus}</if>
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>
+			<if test="orderType != null">AND o.type=#{orderType}</if>
+			<if test="complainStatusList != null">AND lt.complain_status in
+				<foreach collection="complainStatusList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if>
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderDesc == 1">ORDER BY lt.id DESC</if>
+			<if test="orderDesc == 2">ORDER BY lt.update_time DESC</if>
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countLogisticsTimeoutOrders" parameterType="map" resultType="int">
+		SELECT
+			COUNT(o.id)
+		FROM
+			`order` o,logistics_timeout lt
+		WHERE
+			o.id=lt.order_id
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+			<if test="complainStatus != null">AND lt.complain_status=#{complainStatus}</if>			
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>
+			<if test="orderType != null">AND o.type=#{orderType}</if>	
+			<if test="complainStatusList != null">AND lt.complain_status in
+				<foreach collection="complainStatusList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if>					
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	</select>
+	
+	
+	<select id="findLogisticsTimeoutOrders2" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.expire_time AS expireTime,
+			o.is_timeout AS isTimeout,
+			o.send_time AS sendTime,
+			o.`number` AS number,
+			o.`status` AS status,
+			o.total_price+adjust_price AS totalPrice,
+			o.adjust_price AS adjustPrice,
+			o.real_price AS realPrice,
+			o.app_channel AS appChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId,
+			o.receive_address_id AS receiveAddressId,
+			o.seller_id AS sellerId,
+			lt.expire_time AS expireTime,
+			lt.is_timeout AS isTimeout,
+			lt.logistics_timeout_reason_id AS reasonId,
+			lt.complain_status as complainStatus
+		FROM
+			`order` o,order_product op,logistics_timeout lt
+		WHERE
+			op.order_id=o.id
+			AND lt.order_id=o.id
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>	
+			<if test="complainStatusList != null">AND lt.complain_status in
+				<foreach collection="complainStatusList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if>					
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productIdList != null">
+				and op.product_id in
+				<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+		GROUP BY o.id
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+
+	<select id="countLogisticsTimeoutOrders2" parameterType="map" resultType="int">
+		SELECT
+			count(distinct o.id)
+		FROM
+			`order` o,order_product op,logistics_timeout lt
+		WHERE
+			op.order_id=o.id
+			AND lt.order_id=o.id
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>
+			<if test="complainStatusList != null">AND lt.complain_status in
+				<foreach collection="complainStatusList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if>			
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productIdList != null">
+				and op.product_id in
+				<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+	</select>	
+	
+	<select id="findLogisticsTimeoutReasonById" parameterType="int" resultType="string">
+		select `name` from logistics_timeout_reason where id=#{id}
+	</select>
+	
+	<select id="findAllLogisticsTimeoutReason" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			is_available AS isAvailable,
+			create_user AS createUser
+		FROM
+			logistics_timeout_reason
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">and id=#{id}</if>
+			<if test="name != null">and `name`=#{name}</if>
+			<if test="isAvailable != null">and is_available=#{isAvailable}</if>
+		</trim>	
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countLogisticsTimeoutReason" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			logistics_timeout_reason
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">and id=#{id}</if>
+			<if test="name != null">and `name`=#{name}</if>
+			<if test="isAvailable != null">and is_available=#{isAvailable}</if>
+		</trim>			
+	</select>
+	
+	<insert id="insertTimeoutReason" parameterType="map">
+		INSERT INTO logistics_timeout_reason(`name`,`create_user`) VALUES(#{name},#{createUser})
+	</insert>
+	
+	<update id="updateTimeoutReason" parameterType="map">
+		UPDATE logistics_timeout_reason
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="name != null">`name`=#{name},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findLogisticsTimeoutByOid" parameterType="int" resultType="map">
+		SELECT
+			o.number AS orderNumber,
+			s.real_seller_name AS sellerName,
+			lt.logistics_timeout_reason_id AS reasonId
+		FROM
+			logistics_timeout lt,
+			seller s,
+			`order` o
+		WHERE
+			s.id = lt.seller_id
+		AND lt.order_id = o.id
+		AND o.id=#{orderId}	
+	</select>
+	
+	<select id="findLogisticsTimeoutComplainListByOrderId" parameterType="int" resultType="map">
+		SELECT
+			id,
+			order_id AS orderId,
+			reason,
+			`status`,
+			remark,
+			deal_user AS dealUser,
+			create_time AS createTime,
+			update_time AS updateTime
+		FROM
+			logistics_timeout_complain
+		WHERE
+			order_id = #{orderId}
+		ORDER BY id			
+	</select>
+	
+	<select id="findAllTimeoutReason" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			is_available AS isAvailable
+		FROM
+			logistics_timeout_reason
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">and id=#{id}</if>
+			<if test="name != null">and `name`=#{name}</if>
+			<if test="isAvailable != null">and is_available=#{isAvailable}</if>
+		</trim>	
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="findRecentLogisticsTimeoutComplainByOrderId" parameterType="int" resultType="map">
+		SELECT
+			id,
+			order_id AS orderId,
+			reason,
+			`status`,
+			remark
+		FROM
+			logistics_timeout_complain
+		WHERE order_id=#{orderId}
+		ORDER BY id DESC LIMIT 1		
+	</select>
+	
+	<update id="updateLogisticsTimeoutComplain" parameterType="map">
+		update logistics_timeout_complain
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="status != null">`status`=#{status},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="dealUser != null">deal_user=#{dealUser},</if>
+		</trim>
+		where id=#{id}		
+	</update>
+	
+	<update id="updateLogisticsTimeout" parameterType="map">
+		update logistics_timeout
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="status != null">complain_status=#{status},</if>
+			<if test="dealUser != null">deal_user=#{dealUser},</if>
+			<if test="isTimeout != null">is_timeout=#{isTimeout},</if>
+			<if test="timeoutReasonId != null">logistics_timeout_reason_id=#{timeoutReasonId},</if>
+		</trim>
+		where order_id=#{orderId}
+	</update>
+	
+	<insert id="insertLogisticsTimeoutComplain" parameterType="map">
+		INSERT INTO logistics_timeout_complain(order_id,reason,create_time) VALUES(#{orderId},#{reason},now())		
+	</insert>
+	
+	<insert id="addTimeoutOrderQcDeal" parameterType="map">
+		insert into logistics_timeout_qc_deal(order_id,logistics_timeout_reason_id,deal_remark,deal_result,deal_user)
+		values(#{orderId},#{reasonId},#{dealRemark},#{dealResult},#{dealUser})
+	</insert>
+	
+	<select id="findLogisticsTimeoutByOrderId" parameterType="int" resultType="LogisticsTimeoutEntity">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			order_id AS orderId,
+			send_time AS sendTime,
+			expire_time AS expireTime,
+			logistics_time AS logisticsTime,
+			logistics_number AS logisticsNumber,
+			logistics_company AS logisticsCompany,
+			is_timeout AS isTimeout,
+			complain_status AS complainStatus,
+			logistics_timeout_reason_id AS logisticsTimeoutReasonId,
+			deal_user AS dealUser
+		FROM
+			logistics_timeout
+		WHERE
+			order_id = #{orderId}		
+	</select>
+	
+	<select id="findOrderLogisticsTimeoutQcListByOid" parameterType="int" resultType="map">
+		SELECT
+			ltq.id AS id,
+			ltq.deal_user AS dealUser,
+			ltq.deal_result AS dealResult,
+			ltq.deal_remark AS dealRemark,
+			ltq.create_time AS dealTime,
+			ltr.`name` AS reason
+		FROM
+			logistics_timeout_qc_deal ltq,
+			logistics_timeout_reason ltr
+		WHERE
+			ltq.logistics_timeout_reason_id = ltr.id
+		AND ltq.order_id = #{orderId}
+		ORDER BY ltq.id	DESC	
+	</select>
+	
+	<select id="findOrderLogisticsTimeoutQcListByOids" parameterType="list" resultType="map">
+		SELECT
+			ltq.id AS id,
+			ltq.order_id AS orderId,
+			ltq.deal_user AS dealUser,
+			ltq.deal_result AS dealResult,
+			ltq.deal_remark AS dealRemark,
+			ltq.create_time AS dealTime,
+			ltr.`name` AS reason
+		FROM
+			logistics_timeout_qc_deal ltq,
+			logistics_timeout_reason ltr
+		WHERE
+			ltq.logistics_timeout_reason_id = ltr.id
+		AND ltq.order_id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		ORDER BY ltq.id			
+	</select>
+	
+	<insert id="batchAddTimeoutOrderQcDeal" parameterType="list">
+		insert into logistics_timeout_qc_deal(order_id,logistics_timeout_reason_id,deal_remark,deal_result,deal_user)values
+		<foreach collection="list" item="item" index="index" separator=",">
+       (#{item.orderId},#{item.reasonId},#{item.dealRemark},#{item.dealResult},#{item.dealUser})
+      	</foreach>
+	</insert>
+	
+	<select id="findAllTimeoutOrderDetail" parameterType="map" resultType="OrderDetailInfoForSeller">
+		SELECT 
+			o.id AS oId,
+			o.number AS oNumber,
+			o.`status` AS oStatus,
+			o.total_price+o.adjust_price AS oTotalPrice,
+			o.real_price AS oRealPrice,
+			o.create_time AS oCreateTime,
+			o.send_time AS oSendTime,
+			o.pay_time AS oPayTime,
+		 	o.pay_channel AS payChannel,
+			o.remark AS sellerMarks,
+			o.freight_money AS oFreightMoney,
+			o.remark2 AS kefuRemark,
+			o.app_channel AS appChannel,
+			o.app_version AS appVersion,
+			a.name AS aName,
+			a.id AS accountId,
+			op.product_count + op.adjust_count AS productCount,
+			p.`name` AS productName,
+			p.code AS productCode,
+		 	s.id AS sId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			ra.id_card AS raIdCard,
+			ra.province AS raProvince,
+			ra.city AS raCity,
+			ra.district AS raDistrict,
+			ra.detail_address AS raDetailAddress,
+			lt.logistics_company AS ologChannel,
+			lt.logistics_number AS ologNumber
+		FROM 
+			`order` o LEFT JOIN logistics_timeout lt on o.id=lt.order_id
+			LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+		WHERE (op.product_count + op.adjust_count) > 0
+		<if test="orderId != null"> and o.id=#{orderId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+		<if test="paytTimeEnd != null"><![CDATA[and o.pay_time<#{paytTimeEnd} ]]></if>
+		<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+		<if test="sendtTimeEnd != null"><![CDATA[and o.send_time<#{sendtTimeEnd} ]]></if>
+		<if test="expireTimeBegin != null"><![CDATA[AND lt.expire_time>=#{expireTimeBegin}]]></if>
+		<if test="expireTimeEnd != null"><![CDATA[AND lt.expire_time<=#{expireTimeEnd}]]></if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="productId != null"> and op.product_id=#{productId} </if>
+		<if test="productName != null"> and p.name like #{productName} </if>
+		<if test="productCode != null"> and p.code = #{productCode} </if>
+		<if test="sellerId != null"> and s.id=#{sellerId} </if>
+		<if test="accountId != null"> and a.id = #{accountId} </if>
+		<if test="accountName != null"> and a.name like #{accountName} </if>
+		<if test="receiveName != null"> and ra.full_name like #{receiveName} </if>
+		<if test="receivePhone != null"> and ra.mobile_number=#{receivePhone} </if>
+		<if test="logisticsNumber != null"> and lt.number=#{logisticsNumber} </if>
+		<if test="orderType != null">AND o.type=#{orderType}</if>
+		<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+		<if test="logisticsTime != null">AND lt.logistics_time=#{logisticsTime}</if>
+	    <if test="sellerIdList != null">
+		  and o.seller_id in
+		  <foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			 #{item}
+		  </foreach>
+	    </if>
+		<if test="orderIdList != null">
+			and o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY o.id DESC			
+	</select>
+	
+	<select id="countTimeoutOrderDetail" parameterType="map" resultType="int">
+		SELECT 
+			count(DISTINCT(o.id))
+		FROM 
+			`order` o LEFT JOIN logistics_timeout lt on o.id=lt.order_id
+			LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+		WHERE (op.product_count + op.adjust_count) > 0
+		<if test="orderId != null"> and o.id=#{orderId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+		<if test="paytTimeEnd != null"><![CDATA[and o.pay_time<#{paytTimeEnd} ]]></if>
+		<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+		<if test="sendtTimeEnd != null"><![CDATA[and o.send_time<#{sendtTimeEnd} ]]></if>
+		<if test="expireTimeBegin != null"><![CDATA[AND lt.expire_time>=#{expireTimeBegin}]]></if>
+		<if test="expireTimeEnd != null"><![CDATA[AND lt.expire_time<=#{expireTimeEnd}]]></if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="productId != null"> and op.product_id=#{productId} </if>
+		<if test="productName != null"> and p.name like #{productName} </if>
+		<if test="productCode != null"> and p.code = #{productCode} </if>
+		<if test="sellerId != null"> and s.id=#{sellerId} </if>
+		<if test="accountId != null"> and a.id = #{accountId} </if>
+		<if test="accountName != null"> and a.name like #{accountName} </if>
+		<if test="receiveName != null"> and ra.full_name like #{receiveName} </if>
+		<if test="receivePhone != null"> and ra.mobile_number=#{receivePhone} </if>
+		<if test="logisticsNumber != null"> and lt.number=#{logisticsNumber} </if>
+		<if test="orderType != null">AND o.type=#{orderType}</if>
+		<if test="isTimeout != null">AND lt.is_timeout=#{isTimeout}</if>
+	    <if test="sellerIdList != null">
+		  and o.seller_id in
+		  <foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			 #{item}
+		  </foreach>
+	    </if>
+		<if test="orderIdList != null">
+			and o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>		
+	</select>
+</mapper>  

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="YwFansMapper">
+    <resultMap type="YwFansEntity" id="BrandMap">
+    	<id column="id" property="id" />
+    	<result column="account_id" property="accountId" />
+    	<result column="fans_account_id" property="fansAccountId" />
+		<result column="level" property="level" />
+		<result column="fans_image" property="fansImage" />
+    	<result column="fans_nickname" property="fansNickname" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+     <sql id="query">
+		id as id,
+		account_id as accountId,
+		fans_account_id as fansAccountId,
+		level as level,
+		fans_image as fansImage,
+		fans_nickname as fansNickname,
+		create_time as createTime,
+		update_time as updateTime
+     </sql>
+     
+     <insert id="insertFans" parameterType="YwFansEntity" useGeneratedKeys="true" keyProperty="id">
+ 		<![CDATA[
+        	insert into yw_fans(account_id,fans_account_id,level,fans_image,fans_nickname,create_time) 
+        	values(#{accountId},#{fansAccountId},#{level},#{fansImage},#{fansNickname},#{createTime})
+        ]]>
+	</insert>
+	<select id="getFansList" parameterType="map" resultType="YwFansEntity">
+         SELECT
+          <include refid="query"></include>
+         FROM yw_fans 
+         WHERE 1=1 
+         <if test="accountId != null">and account_id=#{accountId}</if>
+         <if test="fansAccountId != null">and fans_account_id=#{fansAccountId}</if>
+         <if test="level != null">and level=#{level}</if>
+         order by id desc
+         <if test="start != null">limit #{start},#{size}</if>
+     </select>
+</mapper>  

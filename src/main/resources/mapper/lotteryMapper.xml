@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="LotteryMapper">
+	<select id="findAllLottery" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			start_time AS startTime,
+			end_time AS endTime,
+			remark,
+			limit_num AS limitNum,
+			share_num AS shareNum,
+			limit_share_num AS limitShareNum,
+			is_available AS isAvailable
+		FROM
+			lottery_activity
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="findAllGiftActivity" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			start_time AS startTime,
+			end_time AS endTime,
+			remark,
+			limit_num AS limitNum,
+			is_available AS isAvailable
+		FROM
+			gift_activity
+		where 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+</mapper>

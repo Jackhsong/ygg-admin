@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ActivitySimplifyMapper">  
+	<select id="findAllActivitySimplify" parameterType="map" resultType="map">
+		SELECT
+			id,
+			title,
+			`desc`,
+			image,
+			is_available as isAvailable
+		FROM
+			activity_simplify
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="title != null">AND title LIKE #{title}</if>
+			<if test="desc != null">AND `desc` LIKE #{desc}</if>
+			<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countActivitySimplify" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			activity_simplify
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="title != null">AND title LIKE #{title}</if>
+			<if test="desc != null">AND `desc` LIKE #{desc}</if>
+			<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		</trim>
+	</select>
+	
+	<insert id="saveActivitySimplify" parameterType="map">
+		INSERT INTO activity_simplify(`title`, `desc`, `image`,`is_available`) 
+		VALUES(#{title},#{desc},#{image},#{isAvailable})
+	</insert>
+	
+	<update id="updateActivitySimplify" parameterType="map">
+		UPDATE activity_simplify set 
+			`title`=#{title}, 
+			`desc`=#{desc}, 
+			`image`=#{image},
+			`is_available`=#{isAvailable}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateActivitySimplifyAvailableStatus" parameterType="map">
+		UPDATE activity_simplify SET is_available=#{isAvailable} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+
+	
+	<select id="findActivitySimplifyProduct" parameterType="map" resultType="map">
+		SELECT
+			id,
+			simplify_activity_id AS activityId,
+			title,
+			`desc`,
+			product_id AS productId,
+			image,
+			sequence AS sequence,
+			is_display AS isDisplay
+		FROM
+			activity_simplify_product
+		WHERE simplify_activity_id = #{activityId}
+		ORDER BY sequence DESC
+		<if test="start !=null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countActivitySimplifyProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			activity_simplify_product
+		WHERE simplify_activity_id = #{activityId}		
+	</select>
+	
+	<update id="updateActivitySimplifyProductDisplayStatus" parameterType="map">
+		update activity_simplify_product set is_display=#{isDisplay} where id in
+		<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	
+	<insert id="saveActivitySimplifyProduct" parameterType="map">
+		INSERT INTO activity_simplify_product(simplify_activity_id,title,`desc`,product_id,image,is_display)
+		VALUES(#{activityId},#{title},#{desc},#{productId},#{image},#{isDisplay})
+	</insert>
+	
+	<update id="updateActivitySimplifyProduct" parameterType="map">
+		update activity_simplify_product
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="title != null">title=#{title},</if>
+			<if test="desc != null">`desc`=#{desc},</if>
+			<if test="productId != null">product_id=#{productId},</if>
+			<if test="image != null">image=#{image},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+		</trim>
+		where id=#{id}
+	</update>
+
+	<select id="findActivitySimplifyProductIdBySimplifyActivityId" parameterType="int" resultType="int">
+		SELECT
+			product_id
+		FROM
+			activity_simplify_product
+		WHERE
+			simplify_activity_id = #{id}
+			AND is_display=1
+	</select>
+	
+</mapper>  

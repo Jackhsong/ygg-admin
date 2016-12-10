@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsWhiteListMapper">
+	<sql id="query">
+		select log.id,log.id as `index`,log.account_id as accountId,
+				log.status,
+				log.create_time as createTime
+	</sql>
+	<sql id="condition">
+		where 1=1
+			<if test="accountId !=null and accountId !=-1"> and log.account_id=#{accountId}</if>
+	</sql>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+	 	<include refid="query"></include>
+		from qqbs_white_list log
+		<include refid="condition"></include>
+		order by STATUS asc,log.create_time DESC,id desc
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) 
+			from qqbs_white_list log
+		<include refid="condition"></include>
+	</select>
+	<!-- 修改日志 -->
+	<update id="updateLog" parameterType="map">
+		update qqbs_white_list t set t.status = #{status}, t.update_time = now() where id=#{id}
+	</update>
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+ 		<![CDATA[
+        	insert into qqbs_white_list(account_id,status,create_time) 
+        	values(#{accountId},#{status},now())
+        ]]>
+	</insert> 
+</mapper>

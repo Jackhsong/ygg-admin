@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ActivityOptionalPartMapper">
+    <resultMap type="ActivitiesOptionalPartEntity" id="ActivityOptionalPartMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="type" property="type" />
+    	<result column="type_id" property="typeId" />
+    	<result column="start_time" property="startTime" />
+    	<result column="end_time" property="endTime" />
+    	<result column="price" property="price" />
+    	<result column="count" property="count" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+
+	<select id="findAllActivityOptionalPart" parameterType="map" resultMap="ActivityOptionalPartMap">
+			select
+		 		*
+			from
+				activities_optional_part
+			where
+				1=1
+				<if test="status != null and status == 1">
+					<!-- 即将开始 -->
+					<![CDATA[ and now() < start_time ]]>
+				</if>
+				<if test="status != null and status == 2">
+					<!-- 进行中 -->
+					<![CDATA[ and start_time < now() and now() < end_time]]>
+				</if>
+				<if test="status != null and status == 3">
+					<!-- 已结束 -->
+					<![CDATA[ and end_time < now()]]>
+				</if>
+				<if test="status != null and status == 4">
+					<!-- 即将开始 or 进行中 -->
+					<![CDATA[ and now() < end_time]]>
+				</if>
+				<if test="status != null and status == 5">
+					<!-- 即将开始 or 已结束 -->
+					<![CDATA[ and (now() < start_time) or (end_time < now())]]>
+				</if>
+				<if test="status != null and status == 6">
+					<!-- 进行中 or 已结束 -->
+					<![CDATA[ and start_time < now()]]>
+				</if>
+				<if test="id != null">
+					and id=#{id}
+				</if>
+			ORDER BY id DESC
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countAllActivityOptionalPart" parameterType="map" resultType="int">
+			select
+		 		count(id)
+			from
+				activities_optional_part
+			where
+				1=1
+				<if test="status != null and status == 1">
+					<!-- 即将开始 -->
+					<![CDATA[ and now() < start_time ]]>
+				</if>
+				<if test="status != null and status == 2">
+					<!-- 进行中 -->
+					<![CDATA[ and start_time < now() and now() < end_time]]>
+				</if>
+				<if test="status != null and status == 3">
+					<!-- 已结束 -->
+					<![CDATA[ and end_time < now()]]>
+				</if>
+				<if test="status != null and status == 4">
+					<!-- 即将开始 or 进行中 -->
+					<![CDATA[ and now() < end_time]]>
+				</if>
+				<if test="status != null and status == 5">
+					<!-- 即将开始 or 已结束 -->
+					<![CDATA[ and (now() < start_time) or (end_time < now())]]>
+				</if>
+				<if test="status != null and status == 6">
+					<!-- 进行中 or 已结束 -->
+					<![CDATA[ and start_time < now()]]>
+				</if>
+				<if test="id != null">
+					and id=#{id}
+				</if>
+	</select>
+
+	<insert id="saveActivityOptionalPart" parameterType="ActivitiesOptionalPartEntity">
+			INSERT INTO activities_optional_part(
+						`name`,
+						`type`,
+						`type_id`,
+						`start_time`,
+						`end_time`,
+						`price`,
+						`count`,
+						`is_available`,
+						`create_time`
+			)
+			VALUES(
+						#{name},
+						#{type},
+						#{typeId},
+						#{startTime},
+						#{endTime},
+						#{price},
+						#{count},
+						#{isAvailable},
+						#{createTime}
+			)
+	</insert>
+
+	<update id="updateActivityOptionalPart" parameterType="ActivitiesOptionalPartEntity">
+			UPDATE activities_optional_part
+			<trim prefix="SET" suffixOverrides=",">
+				<if test="name != null">`name`=#{name},</if>
+				<if test="type != null">`type`=#{type},</if>
+				<if test="typeId != null">`type_id`=#{typeId},</if>
+				<if test="startTime != null">`start_time`=#{startTime},</if>
+				<if test="endTime != null">`end_time`=#{endTime},</if>
+				<if test="price != null">`price`=#{price},</if>
+				<if test="count != null">`count`=#{count},</if>
+				<if test="isAvailable != null">`is_available`=#{isAvailable}</if>
+			</trim>
+			WHERE id=#{id}
+	</update>
+
+</mapper>  

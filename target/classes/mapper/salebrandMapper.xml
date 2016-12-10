@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="selaBrandMapper">
+
+	<resultMap type="SelaBrandEntity" id="BrandRecommend">
+		<id column="id" property="id"/>
+		<result column="brand_id" property="brandId"/>
+		<result column="name" property="name"/>
+		<result column="image" property="image"/>
+		<result column="state_id" property="stateId"/>
+		<result column="category_first_id" property="categoryFirstId"/>
+		<result column="sequence" property="sequence"/>
+		<result column="is_display" property="isDisplay"/>
+		<result column="headImage" property="head_image"/>
+	</resultMap>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select a.id,a.id as `index`,a.brand_id as brandId,
+				a.name as name,a.image as image,
+				a.state_id as stateId, a.category_first_id as categoryFirstId,
+				a.sequence as sequence,a.is_display as isDisplay,head_image as headImage
+		from selling_brand a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="name != null and name != '' "> and a.name like #{name}</if>
+		<if test="brandId!=null and brandId!=-1"> and a.brand_id=#{brandId}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		order by sequence desc,id desc
+		<if test="start">limit #{start},#{size}</if>
+	</select>
+<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) from selling_brand a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="name != null and name != '' "> and a.name like #{name}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="brandId!=null and brandId!=-1"> and a.brand_id=#{brandId}</if>
+		<if test="sequence!=null and sequence!=-1"> and a.sequence>=#{sequence}</if>
+	</select>
+<!-- 新增 -->
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into selling_brand (brand_id,name,image,state_id,category_first_id,sequence
+										,is_display,create_time,head_image)
+		values
+		(#{brandId},#{name},#{image},#{stateId},#{categoryFirstId},#{sequence},
+			#{isDisplay},now(),#{headImage})
+	</insert>
+<!-- 修改 -->
+	<update id="update" parameterType="map">
+		update selling_brand t
+		<set>
+			<if test="sequence!=null">sequence=#{sequence},</if>
+			<if test="isDisplay!=null">is_display=#{isDisplay},</if>
+			<if test="headImage!=null">head_image=#{headImage},</if>
+		</set>
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+	</update>
+	
+	<select id="findCustomGGRecommendById" parameterType="int" resultMap="BrandRecommend">
+		SELECT * FROM selling_brand WHERE id=#{id}
+	</select>
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM selling_brand WHERE id=#{id}
+	</delete>
+	<select id="getBrandInfo" parameterType="map" resultMap="BrandRecommend">
+     		select id as brandId,pr.name as name,pr.image as image ,pr.state_id as stateId,pr.category_first_id as categoryFirstId
+			from brand pr 
+			where pr.id=#{brandId}
+     </select>
+</mapper>

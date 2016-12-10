@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MwebGroupProductMapper">
+
+
+	<resultMap id="mwebGroupProductEntityMap" type="mwebGroupProductEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />	
+		<result column="type" property="type" />
+		<result column="brand_id" property="brandId" />
+		<result column="product_id" property="productId" javaType="int" jdbcType="INTEGER" />
+		<result column="seller_id" property="sellerId" />
+		<result column="barcode" property="barCode" />
+		<result column="code" property="code" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="start_team_time" property="startTeamTime" />
+		<result column="name" property="name" />
+		<result column="seller_product_name" property="sellerProductName" />
+		<result column="remark" property="remark" />
+		<result column="short_name" property="shortName" />
+		<result column="desc" property="desc" />
+		<result column="market_price" property="marketPrice" />
+		<result column="team_price" property="teamPrice" />
+		<result column="team_supply_price" property="teamSupplyPrice" />
+		<result column="sales_price" property="salesPrice" />
+		<result column="team_number_limit" property="teamNumberLimit"/>
+		<result column="team_valid_hour" property="teamValidHour" />
+		<result column="team_count" property="teamCount"/>
+		<result column="product_image" property="productImage" />
+		<result column="image1" property="image1" />
+		<result column="image2" property="image2" />
+		<result column="image3" property="image3" />
+		<result column="image4" property="image4" />
+		<result column="image5" property="image5" />
+		<result column="net_volume" property="netVolume" />
+		<result column="place_of_origin" property="placeOfOrigin" />
+		<result column="storage_method" property="storageMethod" />
+		<result column="manufacturer_date" property="manufacturerDate" />
+		<result column="durability_period" property="durabilityPeriod" />
+		<result column="people_for" property="peopleFor" />
+		<result column="food_method" property="foodMethod" />
+		<result column="use_method" property="useMethod" />
+		<result column="gege_image_id" property="gegeImageId"/>
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="tip" property="tip" />
+		<result column="pc_detail" property="pcDetail" />
+		<result column="is_off_shelves" property="isOffShelves" />
+		<result column="is_available" property="isAvailable" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="product_base_id" property="productBaseId" />
+		<result column="partner_distribution_price" property="partnerDistributionPrice" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+		<result column="activities_status" property="activitiesStatus" />
+		<result column="is_show_in_mall" property="isShowInMall" />
+		<result column="order" property="order" />
+	</resultMap>
+	
+	
+	<resultMap type="productEntity" id="productMap">
+		<id column="id" property="id" />
+		<result column="type" property="type" />
+		<result column="brand_id" property="brandId" />
+		<result column="freight_template_id" property="freightTemplateId" />
+		<result column="seller_id" property="sellerId" />
+		<result column="barcode" property="barcode" />
+		<result column="code" property="code" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="name" property="name" />
+		<result column="seller_product_name" property="sellerProductName" />
+		<result column="remark" property="remark" />
+		<result column="short_name" property="shortName" />
+		<result column="desc" property="desc" />
+		<result column="market_price" property="marketPrice" />
+		<result column="sales_price" property="salesPrice" />
+		<result column="image1" property="image1" />
+		<result column="image2" property="image2" />
+		<result column="image3" property="image3" />
+		<result column="image4" property="image4" />
+		<result column="image5" property="image5" />
+		<result column="net_volume" property="netVolume" />
+		<result column="place_of_origin" property="placeOfOrigin" />
+		<result column="storage_method" property="storageMethod" />
+		<result column="manufacturer_date" property="manufacturerDate" />
+		<result column="durability_period" property="durabilityPeriod" />
+		<result column="people_for" property="peopleFor" />
+		<result column="food_method" property="foodMethod" />
+		<result column="use_method" property="useMethod" />
+		<result column="gege_image_id" property="gegeImageId"/>
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="tip" property="tip" />
+		<result column="pc_detail" property="pcDetail" />
+		<result column="is_off_shelves" property="isOffShelves" />
+		<result column="is_available" property="isAvailable" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="product_base_id" property="productBaseId" />
+		<result column="partner_distribution_price" property="partnerDistributionPrice" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+		<result column="activities_status" property="activitiesStatus" />
+		<result column="is_show_in_mall" property="isShowInMall" />
+	</resultMap>
+	
+
+
+<sql id="find_count_where">
+  <where>
+            <if test="id!=null and id!=0"> AND p.id=#{id}</if>
+            <if test="productBaseId!=null and productBaseId!=0"> AND p.product_base_id=#{productBaseId}</if>
+            <if test="sellerId!=null and sellerId!=0"> AND p.seller_id=#{sellerId}</if>
+            <if test="isAvailable!=null and isAvailable!=-1"> AND p.is_available=#{isAvailable}</if>
+            <if test="isOffShelves!=null and isOffShelves!=-1"> AND p.is_off_shelves=#{isOffShelves}</if>
+            <if test="name!=null and name!=''"> AND p.name like concat('%',#{name},'%')</if>
+		</where>
+</sql>
+
+
+<sql id="ProductAndStock_count_where">
+       <where>
+		   p.id=c.mweb_group_product_id
+		   and p.seller_id=s.id
+            <if test="id!=null and id!=0"> AND p.id=#{id}</if>
+            <if test="productId!=null and productId!=0"> AND p.product_id=#{productId}</if>
+            <if test="productBaseId!=null and productBaseId!=0"> AND p.product_base_id=#{productBaseId}</if>
+            <if test="sellerId!=null and sellerId!=0"> AND p.seller_id=#{sellerId}</if>
+            <if test="isAvailable!=null"> AND p.is_available=#{isAvailable}</if>
+            <if test="isOffShelves!=null"> AND p.is_off_shelves=#{isOffShelves}</if>
+            <if test="name!=null and name!=''"> AND p.name like concat('%',#{name},'%')</if>
+            <if test="startTimeBegin != null"><![CDATA[AND start_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND start_time <= #{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[AND end_time >= #{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[AND end_time <= #{endTimeEnd}]]></if>
+		    <if test="code != null"><![CDATA[AND p.code = #{code}]]></if>
+		</where>
+</sql>
+
+   <select id="countProductAndStock"  resultType="int" parameterType="com.alibaba.fastjson.JSONObject">
+    select count(p.id) FROM mweb_group_product p,mweb_group_product_count c,seller s
+     <include refid="ProductAndStock_count_where"></include>
+
+   </select>
+
+	<select id="findProductAndStock" parameterType="map" resultType="com.alibaba.fastjson.JSONObject">
+    <![CDATA[
+        SELECT 
+        p.id AS mwebGroupProductId,
+        p.product_id as productId,
+        p.type,
+	p.product_base_id AS productBaseId,
+	p.brand_id AS brandId,
+	p.seller_id AS sellerId,
+	p.seller_product_name as sellerProductName,
+	p.code,
+	p.`name`,
+	p.short_name AS shortName,
+	p.selling_point AS sellingSoint,
+	p.`desc`,
+	p.market_price AS marketPrice,
+	p.single_price AS singlePrice,
+	p.team_price AS teamPrice,
+	p.team_supply_price as teamSupplyPrice,
+	p.team_number_limit AS teamNumberLimit,
+	p.team_count as teamCount,
+	p.team_valid_hour AS teamValidHour,
+	p.product_image as productImage,
+	p.image1,
+	p.image2,
+	p.image3,
+	p.image4,
+	p.image5,
+	p.start_time as startTime,
+	p.end_time as endTime,
+	p.start_team_time as startTeamTime,
+	p.create_time AS createTime,
+	p.update_time AS updateTime,
+	p.is_off_shelves AS isOffShelves,
+	p.is_available AS isAvailable,
+	p.`order`,
+	c.stock,
+	c.sell,
+	c.`lock`,
+	s.real_seller_name as realSellerName
+        FROM mweb_group_product p,mweb_group_product_count c,seller s
+        ]]>
+		 <include refid="ProductAndStock_count_where"></include>
+		 
+			 ORDER BY p.id DESC
+	<if test="start!=null">limit #{start},#{max}</if>
+	</select>
+	
+	<select id="countProduct"  resultType="int" parameterType="mwebGroupProductEntity">
+    select count(p.id) FROM mweb_group_product p
+     <include refid="find_count_where"></include>
+
+   </select>
+	
+	<select id="findProduct" parameterType="mwebGroupProductEntity" resultMap="mwebGroupProductEntityMap">
+   <![CDATA[
+        SELECT p.id as mwebGroupProductId,
+         p.type,
+        p.product_base_id as productBaseId,
+        p.brand_id as brandId,
+        p.seller_id as sellerId,
+        p.seller_product_name as sellerProductName,
+        p.code,
+        p.barcode as barCode,
+        p.selling_point as sellingPoint,
+        p.remark,
+        p.name,
+        p.short_name as shortName,
+        p.seller_product_name as sellerProductName,
+        p.selling_point as sellingSoint,
+        p.desc,
+        p.market_price as marketPrice,
+        p.single_price as singlePrice,
+        p.team_price as teamPrice,
+        p.team_supply_price as teamSupplyPrice,
+        p.team_number_limit as teamNumberLimit,
+        p.team_count as teamCount,
+        p.team_valid_hour as teamValidHour,
+        p.product_image as productImage,
+        p.image1,
+        p.image2,
+        p.image3,
+        p.image4,
+        p.image5,
+        p.net_volume as netVolume,
+        p.place_of_origin as placeOfOrigin,
+        p.manufacturer_date as manufacturerDate,
+        p.storage_method as storageMethod,
+        p.durability_period as durabilityPeriod,
+        p.is_off_shelves AS isOffShelves,
+     	p.is_available AS isAvailable,
+        p.people_for as peopleFor,
+        p.food_method as foodMethod,
+        p.use_method as  useMethod,
+        p.tip as tip,
+        p.start_time as startTime,
+        p.end_time as endTime,
+        p.start_team_time as startTeamTime,
+        p.create_time as createTime,
+        p.update_time as updateTime,
+        p.`order`    
+        FROM mweb_group_product p
+        ]]>
+		 <include refid="find_count_where"></include>
+	</select>
+	
+	
+	
+	<select id="findProductImageDetail" parameterType="map" resultType="map">
+    <![CDATA[
+        SELECT
+	         t.id,
+	         t.mweb_group_product_id as mwebGroupProductId,
+	         t.url,
+             t.order
+       FROM mweb_group_image_detail t
+        ]]>
+		<where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+		</where>
+      ORDER BY t.order DESC 
+	</select>
+	
+	
+	
+	<insert id="addProduct" parameterType="mwebGroupProductEntity"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_product
+        ]]>
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+          <if test="type != null" >type,</if>
+          <if test="productBaseId != null" >product_base_id,</if>
+          <if test="productId != null" >product_id,</if>
+          <if test="brandId != null" >brand_id,</if>
+          <if test="sellerId != null" >seller_id,</if>
+          <if test="code != null" >`code`,</if>
+          <if test="barCode != null" >barcode,</if>
+          <if test="startTime != null" >start_time,</if>
+          <if test="endTime != null" >end_time,</if>
+          <if test="startTeamTime != null" >start_team_time,</if>
+          <if test="sellerProductName != null" >seller_product_name,</if>
+          <if test="name != null" >`name`,</if>
+          <if test="shortName != null" >short_name,</if>
+          <if test="sellingPoint != null" >selling_point,</if>
+          <if test="desc != null" >`desc`,</if>
+          <if test="marketPrice != null" >market_price,</if>   
+          <if test="singlePrice != null" >single_price,</if>
+          <if test="teamPrice != null" >team_price,</if>
+          <if test="teamSupplyPrice != null" >team_supply_price,</if>
+          <if test="teamNumberLimit != null" >team_number_limit,</if>
+          <if test="teamCount != null" >team_count,</if>
+          <if test="teamValidHour != null" >team_valid_hour,</if>
+          <if test="productImage != null" >product_image,</if>
+          <if test="image1 != null" >image1,</if>
+          <if test="image2 != null" >image2,</if>
+          <if test="image3 != null" >image3,</if>
+          <if test="image4 != null" >image4,</if>
+          <if test="image5 != null" >image5,</if>
+          <if test="netVolume != null" >net_volume,</if>
+          <if test="placeOfOrigin != null" >place_of_origin,</if>
+          <if test="manufacturerDate != null" >manufacturer_date,</if>
+          <if test="storageMethod != null" >storage_method,</if>
+          <if test="durabilityPeriod != null" >durability_period,</if>
+          <if test="peopleFor != null" >people_for,</if>
+          <if test="foodMethod != null" >food_method,</if>          
+          <if test="useMethod != null" >use_method,</if>
+          <if test="tip != null" >tip,</if>
+          <if test="remark != null" >remark,</if>
+          <if test="isOffShelves != null" >is_off_shelves,</if>
+          <if test="isAvailable != null" >is_available,</if>
+          <if test="deliverAreaDesc != null" >deliver_area_desc,</if>
+          <if test="deliverAreaType != null" >deliver_area_type,</if>
+          <if test="order != null" >`order`,</if>
+          create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="type != null" >#{type},</if>
+          	<if test="productBaseId != null" >#{productBaseId},</if>
+          	<if test="productId != null" >#{productId},</if>
+          	<if test="brandId != null" >#{brandId},</if>
+          	<if test="sellerId != null" >#{sellerId},</if>
+          	<if test="code != null" >#{code},</if>
+          	<if test="barCode != null" >#{barCode},</if>
+          	<if test="startTime != null" >#{startTime},</if>
+          	<if test="endTime != null" >#{endTime},</if>
+            <if test="startTeamTime != null" >#{startTeamTime},</if>
+          	<if test="sellerProductName != null" >#{sellerProductName},</if>
+          	<if test="name != null" >#{name},</if>
+          	<if test="shortName != null" >#{shortName},</if>
+          	<if test="sellingPoint != null" >#{sellingPoint},</if>
+          	<if test="desc != null" >#{desc},</if>
+          	<if test="marketPrice != null" >#{marketPrice},</if>
+          	<if test="singlePrice != null" >#{singlePrice},</if>
+          	<if test="teamPrice != null" >#{teamPrice},</if>
+          	<if test="teamSupplyPrice != null" >#{teamSupplyPrice},</if>
+          	<if test="teamNumberLimit != null" >#{teamNumberLimit},</if>
+          	<if test="teamCount != null" >#{teamCount},</if>
+          	<if test="teamValidHour != null" >#{teamValidHour},</if>
+          	<if test="productImage != null" >#{productImage},</if>      
+          	<if test="image1 != null" >#{image1},</if>
+          	<if test="image2 != null" >#{image2},</if>
+          	<if test="image3 != null" >#{image3},</if>
+          	<if test="image4 != null" >#{image4},</if>
+          	<if test="image5 != null" >#{image5},</if>
+          	<if test="netVolume != null" >#{netVolume},</if>
+          	<if test="placeOfOrigin != null" >#{placeOfOrigin},</if>
+          	<if test="manufacturerDate != null" >#{manufacturerDate},</if>
+          	<if test="storageMethod != null" >#{storageMethod},</if>
+          	<if test="durabilityPeriod != null" >#{durabilityPeriod},</if>
+          	<if test="peopleFor != null" >#{peopleFor},</if>
+          	<if test="foodMethod != null" >#{foodMethod},</if>
+          	<if test="useMethod != null" >#{useMethod},</if>
+          	<if test="tip != null" >#{tip},</if>
+          	<if test="remark != null" >#{remark},</if>
+          	<if test="isOffShelves != null" >#{isOffShelves},</if>
+          	<if test="isAvailable != null" >#{isAvailable},</if>
+          	<if test="deliverAreaDesc != null" >#{deliverAreaDesc},</if>
+          	<if test="deliverAreaType != null" >#{deliverAreaType},</if>
+          	<if test="order != null" >#{order},</if>
+          	now()
+        </trim>
+	</insert>
+
+	<update id="updateProduct" parameterType="mwebGroupProductEntity">
+     <![CDATA[
+        update mweb_group_product t
+        ]]>
+        <set>
+          <if test="startTime != null" >t.start_time=#{startTime},</if>
+          <if test="endTime != null" >t.end_time=#{endTime},</if>
+          <if test="startTeamTime != null" >t.start_team_time=#{startTeamTime},</if>
+          <if test="sellerProductName != null" >t.seller_product_name=#{sellerProductName},</if>
+          <if test="name != null" >t.name=#{name},</if>
+          <if test="shortName != null" >t.short_name=#{shortName},</if>
+          <if test="sellingPoint != null" >t.selling_point=#{sellingPoint},</if>
+          <if test="desc != null" >`desc`=#{desc},</if>
+          <if test="marketPrice != null" >t.market_price=#{marketPrice},</if>   
+          <if test="singlePrice != null" >t.single_price=#{singlePrice},</if>
+          <if test="teamPrice != null" >t.team_price=#{teamPrice},</if>
+          <if test="teamSupplyPrice != null" >t.team_supply_price=#{teamSupplyPrice},</if>
+          <if test="teamNumberLimit != null" >t.team_number_limit=#{teamNumberLimit},</if>
+          <if test="teamValidHour != null" >t.team_valid_hour=#{teamValidHour},</if>
+          <if test="productImage != null" >t.product_image=#{productImage},</if>
+          <if test="image1 != null" >t.image1=#{image1},</if>
+          <if test="image2 != null" >t.image2=#{image2},</if>
+          <if test="image3 != null" >t.image3=#{image3},</if>
+          <if test="image4 != null" >t.image4=#{image4},</if>
+          <if test="image5 != null" >t.image5=#{image5},</if>
+          <if test="netVolume != null" >t.net_volume=#{netVolume},</if>
+          <if test="placeOfOrigin != null" >t.place_of_origin=#{placeOfOrigin},</if>
+          <if test="manufacturerDate != null" >t.manufacturer_date=#{manufacturerDate},</if>
+          <if test="storageMethod != null" >t.storage_method=#{storageMethod},</if>
+          <if test="durabilityPeriod != null" >t.durability_period=#{durabilityPeriod},</if>
+          <if test="peopleFor != null" >t.people_for=#{peopleFor},</if>
+          <if test="foodMethod != null" >t.food_method=#{foodMethod},</if>          
+          <if test="useMethod != null" >t.use_method=#{useMethod},</if>
+          <if test="tip != null" >t.tip=#{tip},</if>
+          <if test="remark != null" >t.remark=#{remark},</if>
+          <if test="isOffShelves != null" >t.is_off_shelves=#{isOffShelves},</if>
+          <if test="isAvailable != null" >t.is_available=#{isAvailable},</if>
+          <if test="deliverAreaDesc != null" >t.deliver_area_desc=#{deliverAreaDesc},</if>
+          <if test="deliverAreaType != null" >t.deliver_area_type=#{deliverAreaType},</if>
+          <if test="order != null and order != 0" >t.`order`=#{order},</if>
+        </set>
+        <where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+		</where>
+	</update>
+	
+	<update id="updateRelationProductByPara" parameterType="map">
+		UPDATE 
+			mweb_group_product
+		SET 
+			brand_id=#{brandId},
+			seller_id=#{sellerId},
+			code=#{code},
+			barcode=#{barcode},
+			net_volume=#{netVolume},
+			place_of_origin=#{placeOfOrigin},
+			manufacturer_date=#{manufacturerDate},
+			storage_method=#{storageMethod},
+			durability_period=#{durabilityPeriod},
+			people_for=#{peopleFor},
+			food_method=#{foodMethod},
+			use_method=#{useMethod}
+			WHERE `product_base_id`=${baseId}
+	</update>
+	
+	<!-- 更新mwebGroupProduct 上下架信息 -->
+	<update id="updateIsOffShelves" parameterType="map">
+		UPDATE mweb_group_product
+		SET is_off_shelves=#{code}
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	<!-- 更新mwebGroupProduct 排序值 -->
+	<update id="updateOrder" parameterType="map">
+		UPDATE mweb_group_product
+		SET `order`=#{order}
+		where id=#{id}
+	</update>
+	
+	
+	
+	<insert id="addProductEntity" parameterType="productEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO product(type,product_base_id,brand_id,freight_template_id,seller_id,`code`,barcode,`name`,short_name,selling_point,`desc`,pc_detail,seller_product_name,create_time)
+		VALUES(#{type},#{productBaseId},#{brandId},#{freightTemplateId},#{sellerId},#{code},#{barcode},#{name},#{shortName},#{sellingPoint},#{desc},#{pcDetail},#{sellerProductName},now())
+	</insert>
+	
+	
+	
+	
+	
+	<update id="updateProductEntity" parameterType="productEntity">
+     <![CDATA[
+        update product t
+        ]]>
+        <set>
+          <if test="shortName != null" >t.short_name=#{shortName},</if>
+        </set>
+        <where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+		</where>
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<update id="updateProductForTeam" parameterType="map">
+        update mweb_group_product t
+        <set>
+          <if test="startTime != null" >t.start_time=#{startTime},</if>
+          <if test="endTime != null" >t.end_time=#{endTime},</if>
+          <if test="isAvailable != null" >t.is_available=#{isAvailable},</if>
+          <if test="order != null" >t.`order`=#{order},</if>
+        </set>
+        where 1 = 1 
+            <if test="id!=null and id!=0"> and t.id=#{id}</if>
+            <if test="productId!=null and productId!=0"> and t.product_id=#{productId}</if>
+	</update>
+	
+	
+	<select id="countProductAndStockForTeam"  resultType="int" parameterType="com.alibaba.fastjson.JSONObject">
+    	select count(p.id) FROM mweb_group_product p,mweb_group_product_count c
+     	<where>
+		   p.id=c.mweb_group_product_id
+            <if test="id!=null and id!=0"> AND p.id=#{id}</if>
+            <if test="productId!=null and productId!=0"> AND p.product_id=#{productId}</if>
+            <if test="isAvailable!=null"> AND p.is_available=#{isAvailable}</if>
+            <if test="name!=null and name!=''"> AND p.name like concat('%',#{name},'%')</if>
+            <if test="startTime!=null"><![CDATA[AND p.start_time > #{startTime}]]></if>
+            <if test="endTime!=null"><![CDATA[AND p.end_time < #{endTime}]]></if>
+            <if test="status==0"><![CDATA[AND p.end_time > now()]]></if>
+            <if test="status==1"><![CDATA[AND p.start_time > now()]]></if>
+			<if test="status==2"><![CDATA[AND p.start_time <= now() and p.end_time > now()]]></if>
+		</where>
+   </select>
+
+	<select id="findProductAndStockForTeam" parameterType="map" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT 
+	        p.id AS id,
+	        p.product_id AS productId,
+			p.`name`,
+			p.short_name AS shortName,
+			p.selling_point AS sellingPoint,
+			p.start_time as startTime,
+			p.end_time as endTime,
+			p.is_available AS isAvailable,
+			p.`order`,
+			p.create_time as createTime,
+            p.update_time as updateTime,
+			c.stock,
+			c.sell,
+			c.`lock`
+        FROM mweb_group_product p,mweb_group_product_count c
+		 <where>
+		   p.id=c.mweb_group_product_id
+            <if test="id!=null and id!=0"> AND p.id=#{id}</if>
+            <if test="productId!=null and productId!=0"> AND p.product_id=#{productId}</if>
+            <if test="isAvailable!=null"> AND p.is_available=#{isAvailable}</if>
+            <if test="name!=null and name!=''"> AND p.name like concat('%',#{name},'%')</if>
+            <if test="startTime!=null"><![CDATA[AND p.start_time > #{startTime}]]></if>
+            <if test="endTime!=null"><![CDATA[AND p.end_time < #{endTime}]]></if>
+            <if test="status==0"><![CDATA[AND p.end_time > now()]]></if>
+            <if test="status==1"><![CDATA[AND p.start_time > now()]]></if>
+			<if test="status==2"><![CDATA[AND p.start_time <= now() and p.end_time > now()]]></if>
+		</where>
+			order by p.`order` desc
+			<if test="start!=null">limit #{start},#{size}</if>
+	</select>
+	
+	<select id="getProduct" parameterType="int" resultMap="mwebGroupProductEntityMap">
+   <![CDATA[
+        SELECT 
+        p.id,
+        p.type,
+        p.product_id as productId,
+        p.product_base_id as productBaseId,
+        p.brand_id as brandId,
+        p.seller_id as sellerId,
+        p.name,
+        p.short_name as shortName,
+        p.selling_point as sellingPoint,
+        p.desc,
+        p.market_price as marketPrice,
+        p.single_price as singlePrice,
+        p.team_price as teamPrice,
+        p.team_number_limit as teamNumberLimit,
+        p.team_valid_hour as teamValidHour,
+        p.team_count as teamCount,
+        p.product_image as productImage,
+        p.image1,
+        p.image2,
+        p.image3,
+        p.image4,
+        p.image5,
+        p.create_time as createTime,
+        p.update_time as updateTime,
+        p.start_team_time as startTeamTime,
+        p.is_available as isAvailable,
+        p.is_off_shelves as isOffShelves,
+        p.net_volume as netVolume,
+        p.place_of_origin as placeOfOrigin,
+        p.manufacturer_date as manufacturerDate,
+        p.storage_method as storageMethod,
+        p.durability_period as durabilityPeriod,
+        p.people_for as peopleFor,
+        p.food_method as foodMethod,
+        p.use_method as useMethod,
+        p.tip as tip
+        FROM mweb_group_product p
+        ]]>
+		<where>
+           p.id=#{id}
+            
+		</where>
+	</select>
+	
+	
+	<select id="getProductByProductId" parameterType="int" resultMap="mwebGroupProductEntityMap">
+   <![CDATA[
+        SELECT 
+        p.id,
+        p.type,
+        p.product_id as productId,
+        p.product_base_id as productBaseId,
+        p.brand_id as brandId,
+        p.seller_id as sellerId,
+        p.name,
+        p.short_name as shortName,
+        p.selling_point as sellingPoint,
+        p.desc,
+        p.market_price as marketPrice,
+        p.single_price as singlePrice,
+        p.team_price as teamPrice,
+        p.team_supply_price as teamSupplyPrice,
+        p.team_number_limit as teamNumberLimit,
+        p.team_valid_hour as teamValidHour,
+        p.team_count as teamCount,
+        p.product_image as productImage,
+        p.image1,
+        p.image2,
+        p.image3,
+        p.image4,
+        p.image5,
+        p.create_time as createTime,
+        p.update_time as updateTime,
+        p.start_team_time as startTeamTime,
+        p.is_available as isAvailable,
+        p.is_off_shelves as isOffShelves,
+        p.net_volume as netVolume,
+        p.place_of_origin as placeOfOrigin,
+        p.manufacturer_date as manufacturerDate,
+        p.storage_method as storageMethod,
+        p.durability_period as durabilityPeriod,
+        p.people_for as peopleFor,
+        p.food_method as foodMethod,
+        p.use_method as useMethod,
+        p.tip as tip
+        FROM mweb_group_product p
+        ]]>
+		<where>
+           p.product_id=#{productId} 
+		</where>
+		LIMIT 1
+	</select>
+	
+</mapper>

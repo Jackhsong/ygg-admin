@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="SaleWindowMapper">  
+
+    <resultMap type="SaleWindowEntity" id="SaleWindowMap">
+    	<result column="id" property="id"/>
+    	<result column="source_type" property="sourceType"/>
+    	<result column="page2_model_id" property="page2ModelId"/>
+    	<result column="type" property="type"/>
+    	<result column="display_id" property="displayId"/>
+    	<result column="sale_time_type" property="saleTimeType"/>
+    	<result column="sale_flag_id" property="saleFlagId"/>
+    	<result column="name" property="name"/>
+    	<result column="desc" property="desc"/>
+    	<result column="image" property="image"/>
+    	<result column="new_image" property="newImage"/>
+    	<result column="new_image17" property="newImage17"/>
+    	<result column="start_time" property="startTime"/>
+    	<result column="end_time" property="endTime"/>
+    	<result column="is_display" property="isDisplay"/>
+    	<result column="is_display_flag" property="isDisplayFlag"/>
+    	<result column="now_order" property="nowOrder"/>
+    	<result column="later_order" property="laterOrder"/>
+    	<result column="category_order" property="categoryOrder"/>
+    	<result column="category_lock_index" property="categoryLockIndex"/>
+    	<result column="category_first_id" property="categoryFirstId"/>
+    </resultMap>
+    
+    <insert id="save" parameterType="SaleWindowEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_window (`type`, `display_id`, `name`, `desc`, `image`,`new_image`,`new_image17`, `start_time`, `end_time`, `is_display`, `now_order`, `later_order`, `create_time`,`sale_flag_id`,`is_display_flag`,`sale_time_type`,`category_first_id`)
+		VALUES (#{type},#{displayId},#{name},#{desc},#{image},#{newImage},#{newImage17},#{startTime},#{endTime},#{isDisplay},#{nowOrder},#{laterOrder},#{createTime,jdbcType=TIMESTAMP},#{saleFlagId},#{isDisplayFlag},#{saleTimeType},#{categoryFirstId})
+    </insert>
+    
+    <update id="update" parameterType="SaleWindowEntity" >
+		UPDATE sale_window 
+		SET `type`=#{type},`display_id`=#{displayId},`name`=#{name},`image`=#{image},`new_image`=#{newImage},`new_image17`=#{newImage17},`start_time`=#{startTime},
+			`end_time`=#{endTime},`desc`=#{desc}, `is_display`=#{isDisplay},`sale_flag_id`=#{saleFlagId},`is_display_flag`=#{isDisplayFlag},`sale_time_type`=#{saleTimeType},`category_first_id`=#{categoryFirstId}
+		WHERE `id`=#{id};
+    </update>
+    
+    <update id="updateDisplayCode" parameterType="map">
+    	UPDATE sale_window 
+		SET `is_display`=#{isDisplay} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <update id="updateLaterOrder" parameterType="map">
+    	UPDATE sale_window 
+		SET `later_order`=#{laterOrder} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <update id="updateNowOrder" parameterType="map">
+    	UPDATE sale_window 
+		SET `now_order`=#{nowOrder} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <select id="findAllSaleWindow" parameterType="map"  resultType="SaleWindowEntity">
+      SELECT id as id,
+      	type as type,
+      	display_id as displayId,
+      	name as name,
+      	`desc` as `desc`,
+      	image as image,
+      	new_image as newImage,
+		new_image17 as newImage17,
+      	start_time as startTime,
+      	end_time as endTime,
+      	is_display as isDisplay,
+      	now_order as nowOrder,
+		later_order as laterOrder,
+		update_time as updateTime,
+		sale_flag_id as saleFlagId,
+		is_display_flag as isDisplayFlag,
+		sale_time_type as saleTimeType,
+		category_first_id as categoryFirstId
+      FROM sale_window 
+      WHERE 1=1 
+      	<if test="nottype != null">AND type!=#{nottype}</if>
+      	<if test="sourceType != null">AND source_type=#{sourceType}</if>
+      	<if test="id != null">AND id=#{id}</if>
+      	<if test="name != null">AND name like #{name}</if>
+      	<if test="type != null">AND type=#{type}</if>
+		<if test="saleTimeType != null">AND sale_time_type=#{saleTimeType}</if>
+		<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+      	<if test="startTime != null">AND start_time=#{startTime}</if> 
+      	<if test="endTime != null">AND end_time=#{endTime}</if>
+      	<if test="status == 1"><![CDATA[AND start_time > #{compareToStart}]]></if>
+      	<if test="maxToStart != null"><![CDATA[AND start_time < #{maxToStart}]]></if>
+      	<if test="status == 2"><![CDATA[AND start_time < #{compareToStart} AND #{compareToEnd} < end_time]]></if> 
+      	<if test="status == 3"><![CDATA[AND end_time < #{compareToEnd}]]></if> 
+      	<if test="saleName != null">AND `name` like #{saleName}</if>
+      	<if test="nowOrder != null">ORDER BY now_order DESC, id DESC </if>
+      	<if test="laterOrder != null">ORDER BY later_order DESC, id DESC </if>
+      	<if test="orderStartTime != null">ORDER BY start_time DESC, id DESC </if>
+      	<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    
+    <select id="countSaleWindow" parameterType="map"  resultType="int">
+      SELECT count(id) FROM sale_window 
+      WHERE 1=1
+		<if test="sourceType != null">AND source_type=#{sourceType}</if>
+      	<if test="name != null">AND name like #{name}</if>
+      	<if test="type != null">AND type=#{type}</if> 
+      	<if test="isDisplay != null">AND is_display=#{isDisplay}</if> 
+      	<if test="startTime != null">AND start_time=#{startTime}</if>
+		<if test="endTime != null">AND end_time=#{endTime}</if>
+      	<if test="status == 1"><![CDATA[AND start_time > #{compareToStart}]]></if>
+      	<if test="maxToStart != null"><![CDATA[AND start_time < #{maxToStart}]]></if>
+      	<if test="status == 2"><![CDATA[AND start_time < #{compareToStart} AND #{compareToEnd} < end_time]]></if> 
+      	<if test="status == 3"><![CDATA[AND end_time < #{compareToEnd}]]></if> 
+      	<if test="saleName != null">AND `name` like #{saleName}</if>
+    </select>
+    
+    <select id="findSaleWindowById" parameterType="int"  resultType="SaleWindowEntity">
+      SELECT id as id,
+      	type as type,
+      	display_id as displayId,
+      	name as name,
+      	`desc` as `desc`,
+      	image as image,
+      	new_image as newImage,
+      	new_image17 as newImage17,
+      	start_time as startTime,
+      	end_time as endTime,
+      	is_display as isDisplay,
+      	now_order as nowOrder,
+		later_order as laterOrder,
+		sale_flag_id as saleFlagId,
+		is_display_flag as isDisplayFlag,
+		sale_time_type as saleTimeType,
+		category_first_id as categoryFirstId
+      FROM sale_window 
+      WHERE id=#{id}
+    </select>
+    
+    <select id="findAllSaleWindowForSellerPeriod" parameterType="map" resultType="map">
+		SELECT
+			ss.id,
+			sw.type AS type,
+			sw.id AS saleWindowId,
+			sw.`name` AS saleWindowName,
+			ss.display_id AS displayId,
+			ss.start_time AS startTime,
+			ss.end_time AS endTime,
+			ss.is_deal_with AS dealWith,
+			s.real_seller_name AS sellerName,
+			s.settlement_period AS settlementPeriod,
+			s.settlement_day AS settlementDay,
+			s.settlement_other AS settlementOther
+		FROM
+			sale_window sw,
+			seller_settlement ss,
+			seller s
+		WHERE
+			sw.id = ss.sale_window_id
+			AND ss.seller_id = s.id
+			<if test="saleWindowId != null">and ss.sale_window_id=#{saleWindowId}</if>
+	        <if test="saleWindowType != null">and sw.type=#{saleWindowType}</if>
+	        <if test="saleWindowName != null">and sw.`name` like #{saleWindowName}</if>
+	        <if test="isDealWith != null">and ss.is_deal_with=#{isDealWith}</if>
+	        <if test="sellerId != null">and s.id=#{sellerId}</if>
+		ORDER BY ss.end_time ASC, ss.create_time ASC
+	   <if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countAllSaleWindowForSellerPeriod" resultType="int">
+       	SELECT 
+       		count(ss.id)
+		FROM
+			sale_window sw,
+			seller_settlement ss,
+			seller s
+		WHERE
+			sw.id = ss.sale_window_id
+			AND ss.seller_id = s.id
+			<if test="saleWindowId != null">and ss.sale_window_id=#{saleWindowId}</if>
+	        <if test="saleWindowType != null">and sw.type=#{saleWindowType}</if>
+	        <if test="saleWindowName != null">and sw.`name` like #{saleWindowName}</if>
+	        <if test="isDealWith != null">and ss.is_deal_with=#{isDealWith}</if>
+	        <if test="sellerId != null">and s.id=#{sellerId}</if>
+    </select>
+    
+	<update id="hideSaleWindow" parameterType="map">
+		UPDATE seller_settlement SET is_deal_with=#{isDealWith} WHERE id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findAllTomorrowSaleWindow" parameterType="int" resultType="map">
+		SELECT
+			display_id AS displayId,
+			type
+		FROM
+			sale_window
+		WHERE
+			start_time = #{startTime} <![CDATA[AND type <> 3]]>
+		ORDER BY display_id		
+	</select>
+	
+	<select id="findAllCurrentSaleWindow" parameterType="int" resultType="map">
+		SELECT
+			display_id AS displayId,
+			start_time AS startTime,
+			sale_time_type AS saleTimeType,
+			type
+		FROM
+			sale_window
+		WHERE
+			<![CDATA[start_time <= #{currentTime}]]>
+		AND <![CDATA[end_time >= #{currentTime}]]>
+		AND is_display=1
+		ORDER BY display_id			
+	</select>
+	
+	<select id="findSaleWindowSingleIdsByPara" parameterType="map" resultType="int">
+		SELECT
+			sw.id
+		FROM
+			sale_window sw,
+			product pt
+		WHERE
+			sw.display_id = pt.id
+		AND sw.type = 1
+		<if test="productId != null">AND pt.id=#{productId}</if>
+		<if test="productName != null">AND pt.`name` LIKE #{productName}</if>
+		<if test="sellerId != null">AND pt.seller_id=#{sellerId}</if>
+		<if test="brandId != null">AND pt.brand_id=#{brandId}</if>
+		ORDER BY sw.id
+	</select>
+	
+	<select id="findSaleWindowGroupIdsByPara" parameterType="map" resultType="int">
+		SELECT DISTINCT
+			sw.id
+		FROM
+			sale_window sw,
+			activities_common ac,
+			relation_activities_common_and_product racp,
+			product pt
+		WHERE
+			sw.display_id = ac.id
+		AND ac.id = racp.activities_common_id
+		AND pt.id = racp.product_id
+		AND sw.type = 2
+		<if test="productId != null">AND pt.id=#{productId}</if>
+		<if test="productName != null">AND pt.`name` LIKE #{productName}</if>
+		<if test="sellerId != null">AND pt.seller_id=#{sellerId}</if>
+		<if test="brandId != null">AND pt.brand_id=#{brandId}</if>
+		ORDER BY sw.id
+	</select>
+	
+	<select id="findSaleWindowByPara" parameterType="map" resultMap="SaleWindowMap">
+		SELECT 
+			* 
+		FROM 
+			sale_window
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="type != null">AND type=#{type}</if>
+			<if test="displayId != null">AND display_id=#{displayId}</if>
+		</trim>
+		LIMIT 1	
+	</select>
+	
+	
+	<select id="findSaleWindowListByPara" parameterType="map" resultMap="SaleWindowMap">
+		SELECT 
+			* 
+		FROM 
+			sale_window
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="sourceType != null">AND source_type=#{sourceType}</if>
+			<if test="categoryFirstId != null">AND category_first_id=#{categoryFirstId}</if>
+			<if test="name != null">AND `name` LIKE #{name}</if>
+			<if test="type != null">AND type=#{type}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+			<if test="startTime != null">AND start_time=#{startTime}</if>
+			<if test="saleStatus == 1"><![CDATA[AND start_time>#{currentTime}]]></if>
+			<if test="saleStatus == 2"><![CDATA[AND start_time<=#{currentTime} AND #{currentTime}<=end_time]]></if>
+			<if test="saleStatus == 3"><![CDATA[AND end_time<#{currentTime}]]></if>
+			<if test="ids != null">AND id in<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSaleWindowByPara" parameterType="map" resultType="int">
+		SELECT 
+			count(*) 
+		FROM 
+			sale_window
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="sourceType != null">AND source_type=#{sourceType}</if>
+			<if test="categoryFirstId != null">AND category_first_id=#{categoryFirstId}</if>
+			<if test="name != null">AND `name` LIKE #{name}</if>
+			<if test="type != null">AND type=#{type}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+			<if test="startTime != null">AND start_time=#{startTime}</if>
+			<if test="saleStatus == 1"><![CDATA[AND start_time>#{currentTime}]]></if>
+			<if test="saleStatus == 2"><![CDATA[AND start_time<=#{currentTime} AND #{currentTime}<=end_time]]></if>
+			<if test="saleStatus == 3"><![CDATA[AND end_time<#{currentTime}]]></if>
+			<if test="ids != null">AND id in<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		</trim>		
+	</select>
+	
+	<select id="findCategoryFirstNamesBySwids" parameterType="list" resultType="map">
+		SELECT
+			sw.id AS id,
+			cf.`name` AS categoryName
+		FROM
+			sale_window sw,
+			category_first cf
+		WHERE
+			sw.category_first_id = cf.id
+			AND sw.id in
+			<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findSellerNameBySingleSwids" parameterType="list" resultType="map">
+		SELECT
+			sw.id AS id,
+			sr.real_seller_name AS sellerName
+		FROM
+			sale_window sw,
+			product pt,
+			seller sr
+		WHERE
+			sw.type = 1
+		AND sw.display_id = pt.id
+		AND pt.seller_id = sr.id
+		AND sw.id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		ORDER BY sw.id DESC		
+	</select>
+	
+	<select id="findSellerNameByGroupSwids" parameterType="list" resultType="map">
+		SELECT
+			sw.id as id,
+			GROUP_CONCAT(DISTINCT sr.real_seller_name) as sellerName
+		FROM
+			sale_window sw,
+			relation_activities_common_and_product racp,
+			product pt,
+			seller sr
+		WHERE
+			sw.type = 2
+		AND sw.display_id = racp.activities_common_id
+		AND racp.product_id = pt.id
+		AND pt.seller_id = sr.id
+		AND sw.id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		GROUP BY sw.id
+		ORDER BY sw.id DESC		
+	</select>
+	
+	<select id="findStockBySingleSwids" parameterType="list" resultType="map">
+		SELECT
+			sw.id AS id,
+			pc.stock AS stock
+		FROM
+			sale_window sw,
+			product pt,
+			product_count pc
+		WHERE
+			sw.type = 1
+		AND sw.display_id = pt.id
+		AND pt.id = pc.product_id
+		AND sw.id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		ORDER BY sw.id DESC		
+	</select>
+	
+	<select id="findProductBasesBySingleswids" parameterType="list" resultType="map">
+		SELECT
+			sw.id AS id,
+			pt.product_base_id AS baseId,
+			pt.sales_price As salesPrice,
+			pt.bs_commision As bsCommision
+		FROM
+			sale_window sw,
+			product pt
+		WHERE
+			sw.type = 1
+		AND sw.display_id = pt.id
+		AND sw.id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		ORDER BY sw.id DESC		
+	</select>
+	
+	<select id="findCustomActivityShareUrlBySwids" parameterType="list" resultType="map">
+		SELECT
+			sw.id,
+			ac.share_url AS shareUrl
+		FROM
+			sale_window sw,
+			activities_custom ac
+		WHERE
+			sw.type = 3
+		AND sw.display_id = ac.id	
+		AND sw.id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		ORDER BY sw.id DESC	
+	</select>
+</mapper>  

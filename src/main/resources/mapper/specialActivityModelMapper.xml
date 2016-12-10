@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SpecialActivityModelMapper">  
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select id,title,image,is_available as isAvailable 
+			from special_activity_model
+		where 1 = 1
+		<if test="title!=null"> and title like concat(concat('%',#{title}),'%')</if>
+		<if test="isAvailable!=null"> and is_available=#{isAvailable}</if>
+		<if test="id!=null"> and id=#{id}</if>
+		<if test="start!=null"> limit ${start},${size}</if>
+	</select>
+	
+	<select id="countByParam" resultType="int" parameterType="map">
+		select count(id) 
+			from special_activity_model
+		where 1 = 1
+		<if test="title!=null"> and title like concat(concat('%',#{title}),'%')</if>
+		<if test="isAvailable!=null"> and is_available=#{isAvailable}</if>
+		<if test="id!=null"> and id=#{id}</if>
+	</select>
+	
+	<update id="updateByParam" parameterType="map">
+		update special_activity_model
+		<set>
+			<if test="title!=null"> title=#{title},</if>
+			<if test="image!=null"> image=#{image},</if>
+			<if test="imageWidth!=null"> image_width=#{imageWidth},</if>
+			<if test="imageHeight!=null"> image_height=#{imageHeight},</if>
+			<if test="isAvailable!=null"> is_available=#{isAvailable}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into special_activity_model(title,image,image_width,image_height,is_available,create_time)
+		values(#{title},#{image},#{imageWidth},#{imageHeight},#{isAvailable},now())
+	</insert>
+	
+</mapper>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ChannelOrderMapper">
+
+    <select id="jsonChannelOrderInfo" parameterType="map" resultType="map">
+        SELECT
+        cnl.channel_name AS channelName,
+        o.number AS number,
+        o.order_pay_time AS orderPayTime,
+        o.order_total_price AS orderTotalPrice,
+        o.order_real_price AS orderRealPrice,
+        cop.price AS price,
+        cop.count AS count,
+        cop.product_total_price AS productTotalPrice,
+        cop.name AS productName,
+        cp.code AS productCode,
+        cp.warehouse_type AS warehouseType,
+        cora.receiver AS receiver,
+        cora.phone AS phone
+        FROM
+        channel_order o
+        JOIN channel_order_product cop ON o.id = cop.order_id
+        JOIN channel_product cp ON cop.product_id = cp.id
+        JOIN channel cnl ON o.channel_id = cnl.id
+        JOIN channel_order_receive_address cora ON o.receive_address_id = cora.id
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="idList != null">
+                AND o.id IN
+                <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="channelId != null">AND o.channel_id = #{channelId}</if>
+            <if test="paytimeStart != null"> <![CDATA[AND o.order_pay_time >= #{paytimeStart}]]></if>
+            <if test="paytimeEnd != null"> <![CDATA[AND o.order_pay_time < #{paytimeEnd}]]></if>
+            <if test="receiver != null"> AND cora.receiver LIKE CONCAT('%', #{receiver},'%') </if>
+            <if test="number != null"> AND o.number = #{number} </if>
+            <if test="phone != null"> AND cora.phone = #{phone} </if>
+            <if test="code != null"> AND cp.code = #{code} </if>
+            <if test="name != null"> AND cop.name LIKE CONCAT('%',#{name},'%')   </if>
+            <if test="warehouseType != null">AND cp.warehouse_type = #{warehouseType}</if>
+        </trim>
+        ORDER BY o.order_create_time DESC ,o.id DESC
+        <if test="start != null and max != null" >LIMIT #{start},#{max}</if>
+    </select>
+
+    <select id="countJsonChannelOrderInfo" parameterType="map" resultType="int">
+        SELECT count(o.id)
+        FROM
+        channel_order o
+        JOIN channel_order_product cop ON o.id = cop.order_id
+        JOIN channel_product cp ON cop.product_id = cp.id
+        JOIN channel cnl ON o.channel_id = cnl.id
+        JOIN channel_order_receive_address cora ON o.receive_address_id = cora.id
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="idList != null">
+                AND o.id IN
+                <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="channelId != null">AND o.channel_id = #{channelId}</if>
+            <if test="paytimeStart != null"> <![CDATA[AND o.order_pay_time >= #{paytimeStart}]]></if>
+            <if test="paytimeEnd != null"> <![CDATA[AND o.order_pay_time < #{paytimeEnd}]]></if>
+            <if test="receiver != null"> AND cora.receiver LIKE CONCAT('%', #{receiver},'%') </if>
+            <if test="number != null"> AND o.number = #{number} </if>
+            <if test="phone != null"> AND cora.phone = #{phone} </if>
+            <if test="code != null"> AND cp.code = #{code} </if>
+            <if test="name != null"> AND cop.name LIKE CONCAT('%',#{name},'%')   </if>
+            <if test="warehouseType != null">AND cp.warehouse_type = #{warehouseType}</if>
+        </trim>
+    </select>
+
+    <select id="getChannelOrderInfoByNumberAndChannelId" parameterType="map" resultType="map">
+        SELECT
+        id, receive_address_id as addressId
+        FROM
+        channel_order o
+        WHERE o.number = #{number} AND channel_id = #{channel_id}
+        LIMIT 1
+    </select>
+
+    <select id="getChannelOrderProductIdByParam" parameterType="map" resultType="long">
+        SELECT
+        id
+        FROM
+        channel_order_product
+        WHERE order_id = #{order_id} AND product_id =
+        (select id from channel_product where code = #{code} AND channel_id = #{channel_id})
+        LIMIT 1
+    </select>
+
+
+    <select id="getChannelOrderAllInfo" parameterType="map" resultType="com.ygg.admin.view.channel.ChannelOrderExcelView">
+        SELECT
+        o.channel_id,
+        o.number AS number,
+        o.status,
+        o.freight,
+        o.order_total_price,
+        o.order_real_price,
+        o.order_pay_time AS order_pay_time,
+        o.order_create_time,
+        o.deliver_time,
+        cora.receiver AS receiver,
+        cora.id_card,
+        cora.phone,
+        o.sender,
+        o.contact_way,
+        o.buyer_remark,
+        o.seller_remark,
+        o.pay_channel,
+        o.pay_number,
+        o.is_freeeze,
+        cop.price ,
+        cop.count ,
+        cop.product_total_price ,
+        cop.name AS productName,
+        cp.code AS code,
+        cp.warehouse_type AS warehouseType,
+        cnl.channel_name AS channel,
+        cora.receive_address,
+        cora.province,
+        cora.city,
+        cora.district,
+        cora.detail_address,
+        o.logistic_channel AS logisticChannel,
+        o.logistic_number AS logisticNumber,
+        cora.post_code
+        FROM
+        channel_order o
+        JOIN channel_order_product cop ON o.id = cop.order_id
+        JOIN channel_product cp ON cop.product_id = cp.id
+        JOIN channel cnl ON o.channel_id = cnl.id
+        JOIN channel_order_receive_address cora ON cora.id = o.receive_address_id
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="idList != null">
+                AND o.id IN
+                <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="channelId != null">AND o.channel_id = #{channelId}</if>
+            <if test="paytimeStart != null"> <![CDATA[AND o.order_pay_time >= #{paytimeStart}]]></if>
+            <if test="paytimeEnd != null"> <![CDATA[AND o.order_pay_time < #{paytimeEnd}]]></if>
+            <if test="receiver != null"> AND cora.receiver LIKE CONCAT('%',#{receiver},'%') </if>
+            <if test="number != null"> AND o.number = #{number} </if>
+            <if test="phone != null"> AND cora.phone = #{phone} </if>
+            <if test="code != null"> AND cp.code = #{code} </if>
+            <if test="name != null"> AND cop.name LIKE CONCAT('%',#{name},'%')   </if>
+            <if test="warehouseType != null">AND cp.warehouse_type = #{warehouseType}</if>
+        </trim>
+        ORDER BY o.order_create_time DESC ,o.id DESC
+        <if test="start != null and max != null" >LIMIT #{start},#{max}</if>
+    </select>
+
+    <insert id="saveChannelOrder" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView"
+            keyColumn="id" keyProperty="order_id" useGeneratedKeys="true">
+        INSERT INTO channel_order (
+        receive_address_id,channel_id,number,status,freight,order_total_price,
+        order_real_price,order_create_time,order_pay_time,deliver_time,
+        sender,contact_way,buyer_remark,seller_remark,
+        logistic_channel, logistic_number,
+        pay_channel,pay_number,is_freeeze,create_time
+        )
+        VALUES(
+        <![CDATA[
+        #{address_id},#{channel_id},#{number},#{status},#{freight},#{order_total_price},
+        #{order_real_price},#{order_create_time},#{order_pay_time},#{deliver_time},
+        #{sender},#{contact_way},#{buyer_remark},#{seller_remark},
+        #{logisticChannel},#{logisticNumber},
+        #{pay_channel},#{pay_number},#{is_freeeze},NOW()
+        )
+        ]]>
+    </insert>
+
+
+    <insert id="saveChannelOrderProduct" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView">
+        INSERT INTO channel_order_product (
+        order_id,product_id,name,count,price,product_total_price,create_time)
+        VALUES
+        (#{order_id},#{product_id},#{productName},#{count},#{price},#{product_total_price},NOW());
+    </insert>
+
+    <insert id="saveChannelOrderReceiveAddress" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView"
+            keyColumn="id" keyProperty="address_id" useGeneratedKeys="true">
+        INSERT INTO channel_order_receive_address (
+        receive_address,province,city,district,detail_address,
+        receiver,id_card,phone,
+        post_code,create_time)
+        VALUES(
+        <![CDATA[
+        #{receive_address},#{province},#{city},#{district},#{detail_address},
+        #{receiver},#{id_card},#{phone},
+        #{post_code},NOW() )
+        ]]>
+    </insert>
+
+    <update id="updateChannelOrder" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView">
+        UPDATE channel_order
+       <set>
+           <if test=" channel_id != null"> channel_id = #{channel_id},</if>
+           <if test=" number != null">number = #{number},</if>
+           <if test=" status != null"> status = #{status},</if>
+           <if test=" freight != null"> freight = #{freight},</if>
+           <if test=" order_total_price != null"> order_total_price = #{order_total_price},</if>
+           <if test=" order_real_price != null"> order_real_price = #{order_real_price},</if>
+           <if test=" order_create_time != null"> order_create_time = #{order_create_time},</if>
+           <if test=" order_pay_time != null"> order_pay_time = #{order_pay_time},</if>
+           <if test=" deliver_time != null"> deliver_time = #{deliver_time},</if>
+           <if test=" sender != null"> sender = #{sender},</if>
+           <if test=" contact_way != null"> contact_way = #{contact_way},</if>
+           <if test=" buyer_remark != null"> buyer_remark = #{buyer_remark},</if>
+           <if test=" seller_remark != null"> seller_remark = #{seller_remark},</if>
+           <if test=" pay_channel != null"> pay_channel = #{pay_channel},</if>
+           <if test=" pay_number != null"> pay_number = #{pay_number},</if>
+           <if test=" is_freeeze != null"> is_freeeze = #{is_freeeze},</if>
+           <if test=" logisticChannel != null"> logistic_channel = #{logisticChannel},</if>
+           <if test=" logisticNumber != null"> logistic_number = #{logisticNumber},</if>
+       </set>
+        WHERE id=#{order_id} LIMIT 1
+    </update>
+
+    <update id="updateChannelOrderReceiverAddress" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView">
+        UPDATE channel_order_receive_address
+        <set>
+            <if test=" receiver != null"> receiver = #{receiver},</if>
+            <if test=" id_card != null"> id_card = #{id_card},</if>
+            <if test=" phone != null"> phone = #{phone},</if>
+            <if test=" receive_address != null"> receive_address = #{receive_address},</if>
+            <if test=" detail_address != null"> detail_address = #{detail_address},</if>
+            <if test=" province != null"> province = #{province},</if>
+            <if test=" city != null"> city = #{city},</if>
+            <if test=" district != null"> district = #{district},</if>
+            <if test=" post_code != null"> post_code = #{post_code},</if>
+        </set>
+        WHERE id=#{address_id} LiMIT 1
+    </update>
+
+    <update id="updateChannelOrderProduct" parameterType="com.ygg.admin.view.channel.ChannelOrderExcelView">
+        UPDATE channel_order_product
+       <set>
+           <if test=" productName != null"> name = #{productName},</if>
+           <if test=" count != null"> count = #{count},</if>
+           <if test=" price != null"> price = #{price},</if>
+           <if test=" product_total_price != null"> product_total_price = #{product_total_price},</if>
+       </set>
+        WHERE id=#{product_id} LIMIT 1
+    </update>
+
+
+
+
+</mapper>

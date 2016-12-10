@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="FinanceMapper">
+
+	<select id="findOrderInfo" parameterType="map" resultType="OrderListView">
+		SELECT 
+			o.id AS id,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.number AS number,
+			o.`status` AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.is_need_settlement AS isNeedSettlement,
+			o.is_settlement AS isSettlement,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress
+		FROM 
+			`order` o,`seller` s
+		WHERE 
+			o.seller_id=s.id
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND o.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND o.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="orderIdList != null and orderIdList.size() > 0">
+			AND o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="NoOrderSettlement != null">
+			AND NOT EXISTS (select 1 from order_settlement where order_id = o.id)
+		</if>
+		<if test="sellerIdList != null  and sellerIdList.size() > 0">
+			AND s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+	<select id="countOrderInfo" parameterType="map" resultType="int">
+		SELECT 
+			count(o.id)
+		FROM 
+			`order` o,`seller` s
+		WHERE 
+			o.seller_id=s.id
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="sellerIdList != null and sellerIdList.size() > 0" >
+			AND s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND o.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND o.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="orderIdList != null and orderIdList.size() > 0" >
+			AND o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="NoOrderSettlement != null">
+			AND NOT EXISTS (select 1 from order_settlement where order_id = o.id)
+		</if>
+	</select>
+	
+	<select id="findOrderSettlementByPara" parameterType="map" resultType="map">
+		SELECT 
+			order_id AS orderId,
+			freight_money AS freightMoney,
+			postage_is_settlement AS postageIsSettlement
+		FROM 
+			order_settlement 
+		WHERE  
+			order_id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findOrderIdFromRefundByPara" parameterType="map" resultType="int">
+		SELECT 
+			order_id AS orderId 
+		FROM 
+			order_product_refund 
+		WHERE 
+			status IN (1,2,3,4)
+			and order_id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findOrderInfoHasOrderSettlement" parameterType="map" resultType="OrderListView">
+		SELECT 
+			o.id AS id,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.number AS number,
+			o.`status` AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.is_settlement AS isSettlement,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			os.freight_money AS settlementFreightMoney,
+			os.postage_is_settlement AS postageIsSettlement
+		FROM 
+			`order` o,`seller` s,`order_settlement` os
+		WHERE 
+			o.seller_id=s.id
+			AND os.order_id=o.id
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="postageIsSettlement != null">AND os.postage_is_settlement=#{postageIsSettlement}</if>
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+	<select id="countOrderInfoHasOrderSettlement" parameterType="map" resultType="int">
+		SELECT 
+			count(o.id)
+		FROM 
+			`order` o,`seller` s,`order_settlement` os
+		WHERE 
+			o.seller_id=s.id
+			AND os.order_id=o.id
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="postageIsSettlement != null">AND os.postage_is_settlement=#{postageIsSettlement}</if>
+	</select>
+	
+	<select id="findOrderManualInfoHasOrderSettlement" parameterType="map" resultType="OrderListView">
+		SELECT 
+			o.id AS id,
+			o.create_time AS createTime,
+			o.create_time AS payTime,
+			o.send_time AS sendTime,
+			o.number AS number,
+			o.`status` AS status,
+			o.total_price AS totalPrice,
+			o.total_price AS realPrice,
+			o.is_settlement AS isSettlement,
+			os.freight_money AS settlementFreightMoney,
+			os.postage_is_settlement AS postageIsSettlement
+		FROM 
+			`order_manual` o,`order_manual_settlement` os
+		WHERE 
+			os.order_manual_id=o.id
+		<if test="sellerId != null"> AND o.seller_id=#{sellerId} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.create_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.create_time<#{startTimeEnd} ]]></if>
+		<if test="postageIsSettlement != null">AND os.postage_is_settlement=#{postageIsSettlement}</if>
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+	<select id="findOrderInfoDetail" parameterType="map" resultType="OrderListDetailView">
+		SELECT 
+			o.id,
+			o.number,
+			o.type,
+			hosr.hb_number AS hbNumber,
+			o.`status`,
+			o.app_channel AS appChannel,
+			o.is_settlement AS isSettlement,
+			o.settlement_time AS settlementTime,
+			o.is_need_settlement AS isNeedSettlement,
+			o.pay_channel AS payChannel,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.freight_money AS freightMoney,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.account_point AS accountPoint,
+			o.coupon_price AS couponPrice,
+			o.activities_optional_part_price AS activitiesOptionalPartPrice,
+			o.adjust_price AS adjustPrice,
+			o.activities_price AS activitiesPrice,
+			o.remark AS remark,
+			o.is_timeout AS isTimeout,
+			s.real_seller_name AS realSellerName,
+			s.send_address AS sendAddress,
+			ora.full_name AS fullName,
+			ora.id_card AS idCard,
+			ora.province,
+			ora.city,
+			ora.district,
+			ora.detail_address AS detailAddress,
+			ora.mobile_number AS mobileNumber,
+			ol.channel AS logisticsChannel,
+			ol.number AS logisticsNumber,
+			a.`name` AS accountName,
+			a.type AS accountType,
+			os.postage_comfirm_date AS postageConfirmDate,
+			os.freight_money AS orderSettlementFreightMoney,
+			os.postage_is_settlement AS orderSettlementPostageIsSettlement,
+			ots.confirm_date AS penaltyTime
+		FROM 
+			`order` o LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN order_receive_address ora ON o.receive_address_id=ora.id 
+			LEFT JOIN order_logistics ol ON o.id=ol.order_id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_settlement os ON o.id=os.order_id
+			LEFT JOIN order_timeout_settlement ots ON o.id=ots.order_id
+			LEFT JOIN hb_order_send_record hosr ON o.number=hosr.number
+		WHERE 
+			1=1 
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND o.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND o.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="orderIdList != null and orderIdList.size() > 0">
+			AND o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="sellerIdList != null and sellerIdList.size() > 0">
+			AND s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY o.id
+	</select>
+	
+	<select id="countOrderInfoDetail" parameterType="map" resultType="int">
+		SELECT 
+			count(o.id)
+		FROM 
+			`order` o LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN order_receive_address ora ON o.receive_address_id=ora.id 
+			LEFT JOIN order_logistics ol ON o.id=ol.order_id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_settlement os ON o.id=os.order_id
+			LEFT JOIN order_timeout_settlement ots ON o.id=ots.order_id
+			LEFT JOIN hb_order_send_record hosr ON o.number=hosr.number
+		WHERE 
+			1=1 
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND o.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND o.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="orderIdList != null and orderIdList.size() > 0">
+			AND o.id in
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="sellerIdList != null and sellerIdList.size() >0 ">
+			AND s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="findOrderProductInfoDetail" parameterType="map" resultType="map">
+		SELECT
+			op.id,
+			op.order_id AS orderId,
+			op.product_id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.cost AS cost,
+			p.`name` AS `name`,
+			p.`code` AS `code`,
+			p.type AS type,
+			p.product_base_id AS productBaseId
+		FROM 
+			order_product op,product p 
+		WHERE 
+			op.product_id=p.id
+			and op.order_id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="findOrderHQBSInfoDetail" parameterType="list" resultType="map">
+		select fans_order_id orderId, sum(withdraw_cash) as totalWithdrawCash from qqbs_fans_order where fans_order_id in
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		group by fans_order_id
+	</select>
+	
+	<select id="findOrderRefundInfoDetail" parameterType="map" resultType="map">
+		SELECT 
+			opr.id,
+			opr.order_id AS orderId,
+			opr.order_product_id AS orderProductId,
+			opr.type,
+			opr.count,
+			opr.`status`,
+			opr.real_money AS realMoney,
+			opr.is_settlement AS isSettlement,
+			opr.responsibility_side AS responsibilitySide,
+			opr.responsibility_money AS responsibilityMoney,
+			opr.settlement_comfirm_date AS settlementComfirmDate,
+			rp.seller_money + rp.seller_postage_money + rp.seller_difference_money AS sellerRefundPrice,
+			rp.gegejia_money + rp.gegejia_postage_money + rp.gegejia_difference_money AS gegeRefundPrice
+		FROM
+			order_product_refund opr LEFT JOIN refund_proportion rp ON opr.id=rp.refund_id
+		WHERE
+			opr.order_id IN
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	
+	<select id="findOrderManualInfoDetail" parameterType="map" resultType="OrderListDetailView">
+		SELECT
+			om.id,
+			om.number,
+			om.`status`,
+			om.create_time AS createTime,
+			om.create_time AS payTime,
+			om.seller_id AS sellerId,
+			om.total_price as totalPrice,
+			om.total_price as realPrice,
+			om.full_name AS fullName,
+			om.id_card AS idCard,
+			om.mobile_number AS mobileNumber,
+			om.province,
+			om.city,
+			om.district,
+			om.detail_address AS detailAddress,
+			om.logistics_channel AS logisticsChannel,
+			om.logistics_number AS logisticsNumber,
+			om.send_time AS sendTime,
+			om.is_settlement AS isSettlement,
+			om.settlement_time AS settlementTime,
+			om.is_need_settlement AS isNeedSettlement,
+			omp.id AS orderManualProductId,
+			omp.product_id AS productId,
+			omp.product_count AS productCount,
+			omp.sales_price AS salesPrice,
+			omp.cost AS cost,
+			oms.postage_comfirm_date AS postageConfirmDate,
+			oms.freight_money AS orderSettlementFreightMoney,
+			oms.postage_is_settlement AS orderSettlementPostageIsSettlement
+		FROM 
+			order_manual om 
+			LEFT JOIN order_manual_product omp ON om.id=omp.order_manual_id 
+			LEFT JOIN order_manual_settlement oms ON om.id=oms.order_manual_id
+		WHERE 1=1
+		<if test="sellerId != null"> AND om.seller_id=#{sellerId} </if>
+		<if test="orderNumber != null"> and om.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND om.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND om.create_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND om.create_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND om.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND om.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="sellerIdList != null and sellerIdList.size() > 0">
+			AND om.seller_id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY id
+	</select>
+	
+	<select id="countOrderManualInfoDetail" parameterType="map" resultType="int">
+		SELECT
+			count(om.id)
+		FROM 
+			order_manual om 
+			LEFT JOIN order_manual_product omp ON om.id=omp.order_manual_id 
+			LEFT JOIN order_manual_settlement oms ON om.id=oms.order_manual_id
+		WHERE 1=1
+		<if test="sellerId != null"> AND om.seller_id=#{sellerId} </if>
+		<if test="orderNumber != null"> and om.number=#{orderNumber} </if>
+		<if test="isSettlement != null">AND om.is_settlement=#{isSettlement}</if>
+		<if test="startTimeBegin != null"><![CDATA[AND om.create_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND om.create_time<#{startTimeEnd} ]]></if>
+		<if test="settlementStartTimeBegin != null"><![CDATA[AND om.settlement_time>=#{settlementStartTimeBegin} ]]></if>
+		<if test="settlementEndTimeEnd != null"><![CDATA[AND om.settlement_time<#{settlementEndTimeEnd} ]]></if>
+		<if test="sellerIdList != null and sellerIdList.size() > 0">
+			AND om.seller_id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="findProductInfoDetail" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			`code`,
+			`name`,
+			type,
+			product_base_id AS productBaseId
+		FROM 
+			product
+		WHERE
+			id IN
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findProductBaseInfoDetail" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			submit_type AS submitType,
+			wholesale_price AS wholesalePrice,
+			proposal_price AS proposalPrice,
+			deduction 
+		FROM 
+			product_base
+		WHERE id IN
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<!-- 订单 for 商家结算统计 -->
+	<select id="findSellerSettlementStatistics" parameterType="map" resultType="map">
+		SELECT 
+			o.id AS id,
+			o.freight_money AS freightMoney,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.account_point AS accountPoint,
+			o.coupon_price AS couponPrice,
+			o.activities_price AS activitiesPrice,
+			o.adjust_price AS adjustPrice,
+			s.real_seller_name AS sellerName,
+			s.id AS sellerId
+		FROM 
+			`order` o,`seller` s
+		WHERE 
+			o.seller_id=s.id
+		<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+		ORDER BY o.id DESC
+	</select>
+	
+	<!-- 订单商品信息 for 商家结算统计 -->
+	<select id="findOrderProductInfoForSellerSettlement" parameterType="map" resultType="map">
+		SELECT
+			op.order_id AS orderId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.cost AS cost,
+			pb.submit_type AS submitType,
+			pb.wholesale_price AS wholesalePrice,
+			pb.proposal_price AS proposalPrice,
+			pb.deduction,
+			p.id
+		FROM 
+			order_product op,product p,product_base pb
+		WHERE 
+			op.product_id=p.id
+			and p.product_base_id=pb.id
+			and op.order_id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findSellerRefundSettlementStatistics" parameterType="map" resultType="map">
+		SELECT
+			pb.submit_type AS submitType,
+			pb.wholesale_price AS wholesalePrice,
+			pb.proposal_price AS proposalPrice,
+			pb.deduction,
+			o.id AS orderId,
+			o.freight_money AS freightMoney,
+			op.id AS orderProductId,
+			op.cost AS cost,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			opr.real_money AS refundMoney,
+			opr.count AS refundCount,
+			s.real_seller_name AS realSellerName,
+			s.id AS sellerId
+		FROM 
+			order_product_refund opr 
+			LEFT JOIN `order` o ON opr.order_id=o.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN order_product op ON opr.order_product_id=op.id
+			LEFT JOIN product p ON op.product_id=p.id
+			LEFT JOIN product_base pb ON p.product_base_id=pb.id
+		WHERE
+			opr.status=4
+		<if test="startTimeBegin != null"><![CDATA[AND opr.check_time>=#{startTimeBegin}]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND opr.check_time<#{startTimeEnd}]]></if>
+	</select>
+	
+	<select id="findOrderProductIdByIdAndOrderIdNotInList" parameterType="map" resultType="map">
+		SELECT 
+			id 
+		FROM 
+			order_product 
+		WHERE 
+			order_id=#{orderId} 
+		AND id NOT IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findOrderProductByOrderNumberAndProductId" parameterType="map" resultType="string">
+		SELECT 
+			op.cost 
+		FROM 
+			order_product op,`order` o 
+		WHERE 
+			o.id=op.order_id 
+			AND o.number=#{number} 
+			AND op.product_id=#{productId}
+	</select>
+	
+	<select id="findOrderProductByOrderManualNumberAndProductId" parameterType="map" resultType="string">
+		SELECT 
+			cost 
+		FROM 
+			order_manual_product
+		WHERE 
+			product_id=#{productId}
+			AND order_manual_id=#{orderId}
+	</select>
+
+	<select id="findOrderInfoForSellerSettlementPeriod" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			o.pay_time AS payTime,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName,
+			s.send_address AS sendAddress,
+			s.settlement_period AS settlementPeriod,
+			s.settlement_day AS settlementDay
+		FROM
+			`order` o,seller s
+		WHERE
+			o.seller_id=s.id
+			AND o.pay_time != '0000-00-00 00:00:00'
+			AND o.is_need_settlement=1
+			AND o.is_settlement=0
+			<if test="sellerIdList != null and sellerIdList.size() > 0">
+				AND s.id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		GROUP BY s.id
+	</select>
+
+	<select id="sumOrderInfoForSellerSettlementPeriod" parameterType="map" resultType="map">
+		SELECT
+			s.id AS sellerId,
+			COUNT(o.id) AS totalNum,
+			SUM(o.real_price) AS totalRealPrice
+		FROM
+			`order` o,seller s
+		WHERE
+			o.seller_id=s.id
+			AND o.pay_time != '0000-00-00 00:00:00'
+			AND o.is_need_settlement=1
+			AND o.is_settlement=0
+		GROUP BY s.id
+	</select>
+
+	<select id="findSellerRefundProportion" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			opr.real_money AS refundMoney,
+			s.real_seller_name AS realSellerName,
+			s.id AS sellerId,
+			rp.seller_money + rp.seller_postage_money + rp.seller_difference_money AS sellerMoney,
+			rp.gegejia_money + rp.gegejia_postage_money + rp.gegejia_difference_money AS gegejiaMoney
+		FROM
+			order_product_refund opr
+			LEFT JOIN `order` o ON opr.order_id=o.id
+			LEFT JOIN seller s ON o.seller_id=s.id
+			LEFT JOIN refund_proportion rp ON opr.id=rp.refund_id
+		WHERE
+			opr.status=4
+			<if test="startTimeBegin != null"><![CDATA[AND opr.check_time>=#{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND opr.check_time<#{startTimeEnd}]]></if>
+	</select>
+	
+	<select id="findOrderIdByRefundSettlementComfirmDate" parameterType="map" resultType="int" >
+		SELECT
+			order_id
+		FROM
+			order_product_refund
+		WHERE
+			1=1
+			<if test="refundSettlementStartTime != null">
+				<![CDATA[AND settlement_comfirm_date>=#{refundSettlementStartTime}]]>
+			</if>
+			<if test="refundSettlementEndTime != null">
+				<![CDATA[AND settlement_comfirm_date<#{refundSettlementEndTime}]]>
+			</if>
+	</select>
+
+	<select id="findOrderProductByOrderSettlementTime" parameterType="map" resultType="map">
+		SELECT
+			o.number AS oNumber,
+			o.real_price AS realPrice,
+			o.seller_id AS sellerId,
+			op.cost AS cost,
+			op.sales_price AS salesPrice,
+			op.product_count AS productCount
+		FROM
+			order_product op, `order` o
+		WHERE
+			op.order_id=o.id
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND o.settlement_time>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND o.settlement_time<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+	<select id="findOrderSettlementInfoByComfirmDate" parameterType="map" resultType="map">
+		SELECT
+			o.seller_id AS sellerId,
+			os.freight_money AS freightMoney,
+			os.postage_is_settlement AS postageIsSettlement
+		FROM
+			order_settlement os, `order` o
+		WHERE
+			os.order_id=o.id
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND os.postage_comfirm_date>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND os.postage_comfirm_date<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+	<select id="findRefundSettlementInfoByComfirmDate" parameterType="map" resultType="map">
+		SELECT
+			o.seller_id AS sellerId,
+			opr.order_product_id AS orderProductId,
+			opr.responsibility_side AS responsibilitySide,
+			opr.responsibility_money AS responsibilityMoney
+		FROM
+			order_product_refund opr, `order` o
+		WHERE
+			opr.order_id=o.id
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND opr.settlement_comfirm_date>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND opr.settlement_comfirm_date<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+	<select id="findOrderManualProductByOrderSettlementTime" parameterType="map" resultType="map">
+		SELECT
+			o.number AS oNumber,
+			o.total_price AS realPrice,
+			o.seller_id AS sellerId,
+			op.cost AS cost,
+			op.sales_price AS salesPrice,
+			op.product_count AS productCount
+		FROM
+			order_manual_product op, `order_manual` o
+		WHERE
+			op.order_manual_id=o.id
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND o.settlement_time>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND o.settlement_time<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+	<select id="findOrderManualSettlementInfoByComfirmDate" parameterType="map" resultType="map">
+		SELECT
+			o.seller_id AS sellerId,
+			os.freight_money AS freightMoney,
+			os.postage_is_settlement AS postageIsSettlement
+		FROM
+			order_manual_settlement os, `order_manual` o
+		WHERE
+			os.order_manual_id=o.id
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND os.postage_comfirm_date>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND os.postage_comfirm_date<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+
+	<select id="findOrderProductAndSettlementByOrderSettlementTime" parameterType="map" resultType="map">
+		SELECT
+			o.id,
+			o.seller_id AS sellerId,
+			op.cost,
+			op.sales_price AS salesPrice,
+			op.product_count AS productCount,
+			os.freight_money AS freightMoney,
+			os.postage_is_settlement as postageIsSettlement
+		FROM
+			order_product op LEFT JOIN `order` o ON op.order_id=o.id LEFT JOIN order_settlement os ON o.id=os.order_id
+		WHERE
+			1=1
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND o.settlement_time>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND o.settlement_time<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+	<select id="findOrderManualProductAndSettlementByOrderSettlementTime" parameterType="map" resultType="map">
+		SELECT
+			o.id,
+			o.seller_id AS sellerId,
+			op.cost,
+			op.sales_price AS salesPrice,
+			op.product_count AS productCount,
+			os.freight_money AS freightMoney,
+			os.postage_is_settlement as postageIsSettlement
+		FROM
+			order_manual_product op LEFT JOIN `order_manual` o ON op.order_manual_id=o.id LEFT JOIN order_manual_settlement os ON o.id=os.order_manual_id
+		WHERE
+			1=1
+			<if test="settlementTimeBegin != null">
+				<![CDATA[AND o.settlement_time>=#{settlementTimeBegin}]]>
+			</if>
+			<if test="settlementTimeEnd != null">
+				<![CDATA[AND o.settlement_time<#{settlementTimeEnd}]]>
+			</if>
+	</select>
+
+
+	
+</mapper>

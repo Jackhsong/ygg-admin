@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="SaleFlagMapper">  
+    
+    <select id="findAllSaleFlagInfo" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+		    name_en AS flagEnName,
+			image AS imageURL,
+			is_available AS isAvailableCode
+		FROM
+			sale_flag
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND `is_available` = #{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+		    
+    </select>
+    
+    <select id="countSaleFlagInfoInfo" parameterType="int" resultType="int">
+ 		SELECT
+			count(id)
+		FROM
+			sale_flag
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND `is_available` = #{isAvailable}</if>
+    </select>
+    
+    <select id="countFlagIdFromSaleWindow" parameterType="int" resultType="int">
+    	SELECT count(id) FROM sale_window WHERE sale_flag_id=#{id}
+    </select>
+    
+    <update id="updateFlag" parameterType="map">
+    	UPDATE sale_flag
+    	<trim prefix="SET" suffixOverrides=",">
+			<if test="name != null">`name`=#{name},</if>
+			<if test="flagEnName != null">`name_en`=#{flagEnName},</if>
+			<if test="image != null">`image` = #{image},</if>
+			<if test="isAvailable != null">`is_available` = #{isAvailable}</if>
+		</trim>
+		WHERE id=#{id}
+    </update>
+    
+    <insert id="saveFlag" parameterType="map">
+    	INSERT INTO sale_flag(`name`,name_en,`image`,`is_available`)VALUES(#{name},#{flagEnName},#{image},#{isAvailable})
+    </insert>
+    
+    
+    <select id="findFlagNameById" parameterType="int" resultType="string">
+    	select `name` from sale_flag where id=#{id}
+    </select>
+</mapper>  

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="QqbsSaleWindowMapper">  
+    
+    <insert id="save" parameterType="QqbsSaleWindowEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qqbs_sale_window (`type`, `display_id`, `name`, `desc`, `image`,`start_time`, `end_time`, `is_display`, `order`, `create_time`,`sale_flag_id`,`is_display_flag`,`sale_time_type`)
+		VALUES (#{type},#{displayId},#{name},#{desc},#{image},#{startTime},#{endTime},#{isDisplay},#{order},now(),#{saleFlagId},#{isDisplayFlag},#{saleTimeType})
+    </insert>
+    
+    <update id="update" parameterType="QqbsSaleWindowEntity" >
+		UPDATE qqbs_sale_window 
+		SET `type`=#{type},`display_id`=#{displayId},`name`=#{name},`image`=#{image},`start_time`=#{startTime},`order`=#{order},
+			`end_time`=#{endTime},`desc`=#{desc}, `is_display`=#{isDisplay},`sale_flag_id`=#{saleFlagId},`is_display_flag`=#{isDisplayFlag},`sale_time_type`=#{saleTimeType}
+		WHERE `id`=#{id};
+    </update>
+    
+    <update id="updateDisplayCode" parameterType="map">
+    	UPDATE qqbs_sale_window 
+		SET `is_display`=#{isDisplay} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <select id="findAllSaleWindow" parameterType="map"  resultType="QqbsSaleWindowEntity">
+      SELECT id as id,
+      	type as type,
+      	display_id as displayId,
+      	name as name,
+      	`desc` as `desc`,
+      	image as image,
+      	start_time as startTime,
+      	end_time as endTime,
+      	is_display as isDisplay,
+      	`order` AS  `order`,
+		update_time as updateTime,
+		sale_flag_id as saleFlagId,
+		is_display_flag as isDisplayFlag,
+		sale_time_type as saleTimeType
+      FROM qqbs_sale_window 
+      WHERE 1=1 
+      	<if test="nottype != null">AND type!=#{nottype}</if>
+      	<if test="id != null">AND id=#{id}</if>
+      	<if test="name != null">AND name like #{name}</if>
+      	<if test="type != null">AND type=#{type}</if>
+		<if test="saleTimeType != null">AND sale_time_type=#{saleTimeType}</if>
+		<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if> 
+      	<if test="status == 1"><![CDATA[AND start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND start_time < now() AND end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND end_time < now()]]></if> 
+      	<if test="saleName != null">AND `name` like #{saleName}</if>
+      	<if test="order != null">ORDER BY `order` DESC, id DESC </if>
+      	<if test="orderStartTime != null">ORDER BY start_time DESC, id DESC </if>
+      	<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    
+    <select id="countSaleWindow" parameterType="map"  resultType="int">
+      SELECT count(id) FROM qqbs_sale_window 
+      WHERE 1=1 
+      	<if test="name != null">AND name like #{name}</if>
+      	<if test="type != null">AND type=#{type}</if> 
+      	<if test="isDisplay != null">AND is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND start_time < now() AND end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND end_time < now()]]></if> 
+      	<if test="saleName != null">AND `name` like #{saleName}</if>
+    </select>
+    
+    <select id="findSaleWindowById" parameterType="int"  resultType="QqbsSaleWindowEntity">
+      SELECT id as id,
+      	type as type,
+      	display_id as displayId,
+      	name as name,
+      	`desc` as `desc`,
+      	image as image,
+      	start_time as startTime,
+      	end_time as endTime,
+      	is_display as isDisplay,
+      	`order` AS  `order`,
+		sale_flag_id as saleFlagId,
+		is_display_flag as isDisplayFlag,
+		sale_time_type as saleTimeType
+      FROM qqbs_sale_window 
+      WHERE id=#{id}
+    </select>
+    
+    <select id="findAllSaleWindowForSellerPeriod" parameterType="map" resultType="map">
+		SELECT
+			ss.id,
+			sw.type AS type,
+			sw.id AS saleWindowId,
+			sw.`name` AS saleWindowName,
+			ss.display_id AS displayId,
+			ss.start_time AS startTime,
+			ss.end_time AS endTime,
+			ss.is_deal_with AS dealWith,
+			s.real_seller_name AS sellerName,
+			s.settlement_period AS settlementPeriod,
+			s.settlement_day AS settlementDay,
+			s.settlement_other AS settlementOther
+		FROM
+			qqbs_sale_window sw,
+			seller_settlement ss,
+			seller s
+		WHERE
+			sw.id = ss.sale_window_id
+			AND ss.seller_id = s.id
+			<if test="saleWindowId != null">and ss.sale_window_id=#{saleWindowId}</if>
+	        <if test="saleWindowType != null">and sw.type=#{saleWindowType}</if>
+	        <if test="saleWindowName != null">and sw.`name` like #{saleWindowName}</if>
+	        <if test="isDealWith != null">and ss.is_deal_with=#{isDealWith}</if>
+	        <if test="sellerId != null">and s.id=#{sellerId}</if>
+		ORDER BY ss.end_time ASC, ss.create_time ASC
+	   <if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countAllSaleWindowForSellerPeriod" resultType="int">
+       	SELECT 
+       		count(ss.id)
+		FROM
+			qqbs_sale_window sw,
+			seller_settlement ss,
+			seller s
+		WHERE
+			sw.id = ss.sale_window_id
+			AND ss.seller_id = s.id
+			<if test="saleWindowId != null">and ss.sale_window_id=#{saleWindowId}</if>
+	        <if test="saleWindowType != null">and sw.type=#{saleWindowType}</if>
+	        <if test="saleWindowName != null">and sw.`name` like #{saleWindowName}</if>
+	        <if test="isDealWith != null">and ss.is_deal_with=#{isDealWith}</if>
+	        <if test="sellerId != null">and s.id=#{sellerId}</if>
+    </select>
+    
+	<update id="hideSaleWindow" parameterType="map">
+		UPDATE seller_settlement SET is_deal_with=#{isDealWith} WHERE id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findAllSingleSaleWindow" parameterType="map" resultType="QqbsSaleWindowEntity">
+		SELECT
+			t1.id AS id,
+			t1.type AS type,
+			t1.display_id AS displayId,
+			t1. NAME AS NAME,
+			t1.`desc` AS `desc`,
+			t1.image AS image,
+			t1.start_time AS startTime,
+			t1.end_time AS endTime,
+			t1.is_display AS isDisplay,
+			t1.`order` AS  `order`,
+			t1.update_time AS updateTime,
+			t1.sale_flag_id AS saleFlagId,
+			t1.is_display_flag AS isDisplayFlag,
+			t1.sale_time_type AS saleTimeType
+		FROM
+			qqbs_sale_window t1
+		LEFT OUTER JOIN product t2 ON t1.display_id = t2.id
+		WHERE t1.type = 1
+      	<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if> 
+      	<if test="productId != null">AND t2.id = #{productId} </if>
+      	<if test="pId != null">AND t2.id = #{pId} </if>
+      	<if test="brandId != null">AND t2.brand_id = #{brandId} </if>
+      	<if test="productName != null">AND t2.`name` like #{productName} </if>
+      	<if test="sellerId != null">AND t2.seller_id = #{sellerId} </if>
+      	<if test="order != null">ORDER BY t1.`order` DESC, t1.id DESC </if>
+      	<if test="orderStartTime != null">ORDER BY t1.start_time DESC, t1.id DESC </if>
+      	<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countSingleSaleWindow" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			qqbs_sale_window t1
+		LEFT OUTER JOIN product t2 ON t1.display_id = t2.id
+		WHERE t1.type = 1
+      	<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if> 
+      	<if test="productId != null">AND t2.id = #{productId} </if>
+      	<if test="pId != null">AND t2.id = #{pId} </if>
+      	<if test="brandId != null">AND t2.brand_id = #{brandId} </if>
+      	<if test="productName != null">AND t2.`name` like #{productName} </if>		
+		<if test="sellerId != null">AND t2.seller_id = #{sellerId} </if>
+	</select>
+	
+	<select id="findAllGroupSaleWinodw" parameterType="map" resultType="QqbsSaleWindowEntity">
+		SELECT
+			t1.id AS id,
+			t1.type AS type,
+			t1.display_id AS displayId,
+			t1. NAME AS NAME,
+			t1.`desc` AS `desc`,
+			t1.image AS image,
+			t1.start_time AS startTime,
+			t1.end_time AS endTime,
+			t1.is_display AS isDisplay,
+			t1.`order` AS  `order`,
+			t1.update_time AS updateTime,
+			t1.sale_flag_id AS saleFlagId,
+			t1.is_display_flag AS isDisplayFlag,
+			t1.sale_time_type AS saleTimeType
+		FROM
+			qqbs_sale_window t1
+		LEFT OUTER JOIN relation_activities_common_and_product t2 ON t1.display_id = t2.activities_common_id
+		LEFT OUTER JOIN product t3 ON t2.product_id = t3.id
+		WHERE
+			t1.type = 2
+		<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if> 
+      	<if test="productId != null">AND t2.activities_common_id = #{productId} </if>
+      	<if test="pId != null">AND t3.id = #{pId} </if>
+      	<if test="brandId != null">AND t3.brand_id = #{brandId} </if>
+      	<if test="productName != null">AND t3.`name` like #{productName} </if>
+      	<if test="sellerId != null">AND t3.seller_id = #{sellerId} </if>
+		GROUP BY t1.id
+		<if test="order != null">ORDER BY t1.`order` DESC, t1.id DESC </if>
+      	<if test="orderStartTime != null">ORDER BY t1.start_time DESC, t1.id DESC </if>
+      	<if test="start != null">LIMIT #{start},#{max}</if>			
+	</select>
+	
+	<select id="countGroupSaleWinodw" parameterType="map" resultType="int">
+		SELECT
+			COUNT(DISTINCT(t1.id))
+		FROM
+			qqbs_sale_window t1
+		LEFT OUTER JOIN relation_activities_common_and_product t2 ON t1.display_id = t2.activities_common_id
+		LEFT OUTER JOIN product t3 ON t2.product_id = t3.id
+		WHERE
+			t1.type = 2
+		<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if> 
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if> 
+      	<if test="productId != null">AND t2.activities_common_id = #{productId} </if>
+      	<if test="pId != null">AND t3.id = #{pId} </if>
+      	<if test="brandId != null">AND t3.brand_id = #{brandId} </if>
+      	<if test="productName != null">AND t3.`name` like #{productName} </if>
+		<if test="sellerId != null">AND t3.seller_id = #{sellerId} </if>
+	</select>
+
+
+
+
+
+	<!--  -->
+	<select id="findAllSaleWindowByParam" parameterType="map" resultType="QqbsSaleWindowEntity">
+		SELECT
+			t1.id AS id,
+			t1.type AS type,
+			t1.display_id AS displayId,
+			t1. NAME AS NAME,
+			t1.`desc` AS `desc`,
+			t1.image AS image,
+			t1.start_time AS startTime,
+			t1.end_time AS endTime,
+			t1.is_display AS isDisplay,
+			t1.`order` AS  `order`,
+			t1.update_time AS updateTime,
+			t1.sale_flag_id AS saleFlagId,
+			t1.is_display_flag AS isDisplayFlag,
+			t1.sale_time_type AS saleTimeType
+		FROM
+			qqbs_sale_window t1
+		WHERE 1 = 1
+      	<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if>
+      	<if test="order != null">ORDER BY t1.`order` DESC, t1.id DESC </if>
+      	<if test="orderStartTime != null">ORDER BY t1.start_time DESC, t1.id DESC </if>
+      	<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countAllSaleWindowByParam" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			qqbs_sale_window t1
+		WHERE 1 = 1
+      	<if test="id != null">AND t1.id=#{id}</if>
+      	<if test="name != null">AND t1.name like #{name}</if>
+      	<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if> 
+      	<if test="startTime != null"><![CDATA[AND t1.start_time > concat(#{startTime},  ' 00:00:01') AND t1.start_time < concat(#{startTime},  ' 23:59:59') ]]></if>
+      	<if test="status == 1"><![CDATA[AND t1.start_time > now()]]></if> 
+      	<if test="status == 2"><![CDATA[AND t1.start_time < now() AND t1.end_time > now()]]></if> 
+      	<if test="status == 3"><![CDATA[AND t1.end_time < now()]]></if> 
+      	<if test="brandId != null">AND t2.brand_id = #{brandId} </if>
+      	<if test="productName != null">AND t2.`name` like #{productName} </if>		
+		<if test="sellerId != null">AND t2.seller_id = #{sellerId} </if>
+	</select>
+	
+	<update id="updateOrder" parameterType="map">
+		update qqbs_sale_window set `order` = #{order} where id = #{id}
+	</update>
+
+</mapper>  

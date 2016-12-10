@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AreaMapper">
+
+<!-- 根据省份id查询省份名称 -->
+    <select id="findProvinceNameByProvinceId"  parameterType="int" resultType="String">
+      SELECT 
+      	name 
+      FROM 
+      	province 
+      WHERE province_id=#{provinceId}
+    </select>
+    
+<!-- 查找所有省份信息 -->
+    <select id="findAllProvince"   resultType="ProvinceEntity">
+      SELECT
+      	id, 
+      	province_id as provinceId,
+      	name 
+      FROM province
+    </select>
+
+	<!-- 查找所有城市信息 -->
+	<select id="findAllCitys"   resultType="CityEntity">
+		SELECT
+			id,
+			city_id as cityId,
+			name
+		FROM city
+	</select>
+
+	<select id="findCityByCityId" parameterType="string" resultType="CityEntity">
+		SELECT
+			id,
+			city_id as cityId,
+			province_id as provinceId,
+			name
+		FROM
+			city
+		WHERE
+			city_id=#{cityId}
+	</select>
+
+	<!-- 查找所有地区信息 -->
+	<select id="findAllDistricts"   resultType="DistrictEntity">
+		SELECT
+			id,
+			district_id as districtId,
+			name
+		FROM district
+	</select>
+
+    
+<!-- 根据城市id查询城市名称 -->
+    <select id="findCityNameByCityId"  parameterType="int" resultType="String">
+      SELECT 
+      	name 
+      FROM 
+      	city 
+      WHERE city_id=#{cityId}
+    </select>
+    
+<!-- 根据provinceId查询所有城市信息 -->
+    <select id="findAllCityByProvinceId" parameterType="int"  resultType="CityEntity">
+      SELECT
+      	id, 
+      	city_id as cityId,
+      	province_id as provinceId,
+      	name 
+      FROM city
+      WHERE province_id=#{id}
+    </select>
+    
+<!-- 根据地区id查询地区名称 -->
+    <select id="findDistrictNameByDistrictId"  parameterType="int" resultType="String">
+      SELECT 
+      	name 
+      FROM 
+      	district 
+      WHERE district_id=#{districtId}
+    </select>
+    
+<!-- 根据cityId查询所有区信息 -->
+    <select id="findAllDistrictByCityId"  parameterType="int"  resultType="DistrictEntity">
+      SELECT
+      	id, 
+      	city_id as cityId,
+      	district_id as districtId,
+      	name 
+      FROM district
+      WHERE city_id=#{id}
+    </select>
+    
+<!-- 更新 city -->
+	<update id="updateCityZipCode" parameterType="map">
+		UPDATE city SET zip_code=#{zipCode} WHERE city_id=#{cityId}
+	</update>
+	
+	
+	<select id="findAllCity" parameterType="map" resultType="CityEntity">
+		SELECT
+	      	id, 
+	      	city_id as cityId,
+	      	province_id as provinceId,
+	      	name 
+      	FROM city
+      	<if test="provincId != null">WHERE province_id=#{provincId}</if>
+      	ORDER BY id
+	</select>
+	
+	<select id="findAllDistrict" parameterType="map" resultType="DistrictEntity">
+      SELECT
+      	id, 
+      	city_id as cityId,
+      	district_id as districtId,
+      	name 
+      FROM district
+      <if test="cityId != null">WHERE city_id=#{cityId}</if>
+	</select>
+	
+	<select id="findCityCodeByPara" parameterType="map" resultType="map">
+		select province_id as provinceId,city_id as cityId from city
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="provinceIdList != null">AND province_id in
+				<foreach collection="provinceIdList" index="index" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+			<if test="cityIdList != null">AND city_id not in
+				<foreach collection="cityIdList" index="index" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+		</trim>
+	</select>
+	
+	<select id="findDistrictCodeByPara" parameterType="map" resultType="map">
+		SELECT
+			c.province_id AS provinceId,
+			c.city_id AS cityId,
+			d.district_id AS districtId
+		FROM
+			city c,
+			district d
+		WHERE
+			c.city_id = d.city_id
+ 		<if test="provinceIdList != null">AND c.province_id in
+			<foreach collection="provinceIdList" index="index" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="cityIdList != null">AND c.city_id in
+			<foreach collection="cityIdList" index="index" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="districtIdList != null">AND d.district_id not in
+			<foreach collection="districtIdList" index="index" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>		
+		</if>		
+	</select>
+	
+	<select id="findAllProvinceCode" resultType="string">
+		SELECT province_id FROM province ORDER BY province_id
+	</select>
+</mapper>

@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MallWindowMapper">
+	<resultMap type="MallWindowEntity" id="MallWindowMap">
+		<id column="id" property="id" />
+    	<result column="mall_page_id" property="mallPageId" />
+    	<result column="name" property="name" />
+    	<result column="image" property="image" />
+    	<result column="is_display" property="isDisplay" />
+    	<result column="remark" property="remark" />
+    	<result column="sequence" property="sequence" />
+    	<result column="create_time" property="createTime" />
+	</resultMap>
+
+	<select id="findJsonMallWindowInfo" parameterType="map" resultType="map">
+		SELECT
+			t1.id AS id,
+			t1.is_display AS isDisplayCode,
+			t1.`name` AS mallWindowName,
+			t1.remark AS remark,
+			t1.image AS imageURL,
+			t2.`name` AS mallPageName,
+			t1.sequence AS sequence
+		FROM
+			mall_window t1,
+			mall_page t2
+		WHERE
+			t1.mall_page_id = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="name != null">AND t1.`name` like #{name}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+		ORDER BY t1.sequence DESC,t1.create_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<select id="countMallWindowInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			mall_window t1,
+			mall_page t2
+		WHERE
+		t1.mall_page_id = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="name != null">AND t1.`name` like #{name}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+	</select>
+	
+	<update id="updateMallWindowByPara" parameterType="map">
+		update mall_window 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="mallPageId != null ">mall_page_id=#{mallPageId},</if>
+			<if test="name != null ">`name`=#{name},</if>
+			<if test="image != null ">`image`=#{image},</if>
+			<if test="isDisplay != null ">is_display=#{isDisplay},</if>
+			<if test="remark != null ">remark=#{remark},</if>
+			<if test="sequence != null ">sequence=#{sequence}</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<select id="getMallWindowMaxSequence" resultType="int">
+		SELECT MAX(sequence)+1 FROM mall_window
+	</select>
+	
+	<insert id="saveMallWindow" parameterType="MallWindowEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO mall_window (mall_page_id,`name`,image,is_display,remark,sequence)
+		VALUES(#{mallPageId},#{name},#{image},#{isDisplay},#{remark},#{sequence})
+	</insert>
+	
+	<select id="findAllMallPage" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			is_available AS isAvailableCode,
+			remark
+		FROM
+			mall_page
+		WHERE 1=1
+		<if test="id != null">AND id = #{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<select id="countMallPageInfo" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			mall_page
+		WHERE 1=1
+		<if test="id != null">AND id = #{id}</if>
+		<if test="name != null">AND `name` like #{name}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable}</if>	
+	</select>
+	
+	<select id="findMallWindowByPara" parameterType="map" resultMap="MallWindowMap">
+		SELECT * FROM mall_window where 1=1
+	    <if test="id != null">AND id = #{id}</if>
+	    <if test="name != null">AND `name` like #{name}</if>
+  		ORDER BY sequence DESC,create_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<insert id="saveMallPage" parameterType="MallPageEntity">
+		INSERT INTO mall_page(`name`,is_available,remark) VALUES(#{name}, #{isAvailable},#{remark})
+	</insert>
+	
+	<update id="updateMallPage" parameterType="MallPageEntity">
+		UPDATE mall_page SET `name`=#{name},is_available=#{isAvailable},`remark`=#{remark} WHERE id=#{id}
+	</update>
+	
+	<select id="findAllMallPageFloor" parameterType="map" resultType="map">
+		SELECT
+			id,
+			mall_page_id AS mallPageId,
+			`name`,
+			is_display AS isDisplayCode,
+			sequence
+		FROM
+			mall_page_floor
+		WHERE mall_page_id = #{mallPageId}
+		ORDER BY sequence DESC,create_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>	
+	</select>
+	
+	<select id="countMallPageFloor" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			mall_page_floor
+		WHERE mall_page_id = #{mallPageId}
+	</select>
+	
+	<insert id="savePageFloor" parameterType="map">
+		INSERT INTO mall_page_floor(mall_page_id,`name`,`sequence`,`is_display`) VALUES(${mallPageId},#{name},#{sequence},#{isDisplay})
+	</insert>
+	
+	<update id="updatePageFloor" parameterType="map">
+		UPDATE mall_page_floor 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="name != null">`name`=#{name},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay}</if>
+		</trim>
+		where id=#{id} and mall_page_id=#{mallPageId}
+	</update>
+	
+	<select id="getPageFloorMaxSequence"  parameterType="map" resultType="int">
+		SELECT MAX(sequence)+1 FROM  mall_page_floor where mall_page_id = #{mallPageId}
+	</select>
+	
+	<select id="findJsonMallFloorProductInfo" parameterType="map" resultType="map">
+		SELECT
+			t3.id as id,
+			t1.id AS productId,
+			t2.`name` AS floorName,
+			t1.product_base_id AS baseId,
+			t1.`name` AS productName,
+			t1.short_name AS shortName,
+			t1.remark AS remark,
+			t1.is_off_shelves AS isOffShelves,
+			t4.sell AS sell,
+			t4.stock AS stock,
+			t1.market_price AS marketPrice,
+			t1.sales_price AS salesPrice,
+			t5.real_seller_name AS sellerName,
+			t5.send_address AS sendAddress,
+			t3.sequence AS sequence,
+			t1.`type` AS type
+		FROM
+			product t1,
+			mall_page_floor t2,
+			relation_mall_page_floor_and_product t3,
+			product_count t4,
+			seller t5
+		WHERE
+			t1.id = t3.product_id
+		AND t2.id = t3.mall_page_floor_id
+		AND t1.seller_id = t5.id
+		AND t1.id = t4.product_id
+		AND t2.mall_page_id = #{mallPageId}
+		<if test="pageFloorId != null">AND t2.id=#{pageFloorId}</if>
+		<if test="productId != null">AND t1.id=#{productId}</if>
+		<if test="productName != null">AND t1.`name` like #{productName}</if>
+		<if test="shortName != null">AND t1.short_name like #{shortName}</if>
+		<if test="brandId != null">AND t1.brand_id=#{brandId}</if>
+		<if test="sellerId != null">AND t5.id=#{sellerId}</if>
+		<if test="code != null">AND t1.`code`=#{code}</if>
+		ORDER BY t2.sequence DESC,t3.sequence DESC
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countMallFloorProductInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			product t1,
+			mall_page_floor t2,
+			relation_mall_page_floor_and_product t3,
+			product_count t4,
+			seller t5
+		WHERE
+			t1.id = t3.product_id
+		AND t2.id = t3.mall_page_floor_id
+		AND t1.seller_id = t5.id
+		AND t1.id = t4.product_id
+		AND t2.mall_page_id = #{mallPageId}
+		<if test="pageFloorId != null">AND t2.id=#{pageFloorId}</if>
+		<if test="productId != null">AND t1.id=#{productId}</if>
+		<if test="productName != null">AND t1.`name` like #{productName}</if>
+		<if test="shortName != null">AND t1.short_name like #{shortName}</if>
+		<if test="brandId != null">AND t1.brand_id=#{brandId}</if>
+		<if test="sellerId != null">AND t5.id=#{sellerId}</if>
+		<if test="code != null">AND t1.`code`=#{code}</if>
+	</select>
+	
+	<update id="updateFloorProductSequence" parameterType="map">
+		UPDATE relation_mall_page_floor_and_product SET sequence=#{sequence} WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteRelationMallPageFloorAndProduct" parameterType="int">
+		DELETE FROM relation_mall_page_floor_and_product WHERE id=#{id}
+	</delete>
+	
+	<select id="findAllProductIdByMallPageId" parameterType="int" resultType="int">
+		SELECT
+			product_id
+		FROM
+			relation_mall_page_floor_and_product t1,
+			mall_page_floor t2
+		WHERE
+			t1.mall_page_floor_id = t2.id
+		AND t2.mall_page_id = #{id}
+		ORDER BY
+			t2.sequence DESC,
+			t1.sequence DESC		
+	</select>
+	
+	
+	<select id="findProductInfoForAdd" parameterType="map" resultType="map">
+		SELECT 
+			p.id as productId,
+			p.code as code,
+			p.name as name,
+			p.type as type,
+			p.remark as remark,
+			pc.stock as stock,
+			p.market_price as marketPrice,
+			p.sales_price as salesPrice,
+			b.name as brandName,
+			b.id as brandId,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			s.warehouse as warehouse,
+			s.id as sellerId 
+		FROM 
+			product p, seller s, brand b, product_count pc 
+		WHERE 
+			p.seller_id=s.id  AND p.brand_id=b.id  AND pc.product_id=p.id 
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="type != null">AND p.type = #{type}</if>
+			<if test="idList != null">AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+		ORDER BY p.id DESC 
+      	<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	
+	<select id="countProductInfoForAdd" parameterType="map" resultType="int">
+		SELECT 
+			count(*)
+		FROM 
+			product p, seller s, brand b, product_count pc 
+		WHERE 
+			p.seller_id=s.id  AND p.brand_id=b.id  AND pc.product_id=p.id 
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="type != null">AND p.type = #{type}</if>
+			<if test="idList != null">AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+	</select>
+	
+	
+	<select id="findAllProductIdByPageFloorId" parameterType="int" resultType="int">
+		SELECT product_id FROM relation_mall_page_floor_and_product WHERE mall_page_floor_id=#{id} ORDER BY sequence DESC
+	</select>
+	
+	<select id="findMaxSequenceRelationMallPageFloorAndProduct" parameterType="int" resultType="int">
+		SELECT MAX(sequence)+1 FROM relation_mall_page_floor_and_product WHERE mall_page_floor_id=#{id}
+	</select>
+	
+	<insert id="saveRelationMallPageFloorAndProduct" parameterType="map">
+		INSERT INTO relation_mall_page_floor_and_product(mall_page_floor_id,product_id,sequence)VALUES(#{mallPageFloorId},#{productId},#{sequence})
+	</insert>
+	
+	<select id="findAllCurrentHotProductInfo" parameterType="map" resultType="map">
+		SELECT
+			t2.id AS id,
+			t1.id AS productId,
+			t1.type AS typeCode,
+			t1.product_base_id AS baseId,
+			t1.start_time AS startTime,
+			t1.end_time AS endTime,
+			t1.`name` AS productName,
+			t1.short_name AS shortName,
+			t1.sales_price AS salesPrice,
+			t3.stock AS stock,
+			t3.`lock` AS lockAmount,
+			t2.sequence AS sequence,
+			t2.is_display AS isDisplayCode,
+			t1.type AS typeCode,
+			t2.sale_count AS saleCount
+		FROM
+			product t1,
+			product_hot t2,
+			product_count t3
+		WHERE
+			t1.id = t2.product_id
+		AND t1.id = t3.product_id
+		<if test="isDisplay == 0">AND t2.is_display=#{isDisplay}</if>
+		<if test="isDisplay == 1">AND t2.is_display=#{isDisplay}</if>
+		<if test="isDisplay == 2">AND t2.is_display=0 AND t2.is_update_display_by_timer=0</if>
+		<if test="isDisplay == 3">AND t2.is_display=0 AND t2.is_update_display_by_timer=1</if>
+		<if test="type != null">AND t1.type=#{type}</if>
+		<if test="isEnd == 1"><![CDATA[AND t1.end_time<now() AND t1.type=1]]></if>
+		<if test="isEnd == 2"><![CDATA[AND ((t1.end_time>now() AND t1.type=1) OR t1.type=2)]]></if>
+		<if test="stock == 1"><![CDATA[AND t3.stock > 0]]></if>
+		<if test="stock == 2"><![CDATA[AND t3.stock = 0]]></if>
+		<if test="productId != null">AND t1.id=#{productId}</if>
+		<if test="productName != null">AND t1.`name` like #{productName}</if>
+		ORDER BY t2.create_time DESC,t2.id DESC
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countCurrentHotProductInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			product t1,
+			product_hot t2,
+			product_count t3
+		WHERE
+			t1.id = t2.product_id
+		AND t1.id = t3.product_id
+		<if test="isDisplay == 0">AND t2.is_display=#{isDisplay}</if>
+		<if test="isDisplay == 1">AND t2.is_display=#{isDisplay}</if>
+		<if test="isDisplay == 2">AND t2.is_display=0 AND t2.is_update_display_by_timer=0</if>
+		<if test="isDisplay == 3">AND t2.is_display=0 AND t2.is_update_display_by_timer=1</if>
+		<if test="type != null">AND t1.type=#{type}</if>
+		<if test="isEnd == 1"><![CDATA[AND t1.end_time<now() AND t1.type=1]]></if>
+		<if test="isEnd == 2"><![CDATA[AND t1.end_time>now() AND t1.type=1]]></if>
+		<if test="stock == 1"><![CDATA[AND t3.stock > 0]]></if>
+		<if test="stock == 2"><![CDATA[AND t3.stock = 0]]></if>
+	</select>
+	
+	<update id="updateHotProduct" parameterType="map">
+		UPDATE product_hot 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+			<if test="updateByTimer != null">is_update_display_by_timer=#{updateByTimer}</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteHotProduct" parameterType="int">
+		DELETE FROM product_hot WHERE id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+       		#{item}
+    	</foreach>
+	</delete>
+	
+	<select id="findAllHotProductId" resultType="int">
+		SELECT product_id FROM product_hot ORDER BY sequence DESC
+	</select>
+	
+	<select id="findMaxSequenceProductHot" resultType="int">
+		SELECT MAX(sequence)+1 FROM product_hot
+	</select>
+	
+	<insert id="saveProductHot" parameterType="map">
+		INSERT INTO product_hot(`type`,`product_id`,`sequence`,`is_display`,`is_update_display_by_timer`) VALUES(#{type},#{productId},#{sequence},#{isDisplay},#{updateDisplayByTimer})
+	</insert>
+	
+	<select id="findAllCurrentHotDisplayProductList" parameterType="map" resultType="map">
+		SELECT
+			t2.id AS id,
+			t1.id AS productId,
+			t1.`name` AS productName,
+			t1.type AS typeCode,
+			t1.start_time AS startTime,
+			t1.end_time AS endTime,
+			t1.sales_price AS salesPrice,
+			t2.sale_count_discount AS saleCountDiscount,
+			t2.sale_count_factor AS saleAmountFactor,
+			t2.sale_money_discount AS saleMoneyDiscount,
+			t2.sale_money_factor AS saleMoneyFactor,
+			t2.custom_factor AS customFactor,
+			t2.sale_count AS saleCount,
+			t2.sale_money AS saleMoney,
+			(t2.sale_count_factor + t2.sale_money_factor) AS totalFactor,
+			(CAST((t2.sale_count_factor + t2.sale_money_factor)AS signed)+t2.custom_factor) AS sequence
+		FROM
+			product t1,
+			product_hot t2
+		WHERE
+			t1.id = t2.product_id
+		AND t2.is_display = 1
+		ORDER BY (CAST((t2.sale_count_factor + t2.sale_money_factor)AS signed)+t2.custom_factor)  DESC, t2.id DESC
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countCurrentHotDisplayProduct" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			product t1,
+			product_hot t2
+		WHERE
+			t1.id = t2.product_id
+		AND t2.is_display = 1		
+	</select>
+	
+	<select id="findProductHotTimeFactor" resultType="map">
+		SELECT
+			mall_product_factor AS factor0,
+			sale_product_factor1 AS factor1,
+			sale_product_factor2 AS factor2,
+			sale_product_factor3 AS factor3,
+			sale_product_factor4 AS factor4,
+			sale_product_factor5 AS factor5
+		FROM
+			product_hot_factor
+		LIMIT 1
+	</select>
+	
+	<select id="findMallProductInfo" parameterType="string" resultType="map">
+		SELECT
+			t2.product_id AS productId,
+			t2.product_count AS amount
+		FROM
+			`order` t1,
+			order_product t2,
+			product_hot t3,
+			product t4
+		WHERE
+			t3.type = 2
+		AND t1.id = t2.order_id
+		AND t3.product_id = t2.product_id
+		AND t3.product_id = t4.id
+		<![CDATA[AND t1.create_time >= #{beginTime}]]>
+		<![CDATA[AND t1.create_time <= now()]]>
+		AND (t1.`status` = 2 OR t1.`status` = 3 OR t1.`status` = 4)		
+	</select>
+	
+	
+	<select id="findHotProductInfoById" parameterType="map" resultType="map">
+		SELECT
+			t1.type AS type,
+			t1.start_time AS startTime,
+			(t2.sale_count_factor + t2.sale_money_factor) AS totalFactor
+		FROM
+			product t1,
+			product_hot t2
+		WHERE
+			t1.id = t2.product_id
+		AND t2.id =	#{id}
+	</select>
+	
+	<update id="updateHotProductCustomFactor" parameterType="map">
+		UPDATE product_hot SET custom_factor=#{customFactor} WHERE id=#{id}
+	</update>
+	
+	<update id="updateSaleTimeFactor" parameterType="map">
+	UPDATE product_hot_factor
+	<set>
+		<if test="index == 0">mall_product_factor=#{factor}</if>
+		<if test="index == 1">sale_product_factor1=#{factor}</if>
+		<if test="index == 2">sale_product_factor2=#{factor}</if>
+		<if test="index == 3">sale_product_factor3=#{factor}</if>
+		<if test="index == 4">sale_product_factor4=#{factor}</if>
+		<if test="index == 5">sale_product_factor5=#{factor}</if>
+	</set>	
+	</update>
+	
+	<select id="countProductHotId" parameterType="int" resultType="int">
+		SELECT COUNT(id) FROM product_hot WHERE product_id=#{productId}
+	</select>
+	
+	<update id="updateHotProductDisplayStatus">
+		UPDATE product_hot SET is_display=#{code}
+		<if test="updateByTimer != null">,is_update_display_by_timer=#{updateByTimer}</if>
+		  WHERE id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          	#{item}
+   		</foreach>
+	</update>
+</mapper>

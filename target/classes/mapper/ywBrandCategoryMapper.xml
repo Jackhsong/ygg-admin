@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="YwBrandCategoryMapper">  
+
+	<!--新增品牌栏目-->
+	<insert id="addBrandCategory" parameterType="YwBrandCategoryEntity">
+		insert into yw_brand_category(`name`,`order`,is_display,create_time)
+		values(#{name},#{order},#{isDisplay},now())
+	</insert>
+	
+	<!-- 更新品牌栏目 -->
+	<update id="updateBrandCategory" parameterType="YwBrandCategoryEntity">
+		update yw_brand_category
+		<set>
+			<if test="name!=null"> `name`=#{name},</if>
+			<if test="order!=null"> `order`=#{order},</if>
+			<if test="isDisplay!=null"> is_display=#{isDisplay} </if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<!-- 查询品牌栏目列表信息 -->
+	<select id="findBrandCategoryInfo" parameterType="map" resultType="YwBrandCategoryEntity">
+		SELECT
+			ybc.id as id,  
+			ybc.`name` as `name`,
+			ybc.`order` as `order`,
+			ybc.is_display as isDisplay  
+			FROM    
+			yw_brand_category ybc
+		ORDER BY ybc.`order` DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+		<!-- 查询品牌栏目列表信息 -->
+	<select id="countBrandCategoryInfo" resultType="int">
+		SELECT
+			count(ybc.id)
+			from yw_brand_category ybc
+	</select>
+	
+</mapper>  

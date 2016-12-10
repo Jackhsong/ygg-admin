@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductCountMapper">
+
+
+	
+	<resultMap id="mwebGroupProductCountEntityMap" type="mwebGroupProductCountEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_product_id" property="mwebGroupProductId" javaType="int" jdbcType="INTEGER" />
+		<result column="sell" property="sell" javaType="int" jdbcType="INTEGER" />
+		<result column="stock" property="stock" javaType="int" jdbcType="INTEGER" />
+        <result column="lock" property="lock" javaType="int" jdbcType="INTEGER" />
+	</resultMap>
+	
+
+
+
+  <select id="getGroupProductCount_forUpdate" parameterType="mwebGroupProductCountEntity" resultMap="mwebGroupProductCountEntityMap">
+    <![CDATA[
+        SELECT
+	         t.id,
+	         t.mweb_group_product_id as mwebGroupProductId,
+	         t.sell,
+             t.stock,
+             t.lock
+       FROM mweb_group_product_count t 
+        ]]>
+		<where>
+            t.mweb_group_product_id=#{mwebGroupProductId}
+		</where>
+		FOR UPDATE
+	</select>
+	
+	
+	<select id="getGroupProductCount" parameterType="mwebGroupProductCountEntity" resultMap="mwebGroupProductCountEntityMap">
+    <![CDATA[
+        SELECT
+	         t.id,
+	         t.mweb_group_product_id as mwebGroupProductId,
+	         t.sell,
+             t.stock,
+             t.lock
+       FROM mweb_group_product_count t 
+        ]]>
+		<where>
+            t.mweb_group_product_id=#{mwebGroupProductId}
+		</where>
+	</select>
+	
+	
+	
+	
+	<update id="updateGroupProductCount" parameterType="com.alibaba.fastjson.JSONObject">
+     <![CDATA[
+        update mweb_group_product_count t
+        ]]>
+        <set>
+
+            <if test="stock != null" >t.stock = #{addStock},</if>
+   
+        </set>
+        <where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+            <if test="stock!=null and stock!=0"> AND t.stock=#{stock}</if>
+		</where>
+	</update>
+	
+	
+	<update id="lockGroupProductCount" parameterType="mwebGroupProductCountEntity">
+     <![CDATA[
+        update mweb_group_product_count t
+        ]]>
+        <set>
+            <if test="sell != null" >t.sell = #{sell},</if>
+            <if test="stock != null" >t.stock = #{stock},</if>
+            <if test="lock != null" >t.lock = #{lock},</if>
+        </set>
+        <where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+            and t.stock>0
+		</where>
+	</update>
+	
+	
+	
+	<update id="unLockGroupProductCount" parameterType="mwebGroupProductCountEntity">
+     <![CDATA[
+        update mweb_group_product_count t
+        ]]>
+        <set>
+            <if test="sell != null" >t.sell = #{sell},</if>
+            <if test="stock != null" >t.stock = #{stock},</if>
+            <if test="lock != null" >t.lock = #{lock},</if>
+        </set>
+        <where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+            and t.lock>0
+		</where>
+	</update>
+	
+	<insert id="addMwebGroupProductCount" parameterType="mwebGroupProductCountEntity"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_product_count
+        
+        ]]>
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="mwebGroupProductId != null" >mweb_group_product_id,</if>
+            <if test="sell != null" >sell,</if>
+            <if test="stock != null" >stock,</if>
+            <if test="lock != null" >`lock`,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+         	<if test="mwebGroupProductId != null" >#{mwebGroupProductId},</if>
+         	<if test="sell != null" >#{sell},</if>
+         	<if test="stock != null" >#{stock},</if>
+         	<if test="lock != null" >#{lock},</if>
+        </trim>
+	</insert>
+</mapper>

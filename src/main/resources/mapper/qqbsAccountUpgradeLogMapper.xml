@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsAccountUpgradeLogMapper">
+	<sql id="query">
+		select log.id,log.id as `index`,log.account_id as accountId,
+				log.flag,
+				log.name,
+				log.card_id as cardId,
+				log.nickname,
+				log.number,
+				log.status,
+				log.force_time as forceTime,
+				log.create_time as createTime
+	</sql>
+	<sql id="condition">
+		where 1=1
+			<if test="name != null and name != '' "> and log.nickname like #{name}</if>
+			<if test="accountId !=null and accountId !=-1"> and log.account_id=#{accountId}</if>
+	</sql>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+	 	<include refid="query"></include>
+		from qqbs_account_upgrade_log log
+		<include refid="condition"></include>
+		order by STATUS asc,log.create_time DESC,id desc
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) 
+			from qqbs_account_upgrade_log log
+		<include refid="condition"></include>
+	</select>
+	<!-- 修改日志 -->
+	<update id="updateLog" parameterType="map">
+		update qqbs_account_upgrade_log t set t.status = #{status} ,t.ex_status = #{exStatus}, t.update_time = now() where id=#{id}
+	</update>
+	<select id="getInfoByLogId" parameterType="string" resultType="map">
+		<include refid="query"></include>
+			from qqbs_account_upgrade_log log 
+			where log.id = #{id}
+     </select>
+     <!-- 获取直属代言人的ID -->
+     <select id="getDirectlyUnderSpokesperson" parameterType="int" resultType="int">
+         select sp_account_id as accountId
+         	from  qqbs_directly_under_spokesperson 
+          	WHERE account_id=#{accountId} and `delete` =0 
+     </select>
+     <!-- 删除直属代言人 -->
+     <update id="deleteDirectlyUnderSpokesperson" parameterType="map">
+ 		update qqbs_directly_under_spokesperson t set t.`delete` = 1 , t.update_time = now() 
+ 		where 
+ 		<![CDATA[account_id != #{accountId} ]]>
+			<if test="lists != null">
+   				and `sp_account_id` in 
+				<foreach collection="lists" item="item" index="index" open="(" separator="," close=")"> 
+			    	#{item}
+			   	</foreach>
+			</if>
+     </update>
+     <!-- 获取团队成员的ID -->
+     <select id="getTeam" parameterType="int" resultType="int">
+         select member_account_id as accountId
+         	from  qqbs_account_team 
+          	WHERE account_id=#{accountId} and `delete` =0 
+     </select>
+     <!-- 删除团队成员 -->
+     <update id="deleteTeam" parameterType="map">
+ 		update qqbs_account_team t set t.`delete` = 1 , t.update_time = now() 
+ 		where 
+ 		<![CDATA[account_id != #{accountId} ]]>
+			<if test="lists != null">
+   				and `member_account_id` in 
+				<foreach collection="lists" item="item" index="index" open="(" separator="," close=")"> 
+			    	#{item}
+			   	</foreach>
+			</if>
+     </update>
+     <insert id="insertAccountIdentity" parameterType="QqbsAccountIdentity" useGeneratedKeys="true" keyProperty="id">
+ 		<![CDATA[
+        	insert into qqbs_account_identity(account_id,
+        								manager,
+        								manager_time,
+        								director,
+        								director_time,
+        								status,
+        								force_time,
+        								create_time) 
+        	values(#{accountId},
+        		   #{manager},
+        		   #{managerTime},
+        		   #{director},
+        		   #{directorTime},
+        		   #{status},
+        		   #{forceTime},
+        		   now())
+        ]]>
+	</insert>
+	<!-- 修改日志 -->
+	<update id="updateAccountIdentity" parameterType="map">
+		update qqbs_account_identity t set t.director = #{director} ,t.director_time = #{directorTime}, t.update_time = now() where account_id=#{accountId}
+	</update>
+</mapper>

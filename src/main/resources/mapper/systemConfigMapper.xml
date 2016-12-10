@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SystemConfigMapper">  
+	<select id="findWhiteIpInfo" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.ip,
+			t1.remark,
+			t2.username AS username,
+			t2.realname AS realname,
+			t1.create_time AS createTime,
+			t1.update_user AS updateUser,
+			t1.update_time AS updateTime,
+			t1.is_available AS isAvailableCode
+		FROM
+			white_list_ip t1,user t2
+		WHERE t1.create_user = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="ip != null">AND t1.ip=#{ip}</if>
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>
+		ORDER BY t1.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+		
+	</select>
+	
+	<select id="countWhiteIpInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			white_list_ip t1,user t2
+		WHERE t1.create_user = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="ip != null">AND t1.ip=#{ip}</if>
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>	
+	</select>
+	
+	<insert id="insertWhiteIp" parameterType="map">
+		INSERT INTO white_list_ip(ip,remark,create_user,create_time,update_user) VALUES(#{ip},#{remark},#{createUser},now(),#{updateUser})
+	</insert>
+	
+	
+	<update id="updateWhiteIp" parameterType="map">
+		UPDATE white_list_ip
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="ip != null">ip=#{ip},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="createUser != null">create_user=#{createUser},</if>
+			<if test="updateUser != null">update_user=#{updateUser},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable}</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findWhiteURLInfo" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.url,
+			t1.remark,
+			t2.username AS username,
+			t2.realname AS realname,
+			t1.create_time AS createTime,
+			t1.update_user AS updateUser,
+			t1.update_time AS updateTime,
+			t1.is_available AS isAvailableCode
+		FROM
+			white_list_url t1,user t2
+		WHERE t1.create_user = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>		
+		<if test="url != null">AND t1.url=#{url}</if>		
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>
+		ORDER BY t1.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countWhiteURLInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			white_list_url t1,user t2
+		WHERE t1.create_user = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>		
+		<if test="url != null">AND t1.url=#{url}</if>		
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>		
+	</select>
+	
+	<insert id="insertWhiteURL" parameterType="map">
+		INSERT INTO white_list_url(url,remark,create_user,create_time,update_user) VALUES(#{url},#{remark},#{createUser},now(),#{updateUser})
+	</insert>
+	
+	<update id="updateWhiteURL" parameterType="map">
+		UPDATE white_list_url
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="url != null">url=#{url},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="createUser != null">create_user=#{createUser},</if>
+			<if test="updateUser != null">update_user=#{updateUser},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable}</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<update id="updateWhiteIpStatus" parameterType="map">
+		UPDATE white_list_ip set is_available=#{isAvailable} where id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateWhiteURLStatus" parameterType="map">
+		UPDATE white_list_url set is_available=#{isAvailable} where id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>		
+</mapper>  

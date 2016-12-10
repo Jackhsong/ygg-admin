@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ProductCommentMapper">  
+	<select id="findAllProductComment" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t3.id AS orderId,
+			t3.number AS orderNo,
+			t5.id AS accountId,
+			t5.`name` AS username,
+			t5.type AS userType,
+			t4.type AS productType,
+			t4.id AS productId,
+			t4.`name` AS productName,
+			t4.sales_price AS salePrice,
+			t2.product_count AS productAmount,
+			t1.`level` AS `level`,
+			t1.content AS content,
+			t1.image1,
+			t1.image2,
+			t1.image3,
+			t6.full_name AS receiveName,
+			t6.mobile_number AS receiveMobile,
+			t7.real_seller_name AS realSellerName
+		FROM
+			order_product_comment t1,
+			order_product t2,
+			`order` t3,
+			product t4,
+			account t5,
+			order_receive_address t6,
+			seller t7
+		WHERE
+			t1.order_product_id = t2.id
+		AND t2.order_id = t3.id
+		AND t2.product_id = t4.id
+		AND t1.account_id = t5.id
+		AND t3.receive_address_id = t6.id
+		AND t7.id = t4.seller_id
+		<if test="id != null">AND t1.id = #{id}</if>
+		<if test="level != null">AND t1.`level` = #{level}</if>
+		<if test="accountId != null">AND t5.id = #{accountId}</if>
+		<if test="username != null">AND t5.`name` like #{username}</if>
+		<if test="productName != null">AND t4.`name` like #{productName}</if>
+		<if test="productId != null">AND t4.id = ${productId}</if>
+		<if test="sellerId != null">AND t7.id=#{sellerId}</if>
+		<if test="brandId != null">AND t4.brand_id=#{brandId}</if>
+		<if test="productType != null">AND t4.type = ${productType}</if>
+		ORDER BY t1.create_time DESC,t1.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countProductComment" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			order_product_comment t1,
+			order_product t2,
+			`order` t3,
+			product t4,
+			account t5,
+			order_receive_address t6,
+			seller t7
+		WHERE
+			t1.order_product_id = t2.id
+		AND t2.order_id = t3.id
+		AND t2.product_id = t4.id
+		AND t1.account_id = t5.id
+		AND t3.receive_address_id = t6.id
+		AND t7.id = t4.seller_id
+		<if test="id != null">AND t1.id = #{id}</if>
+		<if test="level != null">AND t1.`level` = #{level}</if>
+		<if test="accountId != null">AND t5.id = #{accountId}</if>
+		<if test="username != null">AND t5.`name` like #{username}</if>
+		<if test="productName != null">AND t4.`name` like #{productName}</if>
+		<if test="sellerId != null">AND t7.id=#{sellerId}</if>
+		<if test="brandId != null">AND t4.brand_id=#{brandId}</if>
+		<if test="productId != null">AND t4.id = ${productId}</if>
+		<if test="productType != null">AND t4.type = ${productType}</if>
+	</select>
+	
+	<select id="findAllProductBaseComment" parameterType="map" resultType="map">
+		SELECT
+			opc.product_base_id productBaseId,
+			COUNT(opc.product_id) AS totalComment,
+			pb.`name` AS productBaseName,
+			s.real_seller_name AS sellerName,
+			pb.code,
+			b.`name` AS brandName
+		FROM
+			order_product_comment opc,
+			product_base pb,
+			seller s,
+			brand b
+		WHERE
+			opc.product_base_id = pb.id
+		AND pb.seller_id = s.id
+		AND pb.brand_id = b.id
+		<if test="productBaseId !=null">AND pb.id=#{productBaseId}</if>
+		<if test="productBaseName !=null">AND pb.`name` like #{productBaseName}</if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="brandId != null">AND b.id=#{brandId}</if>
+		<if test="productBaseIdList != null">AND pb.id in
+			<foreach collection="productBaseIdList" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY opc.product_base_id
+		ORDER BY totalComment DESC,pb.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countProductBaseComment" parameterType="map" resultType="int">
+		SELECT
+			COUNT(DISTINCT(opc.product_base_id))
+		FROM
+			order_product_comment opc,
+			product_base pb,
+			seller s,
+			brand b
+		WHERE
+			opc.product_base_id = pb.id
+		AND pb.seller_id = s.id
+		AND pb.brand_id = b.id
+		<if test="productBaseId !=null">AND pb.id=#{productBaseId}</if>
+		<if test="productBaseName !=null">AND pb.`name` like #{productBaseName}</if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="brandId != null">AND b.id=#{brandId}</if>
+		<if test="productBaseIdList != null">AND pb.id in
+			<foreach collection="productBaseIdList" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>		
+	</select>
+	
+	<select id="findAllProductBaseCommentLevel" parameterType="map" resultType="map">
+		SELECT
+			product_base_id AS productBaseId,
+			COUNT(`level`) AS levelAmount
+		FROM
+			order_product_comment
+		WHERE
+			`level` = #{level}
+		GROUP BY product_base_id
+		ORDER BY product_base_id		
+	</select>
+	
+	<select id="findAllProductCommentDetail" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.order_id AS orderId,
+			t5.id AS accountId,
+			t5.`name` AS username,
+			t5.type AS userType,
+			t4.type AS productType,
+			t4.id AS productId,
+			t4.`name` AS productName,
+			t4.sales_price AS salePrice,
+			t1.`level` AS `level`,
+			t1.content AS content,
+			t1.reply,
+			t1.image1,
+			t1.image2,
+			t1.image3,
+			t1.is_display AS isDisplay,
+			t1.is_display_image AS isDisplayImage,
+			t1.create_time AS createTime,
+			t1.is_deal AS isDeal,
+			t1.deal_user AS dealUser,
+			t1.handle_time AS handleTime,
+			t1.deal_content AS dealContent
+		FROM
+			order_product_comment t1,
+			account t5,
+			product t4
+		WHERE
+			t1.account_id = t5.id
+		AND t1.product_id = t4.id 
+		<if test="productBaseId != null">AND t1.product_base_id=#{productBaseId}</if>
+		<if test="level != null">AND t1.`level` = #{level}</if>
+		<if test="accountId != null">AND t5.id = #{accountId}</if>
+		<if test="username != null">AND t5.`name` like #{username}</if>
+		<if test="productName != null">AND t4.`name` like #{productName}</if>
+		<if test="comment != null">AND t1.content like #{comment}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+		<if test="isHasImage == 0">AND t1.image1='' AND t1.image2='' AND t1.image3=''</if>
+		<if test="isHasImage == 1">AND (t1.image1 !='' OR t1.image2!='' OR t1.image3!='')</if>
+		<if test="orderId != null">AND t1.order_id=#{orderId}</if>
+		<if test="sellerId != null">AND t4.seller_id=#{sellerId}</if>
+		<if test="brandId != null">AND t4.brand_id=#{brandId}</if>
+		ORDER BY t1.create_time DESC,t1.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countProductCommentDetail" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			order_product_comment t1,
+			account t5,
+			product t4
+		WHERE
+			t1.account_id = t5.id
+		AND t1.product_id = t4.id 
+		<if test="productBaseId != null">AND t1.product_base_id=#{productBaseId}</if>
+		<if test="level != null">AND t1.`level` = #{level}</if>
+		<if test="accountId != null">AND t5.id = #{accountId}</if>
+		<if test="username != null">AND t5.`name` like #{username}</if>
+		<if test="productName != null">AND t4.`name` like #{productName}</if>
+		<if test="comment != null">AND t1.content like #{comment}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+		<if test="isHasImage == 0">AND t1.image1='' AND t1.image2='' AND t1.image3=''</if>
+		<if test="isHasImage == 1">AND (t1.image1 !='' OR t1.image2!='' OR t1.image3!='')</if>
+		<if test="orderId != null">AND t1.order_id=#{orderId}</if>
+		<if test="sellerId != null">AND t4.seller_id=#{sellerId}</if>
+		<if test="brandId != null">AND t4.brand_id=#{brandId}</if>
+	</select>
+	
+	<select id="findProductCommentById" parameterType="int" resultType="OrderProductCommentEntity">
+		SELECT
+			id,
+			account_id AS accountId,
+			order_id AS orderId,
+			order_product_id AS orderProductId,
+			product_id AS productId,
+			product_base_id AS productBaseId,
+			`level`,
+			content,
+			reply,
+			image1,
+			image2,
+			image3,
+			is_display AS isDisplay
+		FROM
+			order_product_comment
+		WHERE
+			id = #{id}		
+	</select>
+	
+	<update id="updateProductCommentDisplayStatus" parameterType="map">
+		update order_product_comment set is_display=#{isDisplay} where  
+		id in 
+		<if test="idList != null">
+			<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+		</if>	
+	</update>
+	
+	<update id="replayProductComment" parameterType="map">
+		update order_product_comment set is_display=#{isDisplay},
+		<if test="isDisplayImage != null">
+			is_display_image=#{isDisplayImage},
+		</if>
+		reply=#{reply} where id=#{id}
+	</update>
+	
+	<select id="findAllProductBaseTotalComment" resultType="map">
+		SELECT
+			opc.product_base_id productBaseId,
+			COUNT(opc.product_id) AS totalComment
+		FROM order_product_comment opc
+		GROUP BY opc.product_base_id
+		ORDER BY totalComment DESC	
+	</select>
+
+	<update id="updateDealContent" parameterType="map">
+		update order_product_comment set deal_content=#{dealContent},is_deal=#{isDeal},deal_user=#{dealUser},handle_time= #{now()} where id=#{id}
+	</update>
+	
+	<update id="updateProductCommentDisplayTextStatus" parameterType="map">
+		update order_product_comment set is_display=#{isDisplay},is_display_image=#{isDisplayImage} where 
+		id in 
+		<if test="idList != null">
+			<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+		</if>	
+	</update>
+	
+		<select id="findProCommentsByIds" parameterType="map" resultType="OrderProductCommentEntity">
+		SELECT
+			id,
+			account_id AS accountId,
+			order_id AS orderId,
+			order_product_id AS orderProductId,
+			product_id AS productId,
+			product_base_id AS productBaseId,
+			`level`,
+			content,
+			reply,
+			image1,
+			image2,
+			image3,
+			is_display AS isDisplay
+		FROM
+			order_product_comment
+		WHERE
+			id in 
+		<if test="idList != null">
+			<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+		</if>		
+	</select>
+
+	<select id="findProductBaseCommentByParam" parameterType="map" resultType="int">
+		SELECT count(1) FROM  order_product_comment WHERE product_base_id=#{productBaseId}
+		<if test="level != null">AND `level`=#{level}</if>
+	</select>
+
+</mapper>  

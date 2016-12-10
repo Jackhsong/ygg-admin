@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MwebGroupImageDetailMapper">
+
+
+
+  	<resultMap id="mwebGroupImageDetailEntityMap" type="mwebGroupImageDetailEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_product_id" property="mwebGroupProductId" javaType="int" jdbcType="INTEGER" />
+		<result column="url" property="url"  />
+		<result column="height" property="height" />
+        <result column="width" property="width" />
+        <result column="order" property="order" />
+	</resultMap>
+	
+	
+	<select id="findMwebGroupImageDetail" parameterType="mwebGroupImageDetailEntity" resultMap="mwebGroupImageDetailEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.url,
+	          t.height,
+	          t.width,
+	          t.`order`
+
+          FROM
+	           mweb_group_image_detail t
+        ]]>
+		<where>
+	       <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+		</where>
+	    order by  t.`order`
+	</select>
+	
+	
+	<select id="getMwebGroupImageDetailById" parameterType="int" resultMap="mwebGroupImageDetailEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.url,
+	          t.height,
+	          t.width,
+	          t.`order`
+
+          FROM
+	           mweb_group_image_detail t
+        ]]>
+		<where>
+	          id=#{id}
+		</where>
+
+	</select>
+	
+	
+	<insert id="addMwebGroupImageDetail" parameterType="mwebGroupImageDetailEntity"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_image_detail(mweb_group_product_id,url,height,width,`order`) values(#{mwebGroupProductId},#{url},#{height},#{width},#{order})
+        ]]>
+	</insert>
+	
+	
+	
+	
+	
+	<update id="updateMwebGroupImageDetail" parameterType="mwebGroupImageDetailEntity">
+     <![CDATA[
+        update mweb_group_image_detail 
+        ]]>
+        <set>
+            <if test="url != null" >url = #{url},</if>
+            <if test="height != null" >height = #{height},</if>
+            <if test="width != null" >width = #{width},</if>
+            <if test="order != null" >`order` = #{order},</if>
+        </set>
+        <where>
+          id=#{id}
+        </where>
+	</update>
+	
+	
+	
+	<delete id = "deleteMwebGroupImageDetailByNotInIdsAndMwebGroupProductId" parameterType = "com.alibaba.fastjson.JSONObject">  
+    <![CDATA[  
+       delete from mweb_group_image_detail where id not in  
+    ]]>  
+    <foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+    and mweb_group_product_id=#{mwebGroupProductId}
+</delete>  
+</mapper>

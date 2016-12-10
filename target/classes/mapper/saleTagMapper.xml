@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="SaleTagMapper">  
+    
+    <insert id="save" parameterType="SaleTagEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_tag (`name`, `image`, `is_available`, `create_time`) 
+		VALUES (#{name},#{image},#{isAvailable},#{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    
+    <update id="update" parameterType="SaleTagEntity">
+		UPDATE sale_tag 
+		SET `name`=#{name},`image`=#{image},`is_available`=#{isAvailable} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <select id="findAllSaleTag" parameterType="map" resultType="SaleTagEntity">
+      SELECT id as id,
+      	name as name,
+      	image as image,
+      	is_available as isAvailable 
+      FROM sale_tag 
+      WHERE 1=1 
+      <if test="available != null">AND is_available=#{available}</if> 
+      LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+    </select>
+    
+    <select id="findSaleTagById" parameterType="int" resultType="SaleTagEntity">
+      SELECT id as id,
+      	name as name,
+      	image as image,
+      	is_available as isAvailable 
+      FROM sale_tag WHERE id=#{id}
+    </select>
+    
+    <select id="countSaleTag" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM sale_tag 
+    	WHERE 1=1 
+      <if test="available != null">AND is_available=#{available}</if> 
+    </select>
+    
+    <insert id="saveRelation" parameterType="map">
+		INSERT INTO relation_sale_window_and_tag (`sale_window_id`, `sale_tag_id`) 
+		VALUES (#{saleWindowId},#{saleTagId})
+    </insert>
+    
+    <delete id="deleteAllRelationBySaleWindowId" parameterType="int">
+    	DELETE FROM relation_sale_window_and_tag WHERE sale_window_id=#{id}
+    </delete>
+    
+    <select id="selectTagIdsBySaleWindowId" parameterType="int" resultType="int">
+    	SELECT sale_tag_id from relation_sale_window_and_tag WHERE sale_window_id=#{id}
+    </select>
+    
+</mapper>  

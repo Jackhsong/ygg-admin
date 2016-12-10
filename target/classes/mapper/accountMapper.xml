@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="AccountMapper">  
+    <resultMap type="AccountEntity" id="AccountMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="pwd" property="pwd" />
+    	<result column="type" property="type" />
+    	<result column="nickname" property="nickname" />
+    	<result column="mobile_number" property="mobileNumber" />
+    	<result column="available_point" property="availablePoint" />
+    	<result column="create_time" property="createTime" />
+    	<result column="update_time" property="updateTime" />
+		<result column="recommended_code" property="recommendedCode"/>
+		<result column="recommended_count" property="recommendedCount"/>
+		<result column="recommended_order_count" property="recommendedOrderCount"/>
+		<result column="sub_recommended_count" property="subRecommendedCount"/>
+		<result column="total_recommended_point" property="totalRecommendedPoint"/>
+		<result column="is_recommended" property="isRecommended"/>
+		<result column="partner_status" property="partnerStatus"/>
+		<result column="apply_partner_status" property="applyPartnerStatus"/>
+		<result column="is_has_order" property="isHasOrder"/>
+		<result column="level" property="level"/>
+		<result column="total_success_price" property="totalSuccessPrice"/>
+		<result column="secret_key" property="secretKey"/>
+    </resultMap>
+    
+<!-- 查询账号信息 -->
+     <select id="findAllAccountByPara" parameterType="map"  resultMap="AccountMap">
+     	SELECT * FROM account 
+     	WHERE 1=1 
+     	<if test="id != null"> AND id=#{id} </if>
+     	<if test="channel != null"> AND channel=#{channel} </if>
+     	<if test="name != null">AND name like #{name} </if>
+     	<if test="type != null">and type=#{type} </if>
+     	<if test="nickname != null">AND nickname like #{nickname} </if>
+     	<if test="mobileNumber != null">AND mobile_number=#{mobileNumber} </if>
+     	<if test="createTimeBegin != null"><![CDATA[AND create_time >= #{createTimeBegin}]]> </if>
+     	<if test="createTimeEnd != null"><![CDATA[AND create_time < #{createTimeEnd}]]> </if>
+     	<if test="recommendedCode != null">AND recommended_code = #{recommendedCode}</if>
+     	<choose>
+     		<when test="orderByIntegral != null">
+     			ORDER BY available_point DESC,id DESC
+     		</when>
+     		<otherwise>
+     			ORDER BY id DESC
+    		</otherwise>
+     	</choose>
+     	<if test="start != null">
+	     	LIMIT #{start},#{max}
+     	</if>
+     </select>
+     
+     <!-- 查询账号数量 -->
+     <select id="countAccountByPara" parameterType="map"  resultType="int">
+     	SELECT count(id) FROM account 
+     	WHERE 1=1 
+     	<if test="id != null"> AND id=#{id} </if>
+	    <if test="channel != null"> AND channel=#{channel} </if>
+     	<if test="name != null">AND name like #{name} </if>
+     	<if test="type != null">and type=#{type} </if>
+     	<if test="nickname != null">AND nickname like #{nickname} </if>
+     	<if test="mobileNumber != null">AND mobile_number=#{mobileNumber} </if>
+     	<if test="createTimeBegin != null"><![CDATA[AND create_time >= #{createTimeBegin}]]> </if>
+     	<if test="createTimeEnd != null"><![CDATA[AND create_time <= #{createTimeEnd}]]> </if>
+     </select>
+     
+     <!-- 更新用户密码  -->
+    <update id="updatePWD" parameterType="map">
+     	UPDATE `account` set pwd=#{pwd} where id=#{id}
+     </update>
+     
+     <!-- 更新用户邀请码  -->
+    <update id="updateRecommendedCode" parameterType="map">
+     	UPDATE `account` set recommended_code=#{recommendedCode} where id=#{id}
+     </update>
+     
+<!-- 根据para查询账号ids -->
+     <select id="findAllAccountIdsByPara" parameterType="map"  resultType="int">
+     	SELECT id FROM account 
+     	WHERE 1=1 
+     	<if test="id != null"> AND id=#{id} </if>
+     	<if test="name != null">AND name like #{name} </if>
+     	<if test="type != null">and type=#{type} </if>
+     	<if test="nickname != null">AND nickname like #{nickname} </if>
+     	<if test="mobileNumber != null">AND mobile_number=#{mobileNumber} </if>
+     	<if test="createTimeBegin != null"><![CDATA[AND create_time >= #{createTimeBegin}]]> </if>
+     	<if test="createTimeEnd != null"><![CDATA[AND create_time <= #{createTimeEnd}]]> </if>
+     	ORDER BY id DESC 
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+
+<!-- 查询 用户退款账号 -->
+	<select id="findAllAccountCard" parameterType="map"  resultType="map">
+		SELECT
+			a.id AS id,
+			a.`name` AS `name`,
+			ac.type,
+			ac.id AS acId,
+			ac.bank_type AS bankType,
+			ac.card_number AS cardNumber,
+			ac.card_name AS cardName
+		FROM 
+			account_card ac,
+			account a
+		WHERE
+			ac.account_id=a.id
+		<if test="cardName != null"> AND ac.card_name like #{cardName} </if>
+		<if test="accountName != null"> AND a.`name` like #{accountName} </if>
+		<if test="accountId != null"> AND a.`id`=#{accountId} </if>
+		<if test="start != null">
+	     	LIMIT #{start},#{max}
+     	</if>
+	</select>
+	
+<!-- 统计 用户退款账号数量 -->
+	<select id="countAllAccountCard" parameterType="map"  resultType="int">
+		SELECT
+			count(a.id)
+		FROM 
+			account_card ac,
+			account a
+		WHERE
+			ac.account_id=a.id
+		<if test="cardName != null"> AND ac.card_name like #{cardName} </if>
+		<if test="name != null"> AND a.`name` like #{name} </if>
+	</select>
+	
+<!-- 更新用户积分 -->
+	<update id="updateIntegral" parameterType="map">
+     	UPDATE 
+     		`account` 
+     	SET 
+     		available_point=#{newAvailablePoint} 
+     	WHERE 
+     		id=#{id}
+     		AND available_point=#{oldAvailablePoint}
+     </update>
+     
+     <update id="updateAccountIntegralByAccountId" parameterType="map">
+     	UPDATE 
+     		`account` 
+     	SET 
+     		available_point=available_point+#{point} 
+     	WHERE 
+     		id=#{accountId}
+     </update>
+     
+<!-- 插入用户积分变动情况 -->     
+     <insert id="insertAccountAvailablePointRecord" parameterType="map">
+		INSERT INTO account_available_point_record (`account_id`, `operate_point`, `total_point`, `operate_type`, `arithmetic_type`, `create_time`) 
+		VALUES (#{accountId}, #{operatePoint}, #{totalPoint}, #{operateType}, #{arithmeticType}, now())
+    </insert>
+    
+<!-- 删除用户积分变动情况 -->     
+     <delete id="deleteAccountAvailablePointRecord" parameterType="int">
+		DELETE FROM account_available_point_record WHERE account_id=#{accountId}
+     </delete>
+    
+<!-- 查询积分变动记录 -->
+	<select id="findAccountAvailablePointRecord" parameterType="map" resultType="map">
+		SELECT
+			account_id AS accountId,
+			operate_point AS operatePoint,
+			total_point AS totalPoint,
+			operate_type AS operateType,
+			arithmetic_type AS arithmeticType,
+			create_time AS createTime
+		FROM 
+			account_available_point_record
+		WHERE
+			account_id=#{accountId}
+		ORDER BY create_time DESC,id DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+<!-- 统计 积分变动记录 总数 -->
+	<select id="countAccountAvailablePointRecord" parameterType="int" resultType="int">
+		SELECT
+			count(id)
+		FROM 
+			account_available_point_record
+		WHERE
+			account_id=#{accountId}
+	</select>
+	
+<!-- 查询用户最新积分变动时间 -->
+	<select id="findLastIntegralUpdateTime" parameterType="list" resultType="map">
+		SELECT 
+			account_id AS accountId,
+			create_time AS createTime 
+		FROM 
+			account_available_point_record 
+		WHERE 
+			id in(
+					SELECT 
+						MAX(id) 
+					FROM 
+						account_available_point_record 
+					WHERE 
+						account_id IN <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+           									#{item}  
+        							  </foreach> 
+					GROUP BY account_id
+				)
+	</select>
+	
+	<select id="findAccountByName" parameterType="string" resultMap="AccountMap">
+		SELECT * FROM account WHERE name=#{name}
+	</select>
+	
+<!-- 根据para查询pushAccount信息 -->
+     <select id="findAllAccountPushByPara" parameterType="map"  resultType="map">
+     	SELECT
+     		a.id AS id,
+     		a.name AS name,
+     		a.type AS type,
+     		a.create_time AS createTime,
+     		ap.push_id AS pushId
+     	FROM 
+     		account a, account_push ap
+     	WHERE
+     		a.id=ap.account_id
+     	<if test="id != null"> AND a.id=#{id} </if>
+     	<if test="cid != null"> AND ap.push_id=#{cid} </if>
+     	<if test="name != null">AND a.name like #{name} </if>
+     	<if test="type != null">AND a.type=#{type} </if>
+     	<if test="nickname != null">AND a.nickname like #{nickname} </if>
+     	<if test="mobileNumber != null">AND a.mobile_number=#{mobileNumber} </if>
+     	<if test="createTimeBegin != null"><![CDATA[AND a.create_time >= #{createTimeBegin}]]> </if>
+     	<if test="createTimeEnd != null"><![CDATA[AND a.create_time <= #{createTimeEnd}]]> </if>
+		ORDER BY id DESC
+     	<if test="start != null">
+	     	LIMIT #{start},#{max}
+     	</if>
+     </select>
+     
+<!-- 根据para COUNT pushAccount信息 -->
+     <select id="countAllAccountPushByPara" parameterType="map"  resultType="int">
+     	SELECT
+     		count(a.id)
+     	FROM 
+     		account a, account_push ap
+     	WHERE
+     		a.id=ap.account_id
+     	<if test="id != null"> AND a.id=#{id} </if>
+     	<if test="name != null">AND a.name like #{name} </if>
+     	<if test="type != null">AND a.type=#{type} </if>
+     	<if test="nickname != null">AND a.nickname like #{nickname} </if>
+     	<if test="mobileNumber != null">AND a.mobile_number=#{mobileNumber} </if>
+     	<if test="createTimeBegin != null"><![CDATA[AND a.create_time >= #{createTimeBegin}]]> </if>
+     	<if test="createTimeEnd != null"><![CDATA[AND a.create_time <= #{createTimeEnd}]]> </if>
+     </select>
+
+<!-- 根据accountId 查询对应的pushId -->
+     <select id="findAccountPushIdByAccountId" parameterType="int" resultType="string">
+     	SELECT 
+     		push_id AS pushId 
+     	FROM 
+     		account_push 
+     	WHERE 
+     		account_id=#{id}
+     </select>
+     
+<!-- 插入用户账户 -->
+	<insert id="saveAccountCard" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO account_card(account_id,type, bank_type, card_number, card_name)
+		VALUES(#{accountId},#{type},#{bankType},#{cardNumber},#{cardName})
+	</insert>
+     
+<!-- 手动创建合伙人更新用户状态 -->
+     <update id="updateAccount" parameterType="AccountEntity">
+		UPDATE 
+			account 
+		SET 
+			partner_status=#{partnerStatus},
+			apply_partner_status= #{applyPartnerStatus}
+		WHERE id=#{id}
+     </update>
+     
+	<!-- 用户建议 -->
+	<select id="findAllPropose" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.account_id AS accountId,
+			t2.`name` AS accountName,
+			t1.type,
+			t1.content,
+			t1.contact,
+			t1.is_back_point AS isBackPoint,
+			t1.back_point AS backPoint,
+			t1.create_time AS createTime,
+			t1.os,
+			t1.version,
+			t1.is_deal AS isDeal,
+			t1.deal_user AS dealUser,
+			t1.deal_content AS dealContent
+		FROM
+			account_proposal t1,account t2
+		WHERE t1.account_id = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="accountName != null">AND t2.name=#{accountName}</if>
+		<if test="accountId != null">AND t1.account_id=#{accountId}</if>
+		<if test="proposeType  != null">AND t1.type=#{proposeType}</if>
+		<if test="isDeal  != null">AND t1.is_deal=#{isDeal}</if>
+		<if test="isBackPoint  != null">AND t1.is_back_point=#{isBackPoint}</if>
+		ORDER BY t1.create_time DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countProposes" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			account_proposal t1,account t2
+		WHERE t1.account_id = t2.id
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="accountName != null">AND t2.name=#{accountName}</if>
+		<if test="accountId != null">AND t1.account_id=#{accountId}</if>
+		<if test="proposeType  != null">AND t1.type=#{proposeType}</if>
+		<if test="isDeal  != null">AND t1.is_deal=#{isDeal}</if>
+		<if test="isBackPoint  != null">AND t1.is_back_point=#{isBackPoint}</if>
+	</select>
+	
+	<update id="updateAccountPropose" parameterType="map">
+		UPDATE account_proposal SET is_back_point=1, back_point=#{backPoint} WHERE id=#{id}
+	</update>
+	
+	<select id="findAccountCouponById" parameterType="int" resultType="AccountCouponEntity">
+		SELECT
+			id,
+			account_id AS accountId,
+			source_type AS sourceType,
+			coupon_id AS couponId,
+			coupon_code_id AS couponCodeId,
+			coupon_detail_id AS couponDetailId,
+			start_time AS startTime,
+			end_time AS endTime,
+			remark,
+			is_used AS isUsed,
+			create_time AS createTime,
+			update_time AS updateTime,
+			reduce_price AS reducePrice
+		FROM
+			coupon_account
+		WHERE
+			id = #{id}	
+	</select>
+
+	<insert id="insertAccountCoupon" parameterType="AccountCouponEntity" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO coupon_account (
+			account_id,
+			source_type,
+			coupon_id,
+			coupon_code_id,
+			coupon_detail_id,
+			start_time,
+			end_time,
+			remark,
+			is_used,
+			create_time,
+			reduce_price
+		)VALUES(
+			#{accountId},
+			#{sourceType},
+			#{couponId},
+			#{couponCodeId},
+			#{couponDetailId},
+			#{startTime},
+			#{endTime},
+			#{remark},
+			#{isUsed},
+			now(),
+			#{reducePrice}
+		)		
+	</insert>
+	
+	<select id="finAccountTotalMoney" parameterType="int" resultType="string">
+		SELECT SUM(real_price) as real_price FROM `order` WHERE account_id=#{id} and status in (2,3,4)
+	</select>
+	
+	<select id="findAccountByNameAndType" parameterType="map" resultMap="AccountMap">
+		SELECT * FROM account WHERE name=#{name} and type=#{type}
+	</select>
+	
+	<update id="updateDealContent" parameterType="map">
+		update account_proposal set deal_content=#{dealContent},is_deal=#{isDeal},deal_user=#{dealUser} where id=#{id}
+	</update>
+	
+	<select id="findAccountCouponInfo" parameterType="map" resultType="map">
+		SELECT
+			a.id AS accountId,
+			a.`name` AS accountName,
+			a.mobile_number AS phoneNumber,
+			c.id AS couponId,
+			c.remark AS couponRemark,
+			ca.id AS couponAccountId,
+			ca.create_time AS acquireTime,
+			ca.is_used AS isUsed,
+			ca.reduce_price AS reducePrice,
+			ca.start_time AS validTimeBegin,
+			ca.end_time AS validTimeEnd,
+			cd.id AS couponDetailId,
+			cd.type AS couponDetailType,
+			cd.scope_type AS scopeType,
+			cd.scope_id AS scopeId,
+			cd.threshold AS threshold,
+			cd.reduce AS reduce,
+			cd.`desc` AS couponDetailRemark,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce
+		FROM
+			account a,
+			coupon c,
+			coupon_account ca,
+			coupon_detail cd
+		WHERE
+			a.id = ca.account_id
+		AND c.id = ca.coupon_id
+		AND c.coupon_detail_id = cd.id 
+		<if test="accountId !=null">AND a.id=#{accountId}</if>
+		<if test="accountName !=null">AND a.`name` LIKE #{accountName}</if>
+		<if test="phoneNumber !=null">AND a.mobile_number=#{phoneNumber}</if>
+		<if test="couponRemark != null">AND c.remark LIKE #{couponRemark}</if>
+		<if test="acquireTimeBegin != null"><![CDATA[AND ca.create_time>=#{acquireTimeBegin}]]></if>
+		<if test="acquireTimeEnd != null"><![CDATA[AND ca.create_time<=#{acquireTimeEnd}]]></if>
+		<if test="validTimeBeginStart != null"><![CDATA[AND ca.start_time>=#{validTimeBeginStart}]]></if>
+		<if test="validTimeBeginEnd != null"><![CDATA[AND ca.start_time<=#{validTimeBeginEnd}]]></if>
+		<if test="validTimeEndStart != null"><![CDATA[AND ca.end_time>=#{validTimeEndStart}]]></if>
+		<if test="validTimeEndEnd != null"><![CDATA[AND ca.end_time<=#{validTimeEndEnd}]]></if>
+		<if test="isUsed != null">AND ca.is_used =#{isUsed}</if>
+		<if test="couponDetailType != null">AND cd.type=#{couponDetailType}</if>
+		<if test="couponDetailRemark != null">AND cd.`desc` LIKE #{couponDetailRemark}</if>
+		<if test="couponIdList != null">
+			AND c.id in 
+			<foreach collection="couponIdList" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+		</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countAccountCouponInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			account a,
+			coupon c,
+			coupon_account ca,
+			coupon_detail cd
+		WHERE
+			a.id = ca.account_id
+		AND c.id = ca.coupon_id
+		AND c.coupon_detail_id = cd.id 
+		<if test="accountId !=null">AND a.id=#{accountId}</if>
+		<if test="accountName !=null">AND a.`name` LIKE #{accountName}</if>
+		<if test="phoneNumber !=null">AND a.mobile_number=#{phoneNumber}</if>
+		<if test="couponRemark != null">AND c.remark LIKE #{couponRemark}</if>
+		<if test="acquireTimeBegin != null"><![CDATA[AND ca.create_time>=#{acquireTimeBegin}]]></if>
+		<if test="acquireTimeEnd != null"><![CDATA[AND ca.create_time<=#{acquireTimeEnd}]]></if>
+		<if test="validTimeBeginStart != null"><![CDATA[AND ca.start_time>=#{validTimeBeginStart}]]></if>
+		<if test="validTimeBeginEnd != null"><![CDATA[AND ca.start_time<=#{validTimeBeginEnd}]]></if>
+		<if test="validTimeEndStart != null"><![CDATA[AND ca.end_time>=#{validTimeEndStart}]]></if>
+		<if test="validTimeEndEnd != null"><![CDATA[AND ca.end_time<=#{validTimeEndEnd}]]></if>
+		<if test="isUsed != null">AND ca.is_used =#{isUsed}</if>
+		<if test="couponDetailType != null">AND cd.type=#{couponDetailType}</if>
+		<if test="couponDetailRemark != null">AND cd.`desc` LIKE #{couponDetailRemark}</if>
+		<if test="couponIdList != null">
+			AND c.id in 
+			<foreach collection="couponIdList" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+		</if>	
+	</select>
+
+	<select id="findIdListByName" parameterType="string" resultType="int">
+		SELECT id FROM account WHERE `name` LIKE #{name}
+	</select>
+
+	<insert id="batchInsertIntegralRecord" parameterType="list">
+		INSERT INTO account_available_point_record (`account_id`, `operate_point`, `total_point`, `operate_type`, `arithmetic_type`, `create_time`)VALUES
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.accountId},#{item.operatePoint},#{item.totalPoint},#{item.operateType}, #{item.arithmeticType}, now())
+     	</foreach>
+	</insert>
+	
+	<update id="batchUpdateIntegral" parameterType="list">
+     	<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+     		UPDATE 
+     			`account` 
+     		SET 
+     			available_point=#{item.newAvailablePoint} 
+     		WHERE 
+     			id=#{item.id}
+     		AND available_point=#{item.oldAvailablePoint}
+         </foreach>		
+	</update>
+
+	<select id="findAccountBlacklist" parameterType="map" resultType="map">
+		SELECT
+			a.id AS accountId,
+			a.name AS accountName,
+			a.partner_status AS partnerStatus,
+			a.recommended_code AS recommendedCode,
+			ab.id,
+			ab.remark AS freezeRemark,
+			ab.create_time AS freezeTime
+		FROM
+			account_blacklist ab,
+			account a
+		WHERE
+			a.id=ab.account_id
+		ORDER BY
+			ab.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countAccountBlacklist" parameterType="map" resultType="int">
+		SELECT
+			count(a.id)
+		FROM
+			account_blacklist ab,
+			account a
+		WHERE
+			a.id=ab.account_id
+	</select>
+
+	<delete id="deleteBlacklist" parameterType="int">
+		DELETE FROM account_blacklist WHERE account_id=#{accountId}
+	</delete>
+
+	<insert id="insertBlacklist" parameterType="map">
+		INSERT INTO account_blacklist (account_id, remark)VALUES( #{accountId}, #{remark})
+	</insert>
+
+	<select id="findAccountBlacklistByAccountId" parameterType="int" resultType="map">
+		SELECT
+			id,
+			account_id AS accountId,
+			remark AS freezeRemark,
+			create_time AS freezeTime
+		FROM
+			account_blacklist
+		WHERE
+			account_id=#{accountId}
+	</select>
+	<select id="findAccountsByAccountIds" parameterType="list"
+		resultMap="AccountMap">
+		SELECT *
+		FROM
+		account
+		WHERE id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+</mapper>  

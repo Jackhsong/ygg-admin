@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerBlacklistMapper">
+
+	<select id="findSellerBlackInfo" parameterType="map"  resultType="map">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			freight_money AS freightMoney,
+			type,
+		threshold_price AS thresholdPrice,
+		display_type AS displayType,
+		display_id AS displayId
+		FROM
+			seller_blacklist
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null"> AND id=#{id} </if>
+			<if test="type != null"> AND type=#{type} </if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable} </if>
+			<if test="sellerId != null">AND seller_id=#{sellerId} </if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+
+	<select id="countSellerBlackInfo" parameterType="map"  resultType="int">
+		SELECT
+			count(id)
+		FROM
+			seller_blacklist
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null"> AND id=#{id} </if>
+			<if test="type != null"> AND type=#{type} </if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable} </if>
+			<if test="sellerId != null">AND seller_id=#{sellerId} </if>
+		</trim>
+	</select>
+
+	<insert id="saveSellerBlackInfo" parameterType="map">
+		INSERT INTO seller_blacklist
+		(
+			`seller_id`,
+			`freight_money`,
+			`type`,
+			`is_available`,
+			`threshold_price`,
+			`display_type`,
+			`display_id`
+		)
+		VALUES
+		(
+			#{sellerId},
+			#{freightMoney},
+			#{type},
+			1,
+            #{thresholdPrice},
+            #{displayType},
+            #{displayId}
+		)
+	</insert>
+
+	<update id="updateSellerBlackInfo" parameterType="map">
+		UPDATE seller_blacklist
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="freightMoney != null">freight_money=#{freightMoney},</if>
+			<if test="thresholdPrice != null">threshold_price=#{thresholdPrice},</if>
+			<if test="displayType != null">display_type=#{displayType},</if>
+			<if test="displayId != null">display_id=#{displayId},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+
+	<delete id="deleteSellerBlackInfo" parameterType="int" >
+		DELETE FROM seller_blacklist WHERE id=#{id}
+	</delete>
+
+</mapper>

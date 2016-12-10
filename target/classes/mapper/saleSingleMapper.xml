@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SaleSingleMapper">
+
+	<resultMap type="SaleSingleProductEntity" id="BrandRecommend">
+		<id column="id" property="id"/>
+		<result column="product_base_id" property="productBaseId"/>
+		<result column="product_id" property="productId"/>
+		<result column="name" property="name"/>
+		<result column="type" property="type"/>
+		<result column="actual_sales" property="actualSales"/>
+		<result column="artificial_increment" property="artificialIncrement"/>
+		<result column="display_sales" property="displaySales"/>
+		<result column="is_display" property="isDisplay"/>
+	</resultMap>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select a.id,a.id as `index`,a.product_base_id as productBaseId,a.product_id as productId,
+				a.name as name,a.type as type,
+				a.actual_sales as actualSales, a.artificial_increment as artificialIncrement,
+				a.display_sales as displaySales,a.is_display as isDisplay
+		from sale_single_product a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="name != null and name != '' "> and a.name like #{name}</if>
+		<if test="productBaseId!=null and productBaseId!=-1"> and a.product_base_id=#{productBaseId}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		order by display_sales desc,id desc
+		<if test="start">limit #{start},#{size}</if>
+	</select>
+<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) from sale_single_product a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="name != null and name != '' "> and a.name like #{name}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="productBaseId!=null and productBaseId!=-1"> and a.product_base_id=#{productBaseId}</if>
+	</select>
+<!-- 新增 -->
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into sale_single_product (product_base_id,product_id,name,type,actual_sales,artificial_increment
+										,display_sales,is_display)
+		values
+		(#{productBaseId},#{productId},#{name},#{type},#{actualSales},#{artificialIncrement},
+			#{displaySales},#{isDisplay})
+	</insert>
+<!-- 修改 -->
+	<update id="update" parameterType="map">
+		update sale_single_product t
+		<set>
+			<if test="displaySales!=null">display_sales=#{displaySales},</if>
+			<if test="artificialIncrement!=null">artificial_increment=#{artificialIncrement},</if>
+			<if test="isDisplay!=null">is_display=#{isDisplay},</if>
+		</set>
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+	</update>
+	
+	<select id="findCustomGGRecommendById" parameterType="int" resultMap="BrandRecommend">
+		SELECT * FROM sale_single_product WHERE id=#{id}
+	</select>
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM sale_single_product WHERE id=#{id}
+	</delete>
+	<select id="getProductInfo" parameterType="map" resultMap="BrandRecommend">
+     		select sum(pc.sell) as actualSales,pr.product_base_id as productBaseId ,pr.id as productId,pr.name,pr.sales_price as salesPrice,pr.type
+			from product pr 
+			inner join product_count pc on pr.id = pc.product_id 
+			where ((pr.type =1 and <![CDATA[pr.start_time<=now()]]> and <![CDATA[pr.end_time>=now()]]>) or (pr.type =2 and pr.is_show_in_mall =1)) 
+					and pr.is_off_shelves = 0 and pr.is_available=1 
+					and pr.product_base_id=#{productBaseId}
+					group by pr.product_base_id 
+					order by pr.type,pr.sales_price asc
+					limit 1
+     </select>
+</mapper>

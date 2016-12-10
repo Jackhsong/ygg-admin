@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="CategorySaleMapper">  
+    
+   <resultMap type="SaleWindowEntity" id="SaleWindowMap">
+    	<result column="id" property="id"/>
+    	<result column="source_type" property="sourceType"/>
+    	<result column="page2_model_id" property="page2ModelId"/>
+    	<result column="type" property="type"/>
+    	<result column="display_id" property="displayId"/>
+    	<result column="sale_time_type" property="saleTimeType"/>
+    	<result column="sale_flag_id" property="saleFlagId"/>
+    	<result column="name" property="name"/>
+    	<result column="desc" property="desc"/>
+    	<result column="image" property="image"/>
+    	<result column="new_image" property="newImage"/>
+    	<result column="new_image17" property="newImage17"/>
+    	<result column="start_time" property="startTime"/>
+    	<result column="end_time" property="endTime"/>
+    	<result column="is_display" property="isDisplay"/>
+    	<result column="is_display_flag" property="isDisplayFlag"/>
+    	<result column="now_order" property="nowOrder"/>
+    	<result column="later_order" property="laterOrder"/>
+    	<result column="category_order" property="categoryOrder"/>
+    	<result column="category_lock_index" property="categoryLockIndex"/>
+    	<result column="category_first_id" property="categoryFirstId"/>
+    </resultMap>
+    
+    <insert id="save" parameterType="SaleWindowEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sale_window (source_type,page2_model_id,`type`, `display_id`, `name`, `desc`, `image`,`new_image`,`new_image17`, `start_time`, `end_time`, `is_display`, `now_order`, `later_order`, `create_time`,`sale_flag_id`,`is_display_flag`,`sale_time_type`,`category_first_id`)
+		VALUES (#{sourceType},#{page2ModelId},#{type},#{displayId},#{name},#{desc},#{image},#{newImage},#{newImage17},#{startTime},#{endTime},#{isDisplay},#{nowOrder},#{laterOrder},#{createTime,jdbcType=TIMESTAMP},#{saleFlagId},#{isDisplayFlag},#{saleTimeType},#{categoryFirstId})
+    </insert>
+    
+    <update id="update" parameterType="SaleWindowEntity" >
+		UPDATE 
+			sale_window 
+		SET 
+			`type`=#{type},
+			`display_id`=#{displayId},
+			`name`=#{name},
+			`image`=#{image},
+			`new_image`=#{newImage},
+			`new_image17`=#{newImage17},
+			`start_time`=#{startTime},
+			`end_time`=#{endTime},
+			`desc`=#{desc}, 
+			`is_display`=#{isDisplay},
+			`sale_flag_id`=#{saleFlagId},
+			`is_display_flag`=#{isDisplayFlag},
+			`sale_time_type`=#{saleTimeType},
+			`category_first_id`=#{categoryFirstId},
+			`category_order`=#{categoryOrder},
+			`category_lock_index`=#{categoryLockIndex}
+		WHERE 
+			`id`=#{id}
+    </update>
+    
+    <update id="updateDisplayCode" parameterType="map">
+    	UPDATE 
+    		sale_window 
+		SET 
+			`is_display`=#{isDisplay} 
+		WHERE 
+			`id`=#{id};
+    </update>
+    
+    <select id="findSaleWindowById" parameterType="int"  resultMap="SaleWindowMap">
+      SELECT 
+      		*
+      FROM 
+      		sale_window 
+      WHERE 
+      		id=#{id}
+    </select>
+    
+	<select id="findCategorySaleWindowByPara" parameterType="map" resultMap="SaleWindowMap">
+		SELECT 
+			* 
+		FROM 
+			sale_window
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="sourceType != null">AND source_type=#{sourceType}</if>
+			<if test="page2ModelId != null">AND page2_model_id=#{page2ModelId}</if>
+			<if test="name != null">AND `name` LIKE #{name}</if>
+			<if test="type != null">AND type=#{type}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+			<if test="startTime != null">AND start_time=#{startTime}</if>
+			<if test="saleStatus == 1"><![CDATA[AND start_time>#{currentTime}]]></if>
+			<if test="saleStatus == 2"><![CDATA[AND start_time<=#{currentTime} AND #{currentTime}<=end_time+1]]></if>
+			<if test="saleStatus == 3"><![CDATA[AND end_time<#{currentTime}]]></if>
+			<if test="ids != null">AND id in<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		</trim>
+		ORDER BY category_order DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countCategorySaleWindowByPara" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			sale_window
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="sourceType != null">AND source_type=#{sourceType}</if>
+			<if test="page2ModelId != null">AND page2_model_id=#{page2ModelId}</if>
+			<if test="name != null">AND `name` LIKE #{name}</if>
+			<if test="type != null">AND type=#{type}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+			<if test="startTime != null">AND start_time=#{startTime}</if>
+			<if test="saleStatus == 1"><![CDATA[AND start_time>#{currentTime}]]></if>
+			<if test="saleStatus == 2"><![CDATA[AND start_time<=#{currentTime} AND #{currentTime}<=end_time+1]]></if>
+			<if test="saleStatus == 3"><![CDATA[AND end_time<#{currentTime}]]></if>
+			<if test="ids != null">AND id in<foreach collection="ids" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		</trim>
+	</select>
+	
+	<delete id="deleteCategorySale" parameterType="int">
+		DELETE FROM sale_window WHERE id=#{id}
+	</delete>
+	
+	<select id="findCategorySaleWindowGreatLockIndex" parameterType="map" resultMap="SaleWindowMap">
+		SELECT * FROM sale_window WHERE <![CDATA[category_lock_index>=#{categoryLockIndex} AND id<>#{id}]]> AND source_type=2 AND page2_model_id=#{page2ModelId} ORDER BY category_lock_index
+	</select>
+	
+	<update id="updateCategoryLockIndex" parameterType="list">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+	       UPDATE
+	        `sale_window`
+	       SET
+	        category_lock_index=#{item.categoryLockIndex}
+	       WHERE
+	        id=#{item.id}
+       </foreach>
+	</update>
+</mapper>  

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="IndexSettingMapper">  
+
+	<select id="findSetting" parameterType="map" resultType="map">
+		SELECT id, `key`, `value`,`desc` FROM platform_config WHERE 1=1
+		<if test="key != null"> AND `key`=#{key}</if>
+		<if test="value != null"> AND `value`=#{value}</if>
+		<if test="id != null"> AND id=#{id}</if>
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	<update id="updateConfigStatus" parameterType="map">
+		update platform_config set `value`=#{status} where id=#{id}
+	</update>
+	
+	<select id="findAllAdvertise" parameterType="map" resultType="map">
+		SELECT
+			id,
+			image,
+			type,
+			display_id AS displayId,
+			width,
+			height,
+			remark,
+			is_display AS isDisplay,
+			sequence
+		FROM
+			spread_ad
+		<if test="id != null">where id=#{id}</if>
+		ORDER BY sequence DESC,id DESC
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countAdvertise" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			spread_ad
+		<if test="id != null">where id=#{id}</if>
+	</select>
+	
+	<update id="updateAdvertise" parameterType="map">
+		UPDATE spread_ad 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="image != null">image = #{image},</if>
+			<if test="type != null">type = #{type},</if>
+			<if test="displayId != null">display_id = #{displayId},</if>
+			<if test="width != null">width = #{width},</if>
+			<if test="height != null">height = #{height},</if>
+			<if test="sequence != null">sequence = #{sequence},</if>
+			<if test="isDisplay != null">is_display = #{isDisplay}</if>
+		</trim>
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="deleteAdvertise" parameterType="int">
+		delete from spread_ad where id=#{id}
+	</delete>
+	
+	<insert id="addAdvertise" parameterType="map">
+		INSERT INTO spread_ad (
+			image,
+			type,
+			display_id,
+			width,
+			height,
+			remark,
+			is_display,
+			sequence
+		)VALUES(
+			#{image},
+			#{type},
+			#{displayId},
+			#{width},
+			#{height},
+			#{remark},
+			#{isDisplay},
+			#{sequence}
+		)
+	</insert>
+	
+	<select id="findAdvertiseMaxSequence" resultType="int">
+		select max(sequence) from spread_ad
+	</select>
+	
+	<update id="updateAdvertiseVersion" parameterType="map">
+		update platform_config set `value`=#{version} where id=#{id} and <![CDATA[`value`<#{version}]]>
+	</update>
+	
+	<update id="updatePlatformVersion" parameterType="map">
+		update platform_config set `value`=#{version} where id=#{id}
+	</update>
+	
+	<select id="findAllVestAppInfo" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`key`,
+			`value`,
+			`value1`,
+			`desc`
+		FROM
+			vest_app_update
+		WHERE 1=1
+		<if test="id != null">AND id = #{id}</if>
+		<if test="desc != null">AND `desc` LIKE #{desc}</if>
+		<if test="value != null">AND `value` = #{value}</if>
+		<if test="value1 != null">AND `value1` = #{value1}</if>
+		ORDER BY id
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countVestAppInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			vest_app_update
+		WHERE 1=1
+		<if test="id != null">AND id = #{id}</if>
+		<if test="desc != null">AND `desc` LIKE #{desc}</if>
+		<if test="value != null">AND `value` = #{value}</if>
+		<if test="value1 != null">AND `value1` = #{value1}</if>	
+	</select>
+	
+	<update id="updateVestApp" parameterType="map">
+		UPDATE vest_app_update 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="key != null">`key`= #{key},</if>
+			<if test="value != null">`value`= #{value},</if>
+			<if test="value1 != null">`value1`= #{value1},</if>
+			<if test="desc != null">`desc`= #{desc}</if>
+		</trim>
+		WHERE id = #{id}	
+	</update>
+	
+	<insert id="addVestApp" parameterType="map">
+		INSERT INTO vest_app_update (`key`,`value`,`desc`) VALUES (#{key},#{value},#{desc})
+	</insert>
+	
+	<delete id="deleteVestApp" parameterType="int">
+		DELETE FROM vest_app_update WHERE id=#{id}
+	</delete>
+	
+	<update id="updateWeiXin" parameterType="map">
+		update platform_config set `value`=#{weixin} where id=#{id}
+	</update>
+
+	<update id="updatePlatformConfigById" parameterType="map">
+		update platform_config set `value`=#{newValue} where id=#{id}
+	</update>
+</mapper>  

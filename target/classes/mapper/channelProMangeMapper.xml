@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ChannelProMangeMapper">  
+
+	<!--新增第三方渠道商品-->
+	<insert id="addChannelProduct" parameterType="ChannelProductEntity">
+		insert into channel_product(channel_id,warehouse_type,code,name,assemble_count,create_time)
+		values(#{channelId},#{wareHouseId},#{productCode},#{productName},#{assembleCount},now())
+	</insert>
+	
+	<insert id="batchAddChannelProduct" parameterType="list">
+		insert into channel_product(channel_id,warehouse_type,code,name,assemble_count,create_time) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.channelId},#{item.wareHouseId},#{item.productCode},#{item.productName}, #{item.assembleCount}, now())
+     	</foreach>
+	</insert>
+	
+	<!-- 更新商品信息 -->
+	<update id="updateChannelProduct" parameterType="ChannelProductEntity">
+		update channel_product
+		<set>
+			<if test="channelId!=null"> channel_id=#{channelId},</if>
+			<if test="wareHouseId!=null"> warehouse_type=#{wareHouseId},</if>
+			<if test="productCode!=null"> code=#{productCode},</if>
+			<if test="productName!=null"> name=#{productName},</if>
+			<if test="assembleCount!=null"> assemble_count=#{assembleCount}</if>
+		</set>
+		where channel_id=#{channelId} AND code=#{productCode}
+	</update>
+	
+	<!-- 商品编码，仓库 取商品名字 -->
+	<select id="getProductName" parameterType="map" resultType="map">
+		SELECT
+			p.`name` as productName
+		FROM
+			product_base p 
+		WHERE
+			LOCATE(#{productCode},p.`code`)
+		AND p.seller_id IN <foreach collection="sellerIdList" index="index" item="item" open="(" separator="," close=")">  
+           						#{item}  
+        						</foreach> 
+		order by p.id
+		limit 1;
+	</select>
+	
+	<!-- 查询列表信息 -->
+	<select id="findChannelProInfo" parameterType="map" resultType="map">
+		SELECT
+			cp.id as id,  
+			cp.channel_id as channelId,
+			c.channel_name as channelName,   
+			cp.warehouse_type as wareHouseId,    
+			cp.code as productCode,   
+			cp.name as productName,    
+			cp.assemble_count as assembleCount
+			FROM    
+			channel_product cp,channel c
+			where c.id = cp.channel_id 
+			<if test="channelId != null"> AND cp.channel_id=#{channelId} </if>
+	     	<if test="wareHouseId != null"> AND cp.warehouse_type=#{wareHouseId} </if>
+	     	<if test="productCode != null"> AND cp.code like CONCAT('%',#{productCode},'%')</if>
+	     	<if test="id != null"> AND cp.id=#{id} </if>
+	     	<if test="productName != null"> AND cp.name like CONCAT('%',#{productName},'%') </if>
+			ORDER BY cp.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- 计算列表total -->
+	<select id="countChannelProInfo" parameterType="map" resultType="int">
+		SELECT
+			count(cp.id)
+		FROM
+			channel_product cp
+			where 1=1 
+			<if test="channelId != null"> AND cp.channel_id=#{channelId} </if>
+	     	<if test="wareHouseId != null"> AND cp.warehouse_type=#{wareHouseId} </if>
+	     	<if test="productCode != null"> AND cp.code like CONCAT('%',#{productCode},'%')</if>
+	     	<if test="id != null"> AND cp.id=#{id} </if>
+	     	<if test="productName != null"> AND cp.name like CONCAT('%',#{productName},'%') </if>
+	</select>
+	
+	
+	<select id="getAllChannelNameAndId" resultType="map">
+		select 
+			channel_name as channelName,
+			id as channelId
+		FROM channel
+		 order by id;
+		 	</select>
+
+	<select id="findChannelProductByPara" parameterType="map" resultType="map">
+		select * from channel_product
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="idList != null">
+				AND id IN
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="channel_id != null" >AND channel_id = #{channel_id}</if>
+			<if test="warehouse_type != null" >AND warehouse_type = #{warehouse_type}</if>
+			<if test="code != null" >AND code = #{code}</if>
+			<if test="productName != null" >AND name = #{productName}</if>
+		</trim>
+		<if test="start != null and max != null" >LIMIT #{start},#{max}</if>
+	</select>
+</mapper>  

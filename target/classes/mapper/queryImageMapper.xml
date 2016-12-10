@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QueryImageMapper">  
+     <!-- 查询account表的图片-->
+     <select id="findAccountImage" parameterType="map"  resultType="string">
+     	select image from account where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	ORDER BY id 
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+	 <!-- 查询activities_common：通用专场表的图片-->
+     <select id="findActivitiesCommonImage" parameterType="map"  resultType="string">
+     	select image from activities_common where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	ORDER BY id 
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     <!-- 查询banner_window表 -->
+     <select id="findBannerWindowImage" parameterType="map"  resultType="string">
+     	select image from banner_window where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询brand：品牌表 -->
+     <select id="findBrandImage" parameterType="map"  resultType="string">
+     	select image from brand where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询gege_image_activities表 -->
+     <select id="findGegeImageActivitiesImage" parameterType="map"  resultType="string">
+     	select image from gege_image_activities where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询gege_image_product表 -->
+     <select id="findGegeImageProductImage" parameterType="map"  resultType="string">
+     	select image from gege_image_product where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     <!-- 查询order_product表 -->
+     <select id="findOrderProductImage" parameterType="map"  resultType="string">
+     	select small_image from order_product where small_image is not null and `small_image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询order_product_refund表 -->
+     <select id="findOrderProductRefundImage" parameterType="map"  resultType="map">
+     	select image1, image2, image3 from order_product_refund order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询product表 -->
+     <select id="findProductImage" parameterType="map"  resultType="map">
+     	select image1, image2, image3, image4, image5 from product order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询product_common表 -->
+     <select id="findProductCommonImage" parameterType="map"  resultType="map">
+     	select medium_image, small_image from product_common order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询product_mobile_detail表 -->
+     <select id="findProductMobileDetailImage" parameterType="map"  resultType="string">
+     	select content from product_mobile_detail where content_type=1 and content is not null and `content` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+
+     <!-- 查询sale_tag表 -->
+     <select id="findSaleTagImage" parameterType="map"  resultType="string">
+     	select image from sale_tag where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     <!-- 查询sale_window表 -->
+     <select id="findSaleWindowImage" parameterType="map"  resultType="string">
+     	select image from sale_window where image is not null and `image` LIKE '%http://yangege.b0.upaiyun.com%'
+     	order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     
+     <!-- 查询product_base表 -->
+     <select id="findProductBaseImage" parameterType="map"  resultType="map">
+     	select image1, image2, image3, image4, image5 from product_base order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     <!-- 查询product_base_mobile_detail表 -->
+     <select id="findProductBaseMobileDetailImage" parameterType="map"  resultType="string">
+     	select content from product_base_mobile_detail where content_type=1 and content is not null order by id
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+</mapper>  

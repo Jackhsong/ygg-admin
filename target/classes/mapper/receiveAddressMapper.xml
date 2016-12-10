@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ReceiveAddressMapper">
+<!-- 用户收货地址 -->
+	<resultMap type="ReceiveAddressEntity" id="ReceiveAddressMap">
+    	<id column="id" property="id" />
+    	<id column="account_id" property="accountId" />
+    	<result column="full_name" property="fullName" />
+    	<result column="mobile_number" property="mobileNumber" />
+    	<result column="detail_address" property="detailAddress" />
+    	<result column="id_card" property="idCard" />
+    	<result column="province" property="province" />
+    	<result column="city" property="city" />
+    	<result column="district" property="district" />
+    	<result column="is_default" property="isDefault" />
+    	<result column="update_time" property="updateTime" />
+    </resultMap>
+<!-- 订单收货地址 -->
+    <resultMap type="OrderReceiveAddress" id="OrderReceiveAddressMap">
+    	<id column="id" property="id" />
+    	<result column="full_name" property="fullName" />
+    	<result column="mobile_number" property="mobileNumber" />
+    	<result column="detail_address" property="detailAddress" />
+    	<result column="id_card" property="idCard" />
+    	<result column="province" property="province" />
+    	<result column="city" property="city" />
+    	<result column="district" property="district" />
+    	<result column="confirm_full_name" property="confirmFullName" />
+    	<result column="update_time" property="updateTime" />
+    </resultMap>
+    
+<!-- 查询收货地址信息 -->
+     <select id="findAllReceiveAddressByPara" parameterType="map"  resultMap="ReceiveAddressMap">
+     	SELECT * FROM `receive_address` 
+     	WHERE 1=1 
+     	<if test="id != null"> and id=#{id} </if>
+     	<if test="accountId != null">and account_id=#{accountId} </if>
+     	<if test="isDefault != null">and is_default=#{isDefault} </if>
+     	ORDER BY id DESC 
+     	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+<!-- 查询订单收货地址信息 -->
+     <select id="findOrderReceiveAddressById" parameterType="int"  resultMap="OrderReceiveAddressMap">
+     	SELECT * FROM `order_receive_address` 
+     	WHERE id=#{id}
+     </select>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MwebGroupGameMapper">
+	
+	<select id="findAllGames" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.mweb_group_product_id as mwebGroupProductId,
+			t1.game_name AS gameName,
+			t1.game_logo AS gameLogo,
+			t1.mweb_group_product_image as mwebGroupProductImage,
+			t1.game_introduce AS introduce,
+			t1.game_url AS gameURL,
+			t1.receive_amount AS receiveAmount,
+			t1.new_register AS registerAmount,
+			t1.total_money AS totalMoney,
+			t1.new_buyer_money AS newBuyerAmount,
+			t1.view_url AS viewURL,
+			t1.is_available AS isAvailableCode,
+			t1.is_send_msg AS isSendMsg,
+			t1.msg_content AS msgContent,
+			t2.id AS prizeId,
+			t2.coupon_id AS couponId,
+			t2.validity_date_type AS dateType,
+			t2.days AS days
+		FROM
+			mweb_group_game t1,
+			mweb_group_game_prize t2
+		WHERE
+			t1.id = t2.game_id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="gameName != null">AND t1.game_name like #{gameName}</if>
+			<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>
+		ORDER BY
+			id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countGames" parameterType="map" resultType="int">
+		SELECT
+			count(t1.id)
+		FROM
+			mweb_group_game t1,
+			mweb_group_game_prize t2
+		WHERE
+			t1.id = t2.game_id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="gameName != null">AND t1.game_name like #{gameName}</if>
+			<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>		
+	</select>
+	
+	<insert id="addGame" parameterType="MwebGroupGameEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO mweb_group_game(mweb_group_product_id,game_name, game_logo,mweb_group_product_image,game_introduce,game_url,create_time)VALUES(#{mwebGroupProductId},#{gameName},#{gameLogo},#{mwebGroupProductImage},#{introduce},#{gameURL},now())		
+	</insert>
+	
+	<update id="updateGame" parameterType="MwebGroupGameEntity">
+		UPDATE mweb_group_game
+		<set>
+			<if test="gameName != null">game_name=#{gameName},</if>
+			<if test="gameLogo != null">game_logo=#{gameLogo},</if>
+			<if test="mwebGroupProductImage != null">mweb_group_product_image=#{mwebGroupProductImage},</if>
+			<if test="mwebGroupProductId != 0">mweb_group_product_id=#{mwebGroupProductId},</if>
+			<if test="introduce != null">game_introduce=#{introduce},</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<update id="setGameURL" parameterType="MwebGroupGameEntity">
+		UPDATE mweb_group_game SET game_url=#{gameURL} where id=#{id}
+	</update>
+	
+	<insert id="addGamePrize" parameterType="map">
+		INSERT INTO mweb_group_game_prize (game_id,coupon_id, validity_date_type,days,create_time)VALUES(#{gameId},#{couponId},#{dateType},#{days},now())		
+	</insert>
+	
+	<update id="updateGamePrize" parameterType="map">
+		UPDATE mweb_group_game_prize  SET coupon_id=#{couponId}
+		<if test="canUpdateDateType == 1">,validity_date_type=#{dateType},days=#{days}</if>
+		 where id=#{prizeId}
+	</update>
+	
+	<update id="updateGameStatus" parameterType="map">
+		UPDATE mweb_group_game 
+		<set>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+			<if test="isSendMsg != null">is_send_msg=#{isSendMsg},</if>
+			<if test="msgContent != null">msg_content=#{msgContent}</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteGame" parameterType="int">
+		DELETE FROM mweb_group_game WHERE id=#{id} AND receive_amount=0
+	</delete>
+	
+	<delete id="deleteGamePrize" parameterType="int">
+		DELETE FROM mweb_group_game_prize WHERE game_id=#{id}
+	</delete>
+</mapper>

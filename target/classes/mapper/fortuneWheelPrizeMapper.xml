@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FortuneWheelPrizeMapper">
+
+    <resultMap type="FortuneWheelPrizeEntity" id="FortuneWheelPrizeMap" >
+        <id column="id" property="id" />
+        <result column="fortune_wheel_id" property="fortuneWheelId" />
+        <result column="is_available" property="isAvailable" />
+        <result column="type" property="type" />
+        <result column="coupon_id" property="couponId" />
+        <result column="min_point" property="minPoint" />
+        <result column="max_point" property="maxPoint" />
+        <result column="point_amount" property="pointAmount" />
+        <result column="prize_amount" property="prizeAmount" />
+        <result column="prize_draw" property="prizeDraw" />
+        <result column="probability" property="probability" />
+        <result column="remark" property="remark" />
+        <result column="tip" property="tip" />
+        <result column="font_color" property="fontColor" />
+        <result column="sequence" property="sequence" />
+        <result column="pic" property="pic" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <insert id="save" parameterType="FortuneWheelPrizeEntity" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+      INSERT INTO `ygg_sale_platform`.`fortune_wheel_prize` (
+         `fortune_wheel_id`, `type`,`coupon_id`,`min_point`,`max_point`,`point_amount`,`prize_amount`,`prize_draw`,`probability`,`is_available`,`remark`,
+          `tip`,`font_color`,`sequence`,`pic`,`create_time`)
+      VALUES(
+          #{fortuneWheelId}, #{type},#{couponId},#{minPoint},#{maxPoint},#{pointAmount},#{prizeAmount},#{prizeDraw},#{probability},#{isAvailable},#{remark},
+         #{tip},#{fontColor},#{sequence},#{pic},NOW())
+    </insert>
+
+    <update id="update" parameterType="FortuneWheelPrizeEntity" >
+        UPDATE `ygg_sale_platform`.`fortune_wheel_prize`
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="type != null">type=#{type},</if>
+            <if test="fortuneWheelId != null">fortune_wheel_id=#{fortuneWheelId},</if>
+            <if test="couponId != null">coupon_id=#{couponId},</if>
+            <if test="minPoint != null">min_point=#{minPoint},</if>
+            <if test="maxPoint != null">max_point=#{maxPoint},</if>
+            <if test="pointAmount != null">point_amount=#{pointAmount},</if>
+            <if test="prizeAmount != null">prize_amount=#{prizeAmount},</if>
+            <!--<if test="prizeDraw != null">prize_draw=#{prizeDraw},</if>-->
+            <if test="probability != null">probability=#{probability},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable},</if>
+            <if test="remark != null">remark=#{remark},</if>
+            <if test="tip != null">tip=#{tip},</if>
+            <if test="fontColor != null">font_color=#{fontColor},</if>
+            <if test="sequence != null">sequence=#{sequence},</if>
+            <if test="pic != null">pic=#{pic},</if>
+        </trim>
+        WHERE id=#{id} LIMIT 1
+    </update>
+
+    <update id="updateByPara" parameterType="map" >
+        UPDATE `ygg_sale_platform`.`fortune_wheel_prize`
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="type != null">type=#{type},</if>
+            <if test="fortuneWheelId != null">fortune_wheel_id=#{fortuneWheelId},</if>
+            <if test="couponId != null">coupon_id=#{couponId},</if>
+            <if test="minPoint != null">min_point=#{minPoint},</if>
+            <if test="maxPoint != null">max_point=#{maxPoint},</if>
+            <if test="pointAmount != null">point_amount=#{pointAmount},</if>
+            <if test="prizeAmount != null">prize_amount=#{prizeAmount},</if>
+            <if test="prizeDraw != null">prize_draw=#{prizeDraw},</if>
+            <if test="probability != null">probability=#{probability},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable},</if>
+            <if test="remark != null">remark=#{remark},</if>
+            <if test="tip != null">tip=#{tip},</if>
+            <if test="fontColor != null">font_color=#{fontColor},</if>
+            <if test="sequence != null">sequence=#{sequence},</if>
+            <if test="pic != null">pic=#{pic},</if>
+        </trim>
+        WHERE id=#{id} LIMIT 1
+    </update>
+
+    <select id="findByPara" resultMap="FortuneWheelPrizeMap" parameterType="map">
+        SELECT id,fortune_wheel_id,type,coupon_id,min_point,max_point,point_amount,prize_amount,prize_draw,probability,is_available,remark,
+        tip,font_color,sequence,pic,create_time
+        FROM fortune_wheel_prize
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="id != null"> and id=#{id} </if>
+            <if test="fortuneWheelId != null"> and fortune_wheel_id = #{fortuneWheelId} </if>
+        </trim>
+        ORDER BY sequence ASC
+        <!--<if test="start != null">-->
+            <!--LIMIT #{start},#{max}-->
+        <!--</if>-->
+    </select>
+
+
+</mapper>

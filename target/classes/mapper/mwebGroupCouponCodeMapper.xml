@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MwebGroupCouponCodeMapper">
+
+<!-- 优惠码相关mapper  begin -->
+	<select id="findCouponDetailDesc" parameterType="int" resultType="string">
+		SELECT `desc` FROM mweb_group_coupon_detail where id = #{id}
+	</select>
+	
+	<select id="findCouponDetailCode" resultType="string">
+		SELECT `code` FROM mweb_group_coupon_code where `type`=2
+	</select>
+	
+	<insert id="insertCouponCode" parameterType="MwebGroupCouponCodeEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO mweb_group_coupon_code 
+		(`coupon_detail_id`,`type`,`same_max_count`,`total`,`code`,`start_time`,`end_time`,`remark`,`desc`,`create_time`,`is_available`,`change_type`,`change_count`)
+		VALUES
+		(#{couponDetailId},#{type},#{sameMaxCount},#{total},#{code},#{startTime},#{endTime},#{remark},#{desc},#{createTime},#{isAvailable},#{changeType},#{changeCount})
+	</insert>
+	
+	<update id="updateCouponCode" parameterType="map" >
+		UPDATE `mweb_group_coupon_code` 
+     	<set>
+          <if test="isAvailable != null"> is_available=#{isAvailable},</if>
+          <if test="code != null"> code=#{code},</if>
+          <if test="desc != null"> `desc`=#{desc}</if>
+     	</set>
+     	where 
+     		id=#{id}
+     		<if test="oldIsAvailable != null"> AND is_available=#{oldIsAvailable}</if>
+	</update>
+	
+	<insert id="insertCouponCodeDetail" parameterType="map">
+		INSERT INTO mweb_group_coupon_code_detail 
+		(`coupon_code_id`,`code`,`create_time`)
+		VALUES
+		(#{couponCodeId},#{code},#{createTime})
+	</insert>
+	
+	<select id="findAllCouponCode" parameterType="map" resultType="MwebGroupCouponCodeEntity">
+		SELECT 
+			cc.id,
+			cc.coupon_detail_id AS couponDetailId,
+			cc.type,
+			cc.change_type AS changeType,
+			cc.change_count AS changeCount,
+			cc.same_max_count AS sameMaxCount,
+			cc.total,
+			cc.`code`,
+			cc.start_time AS startTime,
+			cc.end_time AS endTime,
+			cc.remark,
+			cc.`desc`,
+			cc.is_available AS isAvailable,
+			cc.create_time AS createTime,
+			
+			cd.scope_type AS scopeType,
+			cd.scope_id AS scopeId,
+			cd.type as cdType,
+			cd.threshold,
+			cd.reduce,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce,
+			cd.`desc` as cDdesc
+		FROM 
+			mweb_group_coupon_code cc 
+		left join mweb_group_coupon_detail cd on cc.coupon_detail_id=cd.id
+		WHERE 
+			1=1
+			<if test="id != null">AND cc.id=#{id}</if>
+			<if test="type != null">AND cc.type=#{type}</if>
+			<if test="changeType != null">AND cc.change_type=#{changeType}</if>
+			<if test="code != null">AND cc.`code`=#{code}</if>
+			<if test="desc != null">AND cc.`desc` like #{desc}</if>
+			<if test="isAvailable != null">AND cc.`is_available`=#{isAvailable}</if>
+		ORDER BY 
+			cc.start_time DESC , cc.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+	
+	<select id="countAllCouponCode" parameterType="map" resultType="int">
+		SELECT 
+			count(id) 
+		FROM 
+			mweb_group_coupon_code
+		WHERE 
+			1=1
+			<if test="id != null">AND id=#{id}</if>
+			<if test="type != null">AND type=#{type}</if>
+			<if test="changeType != null">AND change_type=#{changeType}</if>
+			<if test="code != null">AND `code`=#{code}</if>
+			<if test="desc != null">AND `desc` like #{desc}</if>
+			<if test="isAvailable != null">AND `is_available`=#{isAvailable}</if>
+	</select>
+	
+	<!-- <select id="findDetailByCouponCodeId" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			account_id AS accountId,
+			coupon_code_id AS couponCodeId,
+			`code`,
+			is_used isUsed,
+			update_time updateTime 
+		FROM 
+			mweb_group_coupon_code_detail
+		WHERE 
+			1=1
+			<if test="couponCodeId != null">AND coupon_code_id=#{couponCodeId}</if>
+			<if test="code != null">AND `code`=#{code}</if>
+			<if test="isUsed != null">AND `is_used`=#{isUsed}</if>
+			<if test="accountId != null">AND `account_id`=#{accountId}</if>
+		ORDER BY 
+			is_used DESC , id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+	
+	<select id="countDetailByCouponCodeId" parameterType="map" resultType="int">
+		SELECT 
+			count(id) 
+		FROM 
+			mweb_group_coupon_code_detail
+		WHERE 
+			1=1
+			<if test="couponCodeId != null">AND coupon_code_id=#{couponCodeId}</if>
+			<if test="code != null">AND `code`=#{code}</if>
+			<if test="isUsed != null">AND `is_used`=#{isUsed}</if>
+			<if test="accountId != null">AND `account_id`=#{accountId}</if>
+	</select> -->
+	
+	<!-- 1对1 优惠码实际兑换情况 -->
+	<select id="findConvertNumsByCouponCodeIdWithTypeOne2Many" parameterType="list" resultType="map">
+		SELECT 
+			coupon_code_id AS couponCodeId,
+			COUNT(id) AS total
+		FROM 
+			mweb_group_coupon_code_common 
+		WHERE coupon_code_id IN
+							<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+           						#{item}  
+        					</foreach>
+        GROUP BY coupon_code_id
+	</select>
+
+	<!-- 1对多 优惠码实际兑换情况 -->
+	<select id="findConvertNumsByCouponCodeIdWithTypeOne2One" parameterType="list" resultType="map">
+		SELECT 
+			coupon_code_id AS couponCodeId,
+			COUNT(id) AS total
+		FROM 
+			mweb_group_coupon_code_detail 
+		WHERE 
+			coupon_code_id IN 
+							<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+           						#{item}  
+        					</foreach>			
+			AND is_used=1 
+		GROUP BY coupon_code_id
+	</select>
+	
+	<!-- 优惠码实际使用情况 -->
+	<select id="findUsedNumsByCouponCodeId" parameterType="list" resultType="map">
+		SELECT 
+			coupon_code_id AS couponCodeId,
+			COUNT(id) AS total
+		FROM 
+			mweb_group_coupon_account 
+		WHERE 
+			coupon_code_id IN 
+							<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+           						#{item}  
+        					</foreach>
+			AND is_used = 1
+			AND source_type = 2
+    	GROUP BY coupon_code_id
+	</select>
+	
+	<!-- 查询coupon_detail -->
+    <select id="findCouponDetailById"  parameterType="int" resultType="MwebGroupCouponDetailEntity">
+      	SELECT 
+      		id, 
+      		type, 
+      		scope_type AS scopeType, 
+      		scope_id AS scopeId, 
+      		threshold, 
+      		reduce,
+      		is_random_reduce AS isRandomReduce,
+			lowest_reduce AS lowestReduce,
+			maximal_reduce AS maximalReduce
+      	FROM 
+      		mweb_group_coupon_detail 
+      	WHERE id=#{id}
+    </select>
+	
+	<!-- 根据优惠码ID(类型为1对多)查询所有已经兑换信息 for 礼包 -->
+	<select id="findCouponCodeLiBaoCommonByCouponCodeId" parameterType="map" resultType="map">
+		SELECT 
+			ccc.id AS id,
+			ccc.coupon_code_id AS couponCodeId,
+			ccc.coupon_account_id AS couponAccountId,
+			a.base_account_id AS accountId,
+			a.id AS teamAccountId,
+			a.`wechat_nick_name` AS accountName,
+			a.type AS accountType
+		FROM 
+			mweb_group_coupon_code_common ccc,
+			mweb_group_account a
+		WHERE
+			ccc.account_id=a.id
+			AND ccc.coupon_code_id=#{couponCodeId}
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count 根据优惠码ID(类型为1对多)查询所有已经兑换信息  for 礼包 -->
+	<select id="countCouponCodeLiBaoCommonByCouponCodeId" parameterType="map" resultType="int">
+		SELECT 
+			count(ccc.id)
+		FROM 
+			mweb_group_coupon_code_common ccc,
+			mweb_group_account a
+		WHERE
+			ccc.account_id=a.id
+			AND ccc.coupon_code_id=#{couponCodeId}
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+	</select>
+	
+	<!-- 根据优惠码ID(类型为1对多)查询所有已经兑换信息 -->
+	<select id="findCouponCodeCommonByCouponCodeId" parameterType="map" resultType="map">
+		SELECT 
+			ccc.id AS id,
+			ccc.coupon_code_id AS couponCodeId,
+			ccc.coupon_account_id AS couponAccountId,
+			a.base_account_id AS accountId,
+		    a.id AS teamAccountId,
+			a.`wechat_nick_name` AS accountName,
+			a.type AS accountType,
+			ca.is_used AS accountIsUsed,
+			ca.reduce_price AS reducePrice
+		FROM 
+			mweb_group_coupon_code_common ccc,
+			mweb_group_account a,
+			mweb_group_coupon_account ca
+		WHERE
+			ccc.account_id=a.id
+			AND ccc.coupon_account_id=ca.id
+			AND ccc.coupon_code_id=#{couponCodeId}
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="usedType != null">AND ca.is_used=#{usedType}</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count 根据优惠码ID(类型为1对多)查询所有已经兑换信息 -->
+	<select id="countCouponCodeCommonByCouponCodeId" parameterType="map" resultType="int">
+		SELECT 
+			count(ccc.id)
+		FROM 
+			mweb_group_coupon_code_common ccc,
+			mweb_group_account a,
+			mweb_group_coupon_account ca
+		WHERE
+			ccc.account_id=a.id
+			AND ccc.coupon_account_id=ca.id
+			AND ccc.coupon_code_id=#{couponCodeId}
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="usedType != null">AND ca.is_used=#{usedType}</if>
+	</select>
+	
+<!-- 根据优惠码ID(类型为1对1)查询所有已经兑换信息  for 礼包 -->
+	<select id="findCouponCodeLiBaoDetailByCouponCodeId" parameterType="map" resultType="map">
+		SELECT 
+			ccd.`code`,
+			ccd.is_used AS couponCodeIsUsed,
+			ccd.coupon_account_id AS couponAccountId,
+			a.type AS accountType,
+			a.`wechat_nick_name` AS accountName,
+			a.base_account_id AS accountId,
+			a.id AS teamAccountId
+		FROM
+			mweb_group_coupon_code_detail ccd 
+			LEFT JOIN mweb_group_account a ON ccd.account_id=a.id
+		WHERE
+			ccd.coupon_code_id=#{couponCodeId}
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="code != null">AND ccd.`code`=#{code}</if>
+			<if test="convertType != null">AND ccd.`is_used`=#{convertType}</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count 根据优惠码ID(类型为1对1)查询所有已经兑换信息  for 礼包-->
+	<select id="countCouponCodeLiBaoDetailByCouponCodeId" parameterType="map" resultType="int">
+		SELECT 
+			count(ccd.id)
+		FROM
+			mweb_group_coupon_code_detail ccd 
+			LEFT JOIN mweb_group_account a ON ccd.account_id=a.id
+		WHERE 
+			ccd.coupon_code_id=#{couponCodeId}
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="code != null">AND ccd.`code`=#{code}</if>
+			<if test="convertType != null">AND ccd.`is_used`=#{convertType}</if>
+	</select>
+	
+<!-- 根据优惠码ID(类型为1对1)查询所有已经兑换信息 -->
+	<select id="findCouponCodeDetailByCouponCodeId" parameterType="map" resultType="map">
+		SELECT 
+			ccd.`code`,
+			ccd.is_used AS couponCodeIsUsed,
+			ccd.coupon_account_id AS couponAccountId,
+			a.type AS accountType,
+			a.`wechat_nick_name` AS accountName,
+			ca.is_used AS accountIsUsed,
+			ca.reduce_price AS reducePrice
+		FROM
+			mweb_group_coupon_code_detail ccd 
+			LEFT JOIN mweb_group_account a ON ccd.account_id=a.id
+			LEFT JOIN mweb_group_coupon_account ca ON ccd.coupon_account_id=ca.id
+		WHERE
+			ccd.coupon_code_id=#{couponCodeId}
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="code != null">AND ccd.`code`=#{code}</if>
+			<if test="convertType != null">AND ccd.`is_used`=#{convertType}</if>
+			<if test="usedType != null">AND ca.is_used=#{usedType}</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count 根据优惠码ID(类型为1对1)查询所有已经兑换信息 -->
+	<select id="countCouponCodeDetailByCouponCodeId" parameterType="map" resultType="int">
+		SELECT 
+			count(ccd.id)
+		FROM
+			mweb_group_coupon_code_detail ccd 
+			LEFT JOIN mweb_group_account a ON ccd.account_id=a.id
+			LEFT JOIN mweb_group_coupon_account ca ON ccd.coupon_account_id=ca.id
+		WHERE 
+			ccd.coupon_code_id=#{couponCodeId}
+			<if test="userId != null">AND a.`base_account_id`=#{userId}</if>
+			<if test="name != null">AND a.wechat_nick_name like #{name}</if>
+			<if test="code != null">AND ccd.`code`=#{code}</if>
+			<if test="convertType != null">AND ccd.`is_used`=#{convertType}</if>
+			<if test="usedType != null">AND ca.is_used=#{usedType}</if>
+	</select>
+	
+	
+	
+	<select id="queryCouponAccountWithTypeOne2One" parameterType="map" resultType="map">
+		SELECT
+			cd.id AS couponDetailId,
+			cd.reduce,
+			cd.scope_type AS scopeType,
+			cd.threshold,
+			cd.type AS couponType,
+			cd.scope_id AS scopeId,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce,
+			ca.start_time AS startTime,
+			ca.end_time AS endTime,
+			ca.remark,
+			a.base_account_id AS accountId,
+			a.id AS teamAccountId,
+			a.`wechat_nick_name` AS accountName,
+			a.type AS accountType,
+			ccd.`code` AS couponCode
+		FROM
+			mweb_group_coupon_account ca,
+			mweb_group_account a,
+			mweb_group_coupon_detail cd,
+			mweb_group_coupon_code_detail ccd
+			
+		WHERE
+			ca.coupon_code_id=ccd.coupon_code_id
+		AND ca.account_id=ccd.account_id
+		AND ca.account_id=a.id
+		AND ca.coupon_detail_id = cd.id
+		AND ca.source_type = 2
+		AND ca.id=#{couponAccountId}
+	</select>
+	
+	<select id="queryCouponAccountWithTypeOne2Many" parameterType="map" resultType="map">
+		SELECT
+			cd.id AS couponDetailId,
+			cd.reduce,
+			cd.scope_type AS scopeType,
+			cd.threshold,
+			cd.type AS couponType,
+			cd.scope_id AS scopeId,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce,
+			cc.start_time AS startTime,
+			cc.end_time AS endTime,
+			cc.`desc`,
+			cc.`code` AS couponCode,
+			a.base_account_id AS accountId,
+			a.id AS teamAccountId,
+			a.`wechat_nick_name` AS accountName,
+			a.type AS accountType
+		FROM
+			mweb_group_coupon_code cc,
+			mweb_group_account a,
+			mweb_group_coupon_account ca,
+			mweb_group_coupon_detail cd
+		WHERE
+			cc.id = ca.coupon_code_id
+		AND ca.coupon_detail_id = cd.id
+		AND ca.account_id = a.id
+		AND ca.source_type = 2
+		AND ca.id = #{couponAccountId}
+	</select>
+	
+	<select id="queryCouponAccountId" parameterType="map" resultType="int">
+		SELECT
+			id
+		FROM
+			mweb_group_coupon_account
+		WHERE
+			source_type = 2
+		AND coupon_code_id = #{couponCodeId}
+		AND account_id = #{accountId}
+	</select>
+	
+	<insert id="insertCouponCodeGiftBag" parameterType="map" >
+		INSERT INTO mweb_group_coupon_code_gift_bag 
+		(`coupon_code_id`,`coupon_detail_id`,`change_count`)
+		VALUES
+		(#{couponCodeId},#{couponDetailId},#{count})
+	</insert>
+	
+	<select id="findCouponDetailByCouponCodeId" parameterType="int" resultType="MwebGroupCouponDetailEntity">
+		SELECT
+			id,
+			type,
+			scope_type AS scopeType,
+			scope_id AS scopeId, 
+			threshold, 
+			reduce,
+			is_random_reduce AS isRandomReduce,
+			lowest_reduce AS lowestReduce,
+			maximal_reduce AS maximalReduce, 
+			is_available AS isAvailable, 
+			`desc`
+		FROM 
+			mweb_group_coupon_detail 
+		WHERE id IN(SELECT coupon_detail_id FROM mweb_group_coupon_code_gift_bag WHERE coupon_code_id=#{couponCodeId});
+	</select>
+	
+	<select id="findCouponCodeGiftBag" parameterType="int" resultType="map">
+		SELECT 
+			coupon_detail_id AS couponDetailId,
+			change_count AS changeCount
+		FROM 
+			mweb_group_coupon_code_gift_bag 
+		WHERE 
+			coupon_code_id=#{couponCodeId}
+	</select>
+	
+	<select id="findCouponCodeTotoalMoney" parameterType="int" resultType="string">
+		SELECT
+			SUM(t3.real_price)
+		FROM
+			mweb_group_coupon_code t1,
+			mweb_group_coupon_account t2,
+			`order` t3
+		WHERE
+			t1.id = #{couponCodeId}
+		AND t1.id = t2.coupon_code_id
+		AND t2.id = t3.account_coupon_id
+		AND t3.`status` IN (2, 3, 4)
+		AND t3.type=2
+	</select>
+	
+<!-- 优惠码相关mapper  end -->
+</mapper>

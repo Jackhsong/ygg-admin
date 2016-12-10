@@ -1,0 +1,1417 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductMapper">
+	<resultMap type="ProductEntity" id="ProductMap">
+		<id column="id" property="id" />
+		<result column="type" property="type" />
+		<result column="brand_id" property="brandId" />
+		<result column="freight_template_id" property="freightTemplateId" />
+		<result column="seller_id" property="sellerId" />
+		<result column="barcode" property="barcode" />
+		<result column="code" property="code" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="name" property="name" />
+		<result column="seller_product_name" property="sellerProductName" />
+		<result column="remark" property="remark" />
+		<result column="short_name" property="shortName" />
+		<result column="desc" property="desc" />
+		<result column="market_price" property="marketPrice" />
+		<result column="sales_price" property="salesPrice" />
+		<result column="image1" property="image1" />
+		<result column="image2" property="image2" />
+		<result column="image3" property="image3" />
+		<result column="image4" property="image4" />
+		<result column="image5" property="image5" />
+		<result column="net_volume" property="netVolume" />
+		<result column="place_of_origin" property="placeOfOrigin" />
+		<result column="storage_method" property="storageMethod" />
+		<result column="manufacturer_date" property="manufacturerDate" />
+		<result column="durability_period" property="durabilityPeriod" />
+		<result column="people_for" property="peopleFor" />
+		<result column="food_method" property="foodMethod" />
+		<result column="use_method" property="useMethod" />
+		<result column="gege_image_id" property="gegeImageId"/>
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="tip" property="tip" />
+		<result column="pc_detail" property="pcDetail" />
+		<result column="is_off_shelves" property="isOffShelves" />
+		<result column="is_available" property="isAvailable" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="product_base_id" property="productBaseId" />
+		<result column="partner_distribution_price" property="partnerDistributionPrice" />
+		<result column="activity_wholesale_price" property="activityWholesalePrice" />
+		<result column="activity_wholesale_price_start_time" property="activityWholesalePriceStartTime" />
+		<result column="activity_wholesale_price_end_time" property="activityWholesalePriceEndTime" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+		<result column="activities_status" property="activitiesStatus" />
+		<result column="is_show_in_mall" property="isShowInMall" />
+		<result column="is_automatic_adjust_stock" property="isAutomaticAdjustStock" />
+		<result column="bs_commision" property="bsCommision" />
+		<result column="product_use_scope_id" property="productUseScopeId" />
+	</resultMap>
+	
+	<resultMap type="ProductCommonEntity" id="ProductCommonMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="type" property="type" />
+		<result column="medium_image" property="mediumImage" />
+		<result column="small_image" property="smallImage" />
+		<result column="name" property="name" />
+		<result column="short_name" property="shortName" />
+		<result column="market_price" property="marketPrice" />
+		<result column="sales_price" property="salesPrice" />
+		<result column="sell_count" property="sellCount" />
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="partner_distribution_price" property="partnerDistributionPrice" />
+	</resultMap>
+	
+	<resultMap type="ProductMobileDetailEntity" id="ProductMobileDetailMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="content" property="content" />
+		<result column="content_type" property="contentType" />
+		<result column="height" property="height" />
+		<result column="width" property="width" />
+		<result column="is_link" property="isLink" />
+		<result column="link" property="link" />
+		<result column="link_type" property="linkType" />
+		<result column="order" property="order" />
+	</resultMap>
+	
+	<resultMap type="ProductCountEntity" id="ProductCountMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="sell" property="sell" />
+		<result column="stock" property="stock" />
+		<result column="lock" property="lock" />
+		<result column="restriction" property="restriction" />
+		<result column="stock_algorithm" property="stockAlgorithm" />
+	</resultMap>
+
+
+<!-- 插入Product -->
+	<insert id="save" parameterType="ProductEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO product(`barcode`,`brand_id`,`code`,`name`,`seller_product_name`,`remark`,`seller_id`,`desc`,`market_price`,`sales_price`,`freight_template_id`,
+			`short_name`,`image1`, `image2`, `image3`, `image4`, `image5`,`net_volume`, `place_of_origin`, `storage_method`,`manufacturer_date`,
+			`durability_period`, `people_for`, `food_method`,`use_method`,`tip`,`is_available`,`create_time`,`start_time`,`end_time`,`pc_detail`,
+			`gege_image_id`,`selling_point`,`product_base_id`,`partner_distribution_price`,`type`,`activities_status`,`return_distribution_proportion_type`,`is_automatic_adjust_stock`,`bs_commision`,`product_use_scope_id`)
+		VALUES(#{barcode},#{brandId},#{code},#{name},#{sellerProductName},#{remark},#{sellerId},
+			#{desc,jdbcType=VARCHAR},#{marketPrice},#{salesPrice},#{freightTemplateId},#{shortName},#{image1},#{image2},#{image3},#{image4},
+			#{image5},#{netVolume},#{placeOfOrigin},#{storageMethod},#{manufacturerDate},#{durabilityPeriod},#{peopleFor},#{foodMethod},
+			#{useMethod},#{tip},#{isAvailable},now(),#{startTime,jdbcType=TIMESTAMP},#{endTime,jdbcType=TIMESTAMP},
+			#{pcDetail,jdbcType=VARCHAR}, #{gegeImageId}, #{sellingPoint},#{productBaseId},#{partnerDistributionPrice},#{type},#{activitiesStatus},#{returnDistributionProportionType},#{isAutomaticAdjustStock},#{bsCommision},#{productUseScopeId})
+	</insert>
+
+<!-- 更新Product -->
+	<update id="update" parameterType="ProductEntity">
+		UPDATE product
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="barcode != null">barcode=#{barcode},</if>
+			<if test="brandId != null">brand_id=#{brandId},</if>
+			<if test="code != null">code=#{code},</if>
+			<if test="name != null">name=#{name},</if>
+			<if test="sellerProductName != null">seller_product_name=#{sellerProductName},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="sellerId != null">seller_id=#{sellerId},</if>
+			<if test="desc != null">`desc`=#{desc},</if>
+			<if test="marketPrice != null">market_price=#{marketPrice},</if>
+			<if test="salesPrice != null">sales_price=#{salesPrice},</if>
+			<if test="freightTemplateId != null">freight_template_id=#{freightTemplateId},</if>
+			<if test="shortName != null">short_name=#{shortName},</if>
+			<if test="image1 != null">image1=#{image1},</if>
+			<if test="image2 != null">image2=#{image2},</if>
+			<if test="image3 != null">image3=#{image3},</if>
+			<if test="image4 != null">image4=#{image4},</if>
+			<if test="image5 != null">image5=#{image5},</if>
+			<if test="netVolume != null">net_volume=#{netVolume},</if>
+			<if test="placeOfOrigin != null">place_of_origin=#{placeOfOrigin},</if>
+			<if test="storageMethod != null">storage_method=#{storageMethod},</if>
+			<if test="manufacturerDate != null">manufacturer_date=#{manufacturerDate},</if>
+			<if test="durabilityPeriod != null">durability_period=#{durabilityPeriod},</if>
+			<if test="peopleFor != null">people_for=#{peopleFor},</if>
+			<if test="foodMethod != null">food_method=#{foodMethod},</if>
+			<if test="useMethod != null">use_method=#{useMethod},</if>
+			<if test="tip != null">tip=#{tip},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+			<if test="startTime != null">start_time=#{startTime},</if>
+			<if test="endTime != null">end_time=#{endTime},</if>
+			<if test="gegeImageId != null">gege_image_id=#{gegeImageId},</if>
+			<if test="sellingPoint != null">selling_point=#{sellingPoint},</if>
+			<if test="productBaseId != null">`product_base_id`=${productBaseId},</if>
+			<if test="partnerDistributionPrice != null">`partner_distribution_price`=#{partnerDistributionPrice},</if>
+			<if test="isOffShelves != null">is_off_shelves=#{isOffShelves},</if>
+			<if test="isAutomaticAdjustStock != null">is_automatic_adjust_stock=#{isAutomaticAdjustStock},</if>
+			<if test="bsCommision != null">bs_commision=#{bsCommision},</if>
+			<if test="productUseScopeId != null">product_use_scope_id=#{productUseScopeId},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+
+<!-- 根据para查询商品信息 -->
+	<select id="findProAndSellerInfoByPara" parameterType="map" resultType="map">
+		SELECT 
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress  
+		FROM 
+			product p,seller s 
+		WHERE 
+			p.seller_id=s.id 
+			and p.`code`=#{code}
+		LIMIT 1
+	</select>
+
+<!-- 更新Product 上下架信息 -->
+	<update id="updateIsOffShelves" parameterType="map">
+		UPDATE product
+		SET is_off_shelves=#{code}
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+<!-- 更新Product 可用信息-->
+	<update id="updateisAvailable" parameterType="map">
+		UPDATE product
+		SET is_available=#{code}
+		<!-- 商品停用时，设为下架 -->
+		<if test="code == 0">,is_off_shelves=1</if>
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<!-- 更新Product 温馨提示信息-->
+	<update id="updateTipById" parameterType="map">
+		UPDATE product
+		SET tip=#{tip}
+		where type=1 and id = #{id}  
+	</update>
+	
+<!-- 更新Product 合伙人分销价-->
+	<update id="updatePartnerDistributionPriceByPara" parameterType="map">
+		UPDATE product
+		SET partner_distribution_price=#{partnerDistributionPrice}
+		where type=#{type} and id=#{id}  
+	</update>
+	
+<!-- 查询Product 温馨提示信息-->
+	<select id="findTipById" parameterType="int" resultType="map" >
+		SELECT tip 
+		FROM product
+		WHERE type=1 and id = #{id}
+	</select>
+	
+<!-- 更新Product的时间 -->
+	<update id="updateProductTime" parameterType="ProductEntity">
+		UPDATE product
+		SET
+		start_time=#{startTime,jdbcType=TIMESTAMP},end_time=#{endTime,jdbcType=TIMESTAMP}
+		WHERE type=1 and id=#{id}
+	</update>
+	
+<!-- 根据para更新Product -->
+	<update id="updateProductByPara" parameterType="map">
+		UPDATE product
+     	<set>
+          <if test="salesPrice != null"> sales_price=#{salesPrice}, </if>
+          <if test="marketPrice != null">market_price=#{marketPrice},</if>
+          <if test="activitiesStatus != null">activities_status=#{activitiesStatus},</if>
+          <if test="shortName != null"> short_name=#{shortName}, </if>
+          <if test="name != null">name=#{name} </if>
+     	</set>
+     	<trim prefix="WHERE" prefixOverrides="AND">
+     		<if test="id != null">AND id=#{id}</if>
+     		<if test="idList != null">AND id in
+     			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+     		</if>
+     	</trim>
+	</update>
+	
+<!-- 根据para更新ProductCommon -->
+	<update id="updateProductCommonByPara" parameterType="map">
+		UPDATE product_common
+     	<set>
+          <if test="salesPrice != null"> sales_price=#{salesPrice}, </if>
+          <if test="marketPrice != null">market_price=#{marketPrice},</if>
+          <if test="shortName != null"> short_name=#{shortName}, </if>
+          <if test="name != null">name=#{name} </if>
+     	</set>
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND product_id=#{id}</if>
+			<if test="idList != null">AND product_id in
+				<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if>
+		</trim>
+	</update>
+
+<!-- 查询商品和库存的联合信息 -->
+	<select id="findProductAndCountInfoByProductId" parameterType="int" resultType="map">
+		SELECT 
+			p.id,
+			p.short_name as shortName,
+			p.`name`,
+			pc.sell,
+			pc.stock,
+			pc.`lock` as lockNum 
+		FROM 
+			product p, product_count pc 
+		WHERE 
+			p.id=pc.product_id 
+			and p.id=#{id}
+	</select>
+
+<!-- 查询商品信息 -->
+	<select id="findAllProductByPara" parameterType="map" resultMap="ProductMap">
+		SELECT * FROM product
+		WHERE 1=1
+		<if test="ids != null"> AND id  IN
+			<foreach collection="ids" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</if>
+		<if test="type != null">AND type=#{type}</if>
+		<if test="code != null">AND code=#{code}</if>
+		<if test="name != null">AND name like #{name}</if>
+		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		<if test="isOffShelves != null">AND is_off_shelves=#{isOffShelves}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}</if>
+	</select>
+
+<!-- 查询商品销售时间 -->
+	<select id="findProductSaleTimeById" parameterType="int"  resultType="ProductEntity">
+      SELECT id as  id ,
+      start_time as startTime,
+      end_time as endTime,
+      sales_price as salesPrice,
+      partner_distribution_price as partnerDistributionPrice
+      FROM product 
+      WHERE type=1 and id=#{id} LIMIT 1
+    </select>
+
+<!-- 统计商品数量 -->
+	<select id="countProduct" parameterType="map" resultType="int">
+		SELECT COUNT(id) FROM product WHERE type=1
+		<if test="code != null">AND code=#{code}</if>
+		<if test="name != null">AND name like #{name}</if>
+		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		<if test="isOffShelves != null">AND is_off_shelves=#{isOffShelves}</if>
+	</select>
+	
+<!-- 商品管理页面商品查询 -->
+    <select id="findProductInfoForManage" parameterType="map" resultType="map">
+    	SELECT 
+    		p.id as id,
+    		p.product_base_id as baseId,
+    		p.sales_price as salesPrice,
+    		p.is_available as isAvailableCode,
+    		p.is_off_shelves as isOffShelvesCode,
+    		p.`code` as `code`,
+    		p.`name` as `name`,
+    		p.short_name as shortName,
+    		p.`remark` as `remark`,
+			p.`seller_product_name` as `sellerProductName`,
+		    p.image1,
+			p.start_time as startTime,
+			p.end_time as endTime,
+		    p.is_automatic_adjust_stock as isAutomaticAdjustStock,
+			p.type,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress,
+    		s.warehouse as warehouse,
+			s.is_available AS sellerIsAvailable,
+    		b.`name` as brandName,
+    		pc.stock as stock,
+    		pc.sell as sell,
+    		pc.`lock` as lockNum,
+    		pc.`restriction`,
+    		ft.`name` as ftName,
+    		p.market_price as marketPrice,
+    		p.type as type,
+    		p.is_remind_stock as isRemindStock,
+    		pb.submit_type as submitType,
+    		pb.wholesale_price as wholesalePrice,
+    		pb.deduction as deduction,
+    		pb.proposal_price as proposalPrice,
+    		pb.self_purchase_price as selfPurchasePrice,
+    		sf.`name` as countryName,
+    		p.bs_commision as bsCommision,
+		    puc.name as scopeName
+		FROM 
+			seller s,
+			brand b,
+			product_count pc,
+			freight_template ft,
+			product_base pb,
+			sale_flag sf,
+			product p LEFT JOIN product_use_scope puc ON p.product_use_scope_id = puc.id
+		WHERE
+			p.seller_id=s.id 
+			AND p.brand_id=b.id 
+			AND pc.product_id=p.id 
+			AND p.freight_template_id = ft.id
+			AND p.product_base_id=pb.id
+			AND pb.sale_flag_id = sf.id
+			<if test="productType != null">AND p.`type`=#{productType}</if>
+			<if test="activitiesStatus != null">AND p.`activities_status`=#{activitiesStatus}</if>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="desc != null">AND p.`desc` like #{desc}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="likecode != null">AND p.code like #{likecode}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="startTimeBegin != null"><![CDATA[AND start_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND start_time <= #{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[AND end_time >= #{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[AND end_time <= #{endTimeEnd}]]></if>
+			<if test="sellerId != null">AND s.id=#{sellerId}</if> 
+			<if test="sellerType != null">AND s.seller_type=#{sellerType}</if>
+			<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+			<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+      		<if test="baseId != null">AND p.product_base_id=#{baseId}</if>
+      		<if test="lowerPrice != null"><![CDATA[AND p.sales_price >= #{lowerPrice}]]></if>
+      		<if test="higherPrice != null"><![CDATA[AND p.sales_price <= #{higherPrice}]]></if>
+      		<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+		    <if test="productUseScopeId != null">
+				AND puc.id = #{productUseScopeId}
+			</if>
+			ORDER BY p.id DESC 
+			<if test="start != null">LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}</if>
+    </select>
+    
+<!-- 计算商品管理页面商品总数 -->
+    <select id="countProductInfoForManage" parameterType="map" resultType="int">
+    	SELECT 
+    		count(p.id)
+		FROM 
+			seller s,
+			brand b,
+			product_count pc,
+			freight_template ft,
+			product_base pb,
+			sale_flag sf,
+			product p LEFT JOIN product_use_scope puc ON p.product_use_scope_id = puc.id
+		WHERE 
+			p.seller_id=s.id 
+			AND p.brand_id=b.id 
+			AND pc.product_id=p.id 
+			AND p.freight_template_id = ft.id
+			AND p.product_base_id=pb.id
+			AND pb.sale_flag_id = sf.id
+			<if test="productType != null">AND p.`type`=#{productType}</if>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="activitiesStatus != null">AND p.`activities_status`=#{activitiesStatus}</if>
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="desc != null">AND p.`desc` like #{desc}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="likecode != null">AND p.code like #{likecode}</if>
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="startTimeBegin != null"><![CDATA[AND start_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND start_time <= #{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[AND end_time >= #{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[AND end_time <= #{endTimeEnd}]]></if>
+			<if test="sellerId != null">AND s.id=#{sellerId}</if> 
+			<if test="sellerType != null">AND s.seller_type=#{sellerType}</if>
+			<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+			<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+      		<if test="baseId != null">AND p.product_base_id=#{baseId}</if>
+      		<if test="lowerPrice != null"><![CDATA[AND p.sales_price >= #{lowerPrice}]]></if>
+      		<if test="higherPrice != null"><![CDATA[AND p.sales_price <= #{higherPrice}]]></if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+			<if test="productUseScopeId != null">
+				AND puc.id = #{productUseScopeId}
+			</if>
+    </select>
+
+<!-- 插入ProductCommon -->
+	<insert id="saveProductCommon" parameterType="ProductCommonEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO 
+		product_common(product_id, type,medium_image, small_image, name, short_name,market_price,sales_price,selling_point,partner_distribution_price)
+		VALUES(#{productId},#{type},#{mediumImage},#{smallImage},#{name},#{shortName},#{marketPrice},#{salesPrice}, #{sellingPoint},#{partnerDistributionPrice})
+	</insert>
+
+<!-- 更新ProductCommon -->
+	<update id="updateProductCommon" parameterType="ProductCommonEntity">
+		UPDATE
+		product_common
+		SET
+		medium_image=#{mediumImage},small_image=#{smallImage},name=#{name},short_name=#{shortName},
+		sales_price=#{salesPrice},market_price=#{marketPrice},selling_point=#{sellingPoint},partner_distribution_price=#{partnerDistributionPrice}
+		WHERE id=#{id}
+	</update>
+
+<!-- 根据ProductId查询ProductCommon信息 -->
+	<select id="findProductCommonByProductId" parameterType="int" resultMap="ProductCommonMap">
+		SELECT * FROM product_common 
+		WHERE product_id=#{productId} 
+	</select>
+
+<!-- 插入product_mobile_detail -->
+	<insert id="saveProductMobileDetail" parameterType="ProductMobileDetailEntity" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO product_mobile_detail(`product_id`, `content`, `content_type`,`order`,`height`,`width`)
+		VALUES (#{productId},#{content},#{contentType},#{order},#{height},#{width})
+	</insert>
+	
+	<!-- 批量插入product_mobile_detail -->
+	<insert id="insertProductMobileDetail" parameterType="list">
+		INSERT INTO product_mobile_detail(`product_id`, `content`, `content_type`,`order`,`height`,`width`)VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+		(#{item.productId},#{item.content},#{item.contentType},#{item.order},#{item.height},#{item.width})
+		</foreach>
+	</insert>
+
+<!-- 删除product_mobile_detail -->
+	<delete id="deleteProductMobileDetail" parameterType="int">
+		DELETE FROM product_mobile_detail WHERE id=#{id}
+	</delete>
+	
+	<!-- 根据商品id删除product_mobile_detail -->
+	<delete id="deleteProductMobileDetailByProductId" parameterType="int">
+		DELETE FROM product_mobile_detail WHERE product_id=#{id}
+	</delete>
+
+<!-- 更新product_mobile_detail -->
+	<update id="updateProductMobileDetail" parameterType="ProductMobileDetailEntity">
+		UPDATE
+			product_mobile_detail
+		SET 
+			product_id=#{productId},
+			content=#{content},
+			content_type=#{contentType},
+			`order`=#{order},
+			`height`=#{height},
+			`width`=#{width}
+		WHERE id=#{id}
+	</update>
+
+<!-- 查询商品移动端详情信息 -->
+	<select id="findProductMobileDetail" parameterType="map" resultMap="ProductMobileDetailMap">
+		SELECT * FROM product_mobile_detail 
+		WHERE 1=1 
+		<if test="productId != null"> and product_id=#{productId} </if>
+		<if test="id != null"> and id=#{id} </if>
+		ORDER BY `order` DESC
+	</select>
+
+<!-- 插入库存 -->
+	<insert id="saveProductCount" parameterType="ProductCountEntity">
+		INSERT INTO
+		product_count(`product_id`,`stock`,`stock_algorithm`,`restriction`)
+		VALUES (#{productId},#{stock},#{stockAlgorithm},#{restriction})
+	</insert>
+	
+<!-- 更新库存信息 -->
+	<update id="updateProductCount" parameterType="ProductCountEntity">
+		UPDATE 
+		product_count 
+		SET
+		stock_algorithm=#{stockAlgorithm},restriction=#{restriction} 
+		WHERE id=#{id}
+	</update>
+
+	<update id="updateProductCountByPara" parameterType="map">
+		UPDATE
+			product_count
+		SET
+			restriction=#{restriction}
+		WHERE product_id=#{productId}
+	</update>
+
+	
+<!-- 增加销量 -->
+	<update id="addProductSellNum" parameterType="map">
+		UPDATE 
+		product_count 
+		SET
+		sell=sell + #{sellNum} 
+		WHERE product_id=#{id}
+		<if test="jian == 1"> AND sell >= #{rSellNum}</if> 
+	</update>
+<!-- 增加销量 -->
+	<update id="addProductCommonSellNum" parameterType="map">
+		UPDATE 
+		product_common 
+		SET
+		sell_count=sell_count + #{sellNum} 
+		WHERE product_id=#{id}
+		<if test="jian == 1"> AND sell_count >= #{rSellNum}</if> 
+	</update>
+	
+<!-- 根据ProductId查询库存 -->
+	<select id="findProductCountByProductId" parameterType="int" resultMap="ProductCountMap" >
+		SELECT * FROM product_count WHERE product_id=#{productId}
+	</select>
+	
+<!-- 根据ProductIds查询总库存 -->
+	<select id="countStockByProductIds" resultType="int">
+    	select SUM(stock) from product_count where product_id in 
+    	<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+           #{item}  
+        </foreach>
+    </select>
+
+<!-- 根据特卖ID 查询对应所有商品相关信息 -->
+	<select id="findProductInfoForGroupSaleById" parameterType="map" resultType="ProductInfoForGroupSale">
+		select
+			r.id as relationId,
+			p.id as productId,
+			p.product_base_id as productBaseId,
+			r.`order` as `order`,
+			p.code as code,
+			p.name as name,
+			p.short_name as shortName,
+			p.remark as remark,
+			p.start_time as startTime,
+			p.end_time as endTime,
+			p.is_off_shelves as isOffShelves,
+			c.sell as sell,
+			c.stock as stock,
+			p.market_price as marketPrice,
+			p.sales_price as salesPrice,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			p.type,
+			r.is_display as isDisplay
+		from 
+			relation_activities_common_and_product r,
+			product p,
+			product_count c,
+			seller s 
+		where r.activities_common_id=#{id} 
+			and r.product_id=p.id 
+			and p.id = c.product_id
+			and p.seller_id = s.id 
+		ORDER BY r.`order` DESC
+		<if test="start != null">LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}</if> 
+	</select>
+
+<!-- 查询特卖可关联的所有商品相关信息 -->
+	<select id="findAllProductInfoForGroupSale" parameterType="map" resultType="ProductInfoForGroupSale">
+		SELECT 
+		p.id as productId,
+		p.code as code,
+		p.name as name,
+		p.remark as remark,
+		pc.stock as stock,
+		p.market_price as marketPrice,
+		p.sales_price as salesPrice,
+		b.name as brandName,
+		b.id as brandId,
+		s.real_seller_name as sellerName,
+		s.send_address as sendAddress,
+		s.warehouse as warehouse,
+		s.id as sellerId 
+		FROM 
+			product p, seller s, brand b, product_count pc 
+		WHERE 
+			p.seller_id=s.id  AND p.brand_id=b.id  AND pc.product_id=p.id 
+			<if test="type != null">AND p.type=#{type}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="idList != null">
+      			AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+			ORDER BY p.id DESC 
+      		LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+	</select>
+
+	<select id="countProductInfoForGroupSale" parameterType="map" resultType="int">
+		select count(p.id) 
+		FROM 
+			product p, seller s, brand b, product_count pc 
+		WHERE 
+			p.seller_id=s.id  AND p.brand_id=b.id  AND pc.product_id=p.id 
+			<if test="type != null">AND p.type=#{type}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="idList != null">
+      			AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+	</select>
+	
+	
+	<!-- 商品数据统计 根据para 查询 所有已下单记录 -->
+	<select id="findProductSalesRecord" parameterType="map"  resultType="map">
+		SELECT 
+			o.pay_time AS payTime,
+			op.product_id AS productId, 
+			op.product_count AS productCount, 
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.short_name AS shortName,
+			p.type AS type,
+			p.`code` AS `code`,
+			p.product_base_id AS productBaseId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			b.`name` AS brandName
+		FROM 
+			`order` o,
+			order_product op,
+			product p,
+			seller s,
+			brand b
+		WHERE
+			op.order_id=o.id
+			and op.product_id=p.id
+			and p.seller_id=s.id
+			and p.brand_id=b.id
+			and o.type = 1
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+		<!-- 心动慈露
+商品数据统计 根据para 查询 所有已下单记录 -->
+	<select id="findQqbsProductSalesRecord" parameterType="map"  resultType="map">
+		SELECT 
+			o.pay_time AS payTime,
+			op.product_id AS productId, 
+			op.product_count AS productCount, 
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.short_name AS shortName,
+			p.type AS type,
+			p.`code` AS `code`,
+			p.product_base_id AS productBaseId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			b.`name` AS brandName
+		FROM 
+			`order` o,
+			order_product op,
+			product p,
+			seller s,
+			brand b
+		WHERE
+			op.order_id=o.id
+			and op.product_id=p.id
+			and p.seller_id=s.id
+			and p.brand_id=b.id
+			and o.type = 4
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	
+		<!-- 燕网商品数据统计 根据para 查询 所有已下单记录 -->
+	<select id="findYWProductSalesRecord" parameterType="map"  resultType="map">
+		SELECT 
+			o.pay_time AS payTime,
+			op.product_id AS productId, 
+			op.product_count AS productCount, 
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.short_name AS shortName,
+			p.type AS type,
+			p.`code` AS `code`,
+			p.product_base_id AS productBaseId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			b.`name` AS brandName
+		FROM 
+			`order` o,
+			order_product op,
+			product p,
+			seller s,
+			brand b
+		WHERE
+			op.order_id=o.id
+			and op.product_id=p.id
+			and p.seller_id=s.id
+			and p.brand_id=b.id
+			and o.type = 5
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	<select id="findMaxProductId" resultType="int">
+		select max(id) from product
+	</select>
+	
+<!-- 根据商品id集合获取商家真实名称 -->
+	<select id="findRealSellerNameByProductIdList" parameterType="map"  resultType="string" >
+		SELECT 
+			DISTINCT s.real_seller_name AS realSellerName 
+		FROM 
+			seller s,product p
+		WHERE 
+			p.seller_id = s.id 
+			<if test="idList != null">
+      			AND p.id IN
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+	</select>
+	
+	<update id="changeEmailRemind" parameterType="map">
+		update product set is_remind_stock=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findAllProductSimpleByPara" parameterType="map" resultType="map">
+		SELECT 
+    		p.id,
+    		p.name,
+    		p.type,
+    		p.sales_price as salesPrice
+		FROM 
+			product p
+		WHERE 
+			1=1
+			<if test="idList != null">
+      			AND p.id IN
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+	</select>
+	
+	<select id="findAllGegeWelfareProductByPara" parameterType="map" resultType="map" >
+		SELECT 
+			gwp.id AS id,
+			p.id AS productId,
+			p.type AS productType,
+			p.name AS productName,
+			p.sales_price AS gegePrice,
+			pc.stock AS stock,
+			gwp.limit_price AS limitPrice,
+			gwp.limit_num AS limitNum,
+			gwp.remark AS remark,
+			gwp.brand_ids AS brandIds,
+			gwp.pay_time_begin AS payTimeBegin,
+			gwp.pay_time_end AS payTimeEnd
+		FROM 
+			product p,
+			product_gege_welfare gwp,
+			product_count pc
+		WHERE
+			p.id=gwp.product_id
+			AND p.id=pc.product_id
+			AND p.activities_status=3
+			<if test="productName != null">AND p.name like #{productName}</if> 
+			<if test="productId != null">AND p.id=#{productId}</if> 
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if> 
+	</select>	
+		
+	<select id="countAllGegeWelfareProductByPara" parameterType="map" resultType="int" >
+		SELECT 
+			count(p.id)
+		FROM 
+			product p,
+			product_gege_welfare gwp,
+			product_count pc
+		WHERE
+			p.id=gwp.product_id
+			AND p.id=pc.product_id
+			AND p.activities_status=3
+			<if test="productName != null">AND p.name like #{name}</if> 
+			<if test="productId != null">AND p.id=#{productId}</if> 
+	</select>
+	
+	<insert id="addGegeWelfareProduct" parameterType="map">
+		INSERT INTO product_gege_welfare (`product_id`, `limit_price`, `limit_num`, `remark`, `create_time`,`brand_ids`,`pay_time_begin`,`pay_time_end`)
+		VALUES (#{productId}, #{limitPrice}, #{limitNum}, #{remark}, now(),#{brandIds},#{payTimeBegin},#{payTimeEnd})
+	</insert>
+	
+	<update id="updateGegeWelfareProduct" parameterType="map">
+     	UPDATE `product_gege_welfare` 
+     	<set>
+          <if test="limitNum != null"> limit_num=#{limitNum}, </if>
+          <if test="limitPrice != null"> limit_price=#{limitPrice}, </if>
+          <if test="remark != null"> remark=#{remark},</if>
+          <if test="brandIds != null"> brand_ids=#{brandIds},</if>
+          <if test="payTimeBegin != null"> pay_time_begin=#{payTimeBegin},</if>
+          <if test="payTimeEnd != null"> pay_time_end=#{payTimeEnd}</if>
+     	</set>
+     	where id=#{id} AND product_id=#{productId}
+     </update>
+     
+     <delete id="deleteGegeWelfareProductByProductId" parameterType="int">
+     	DELETE FROM product_gege_welfare WHERE product_id=#{id}
+     </delete>
+
+	<select id="findAllProductInfoForElasticsearchIndex" parameterType="map" resultType="map">
+		SELECT
+			p.id,
+			p.product_base_id AS productBaseId,
+			p.`desc` AS gegeSay,
+			p.`name`,
+			p.type,
+			p.short_name AS shortName,
+			p.sales_price AS salesPrice,
+			s.seller_name AS sellerName
+		FROM
+			product p,
+			seller s,
+			brand b
+		WHERE
+			p.seller_id=s.id
+			and p.brand_id=b.id
+			AND b.is_available=1
+			AND p.is_available=1
+			AND p.is_off_shelves=0
+			AND s.is_available=1
+			AND ((p.type=1 AND p.id in
+			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			) OR (type=2 AND p.is_show_in_mall=1))
+	</select>
+
+	<select id="findAllProductCategoryInfoByProductBaseIds" parameterType="map" resultType="map">
+		SELECT
+			product_base_id AS productBaseId,
+			category_second_id AS categorySecondId,
+			category_third_id AS categoryThirdId
+		FROM
+			relation_category_and_product_base
+		WHERE
+			product_base_id IN
+			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="findMallProductForManage" parameterType="map" resultType="map">
+    	SELECT 
+    		p.id as id,
+    		p.product_base_id baseId,
+    		p.sales_price as salesPrice,
+    		p.is_available as isAvailableCode,
+    		p.is_off_shelves as isOffShelvesCode,
+    		p.`code` as `code`,
+    		p.`name` as `name`,
+    		p.short_name as shortName,
+    		p.`remark` as `remark`,
+    		p.`seller_product_name` as `sellerProductName`,
+			p.image1,
+	        p.is_automatic_adjust_stock as isAutomaticAdjustStock,
+			p.type,
+			s.is_available AS sellerIsAvailable,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress,
+    		s.warehouse as warehouse,
+    		b.`name` as brandName,
+    		pc.stock as stock,
+    		pc.sell as sell,
+    		pc.`lock` as lockNum,
+		    pc.restriction,
+    		ft.`name` as ftName,
+    		p.market_price as marketPrice,
+    		p.type as type,
+    		p.is_remind_stock as isRemindStock,
+			p.is_show_in_mall as isShowInMall,
+			rpc.category_third_id as thirdId,
+			pb.submit_type as submitType,
+    		pb.wholesale_price as wholesalePrice,
+    		pb.deduction as deduction,
+    		pb.proposal_price as proposalPrice,
+    		pb.self_purchase_price as selfPurchasePrice,
+    		sf.`name` as countryName,
+			puc.name as scopeName
+		FROM 
+			product p LEFT JOIN relation_category_and_product_base rpc ON p.product_base_id=rpc.product_base_id
+		    LEFT JOIN product_use_scope puc ON p.product_use_scope_id = puc.id,
+			seller s,
+			brand b,
+			product_count pc,
+			freight_template ft,
+			product_base pb,
+			sale_flag sf
+		WHERE 
+			p.seller_id=s.id 
+			AND p.brand_id=b.id 
+			AND pc.product_id=p.id 
+			AND p.freight_template_id = ft.id
+			AND p.product_base_id = pb.id
+			AND pb.sale_flag_id = sf.id
+			<if test="productType != null">AND p.`type`=#{productType}</if>
+			<if test="activitiesStatus != null">AND p.`activities_status`=#{activitiesStatus}</if>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="desc != null">AND p.`desc` like #{desc}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="likecode != null">AND p.code like #{likecode}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="startTimeBegin != null"><![CDATA[AND start_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND start_time <= #{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[AND end_time >= #{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[AND end_time <= #{endTimeEnd}]]></if>
+			<if test="sellerId != null">AND s.id=#{sellerId}</if> 
+			<if test="sellerType != null">AND s.seller_type=#{sellerType}</if>
+			<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+			<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+      		<if test="baseId != null">AND p.product_base_id=#{baseId}</if>
+      		<if test="lowerPrice != null"><![CDATA[AND p.sales_price >= #{lowerPrice}]]></if>
+      		<if test="higherPrice != null"><![CDATA[AND p.sales_price <= #{higherPrice}]]></if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+      		<if test="categoryFirstId != null">AND rpc.category_first_id=#{categoryFirstId}</if> 
+      		<if test="categorySecondId != null">AND rpc.category_second_id=#{categorySecondId}</if> 
+      		<if test="categoryThirdId != null">AND rpc.category_third_id=#{categoryThirdId}</if>
+      		<if test="isShowInMall != null">AND p.is_show_in_mall=#{isShowInMall}</if>
+			<if test="productUseScopeId != null">
+				AND puc.id = #{productUseScopeId}
+			</if>
+			GROUP BY p.id
+			ORDER BY p.id DESC 
+			<if test="start != null">LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}</if>	
+	</select>
+	
+	<select id="countMallProductForManage" parameterType="map" resultType="int">
+    	SELECT 
+    		count(DISTINCT(p.id))
+		FROM 
+			product p LEFT JOIN relation_category_and_product_base rpc ON p.product_base_id=rpc.product_base_id
+		    LEFT JOIN product_use_scope puc ON p.product_use_scope_id = puc.id,
+			seller s,
+			brand b,
+			product_count pc,
+			freight_template ft,
+			product_base pb,
+			sale_flag sf
+		WHERE 
+			p.seller_id=s.id 
+			AND p.brand_id=b.id 
+			AND pc.product_id=p.id 
+			AND p.freight_template_id = ft.id
+			AND p.product_base_id = pb.id
+			AND pb.sale_flag_id = sf.id
+			<if test="productType != null">AND p.`type`=#{productType}</if>
+			<if test="activitiesStatus != null">AND p.`activities_status`=#{activitiesStatus}</if>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="desc != null">AND p.`desc` like #{desc}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="likecode != null">AND p.code like #{likecode}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="startTimeBegin != null"><![CDATA[AND start_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND start_time <= #{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[AND end_time >= #{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[AND end_time <= #{endTimeEnd}]]></if>
+			<if test="sellerId != null">AND s.id=#{sellerId}</if> 
+			<if test="sellerType != null">AND s.seller_type=#{sellerType}</if>
+			<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+			<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+      		<if test="baseId != null">AND p.product_base_id=#{baseId}</if>
+      		<if test="lowerPrice != null"><![CDATA[AND p.sales_price >= #{lowerPrice}]]></if>
+      		<if test="higherPrice != null"><![CDATA[AND p.sales_price <= #{higherPrice}]]></if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+      		<if test="categoryFirstId != null">AND rpc.category_first_id=#{categoryFirstId}</if> 
+      		<if test="categorySecondId != null">AND rpc.category_second_id=#{categorySecondId}</if> 
+      		<if test="categoryThirdId != null">AND rpc.category_third_id=#{categoryThirdId}</if>
+      		<if test="isShowInMall != null">AND p.is_show_in_mall=#{isShowInMall}</if>
+			<if test="productUseScopeId != null">
+				AND puc.id = #{productUseScopeId}
+			</if>
+	</select>
+	
+	
+	<update id="updateShowInMall" parameterType="map">
+		update product set is_show_in_mall=#{isShow} where type=#{type} and id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateProductReturnDistributionProportionTypeByBrandId" parameterType="map">
+		UPDATE
+			product
+		SET
+			return_distribution_proportion_type=#{returnDistributionProportionType}
+		WHERE
+			brand_id=#{brandId}
+	</update>
+	
+	<select id="findAllProductStock" parameterType="map" resultType="map">
+    	SELECT 
+    		p.id as id,
+    		p.product_base_id baseId,
+    		p.sales_price as salesPrice,
+    		p.is_off_shelves as isOffShelvesCode,
+    		p.`name` as `name`,
+    		p.`remark` as `remark`,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress,
+    		pc.stock as stock,
+    		pc.`lock` as lockNum,
+    		p.type as type,
+    		p.start_time as startTime,
+    		p.end_time as endTime,
+    		p.is_show_in_mall as isShowInMall
+		FROM 
+			product p,
+			seller s,
+			product_count pc
+		WHERE 
+			p.seller_id=s.id 
+			AND pc.product_id=p.id
+			<![CDATA[AND pc.stock<=10]]>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			ORDER BY pc.stock ASC,p.id DESC 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+	
+    <select id="findSaleProductStock" parameterType="map" resultType="map">
+    	SELECT 
+    		p.id as id,
+    		p.product_base_id baseId,
+    		p.sales_price as salesPrice,
+    		p.is_off_shelves as isOffShelvesCode,
+    		p.`name` as `name`,
+    		p.`remark` as `remark`,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress,
+    		pc.stock as stock,
+    		pc.`lock` as lockNum,
+    		p.type as type,
+    		p.start_time as startTime,
+    		p.end_time as endTime
+		FROM 
+			product p,
+			seller s,
+			product_count pc
+		WHERE 
+			p.seller_id=s.id 
+			AND pc.product_id=p.id
+			AND p.type=1
+			AND p.is_off_shelves=0
+			<![CDATA[AND pc.stock<=10]]>
+			<![CDATA[AND p.start_time<=#{nowTime}]]>
+			<![CDATA[AND p.end_time>=#{nowTime}]]>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="name != null">AND p.name like #{name}</if>
+			ORDER BY pc.stock ASC,p.id DESC 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countSaleProductStock" parameterType="map" resultType="int">
+     	SELECT 
+    		COUNT(*)
+		FROM 
+			product p,
+			seller s,
+			product_count pc
+		WHERE 
+			p.seller_id=s.id 
+			AND pc.product_id=p.id
+			AND p.type=1
+			AND p.is_off_shelves=0
+			<![CDATA[AND pc.stock<=10]]>
+			<![CDATA[AND p.start_time<=#{nowTime}]]>
+			<![CDATA[AND p.end_time>=#{nowTime}]]>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="name != null">AND p.name like #{name}</if>  	
+    </select>
+    	
+    <select id="findMallProductStock" parameterType="map" resultType="map">
+    	SELECT 
+    		p.id as id,
+    		p.product_base_id baseId,
+    		p.sales_price as salesPrice,
+    		p.is_off_shelves as isOffShelvesCode,
+    		p.`name` as `name`,
+    		p.`remark` as `remark`,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress,
+    		pc.stock as stock,
+    		pc.`lock` as lockNum,
+    		p.type as type,
+    		p.start_time as startTime,
+    		p.end_time as endTime
+		FROM 
+			product p,
+			seller s,
+			product_count pc
+		WHERE 
+			p.seller_id=s.id 
+			AND pc.product_id=p.id
+			AND p.type=2
+			AND p.is_show_in_mall=1
+			AND p.is_off_shelves=0
+			<![CDATA[AND pc.stock<=10]]>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			ORDER BY pc.stock ASC,p.id DESC 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countMallProductStock" parameterType="map" resultType="int">
+    	SELECT 
+    		COUNT(*)
+		FROM 
+			product p,
+			seller s,
+			product_count pc
+		WHERE 
+			p.seller_id=s.id 
+			AND pc.product_id=p.id
+			AND p.type=2
+			AND p.is_show_in_mall=1
+			AND p.is_off_shelves=0
+			<![CDATA[AND pc.stock<=10]]>
+			<if test="id != null">AND p.id=#{id}</if>
+			<if test="name != null">AND p.name like #{name}</if>     	
+    </select>
+
+	<select id="findProductBrandsByCodeList" parameterType="list" resultType="map">
+		SELECT
+		p.code,b.name
+		FROM
+		product p,brand b
+		WHERE
+		p.brand_id=b.id
+		AND code IN
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		group by p.code
+	</select>
+	
+	<select id="findProductIdByNameAndRemark" parameterType="map" resultType="int">
+		SELECT id FROM product
+		WHERE
+			1=1
+			<if test="productName != null"> AND name like #{productName} </if>
+			<if test="productRemark != null"> AND remark like #{productRemark} </if>
+			<if test="code != null">AND code=#{code}</if>
+	</select>
+	
+	<select id="findProductCountByProductIdForUpdate" parameterType="int" resultMap="ProductCountMap">
+		select * from product_count where product_id=#{id} for update
+	</select>
+	
+	<update id="updateProductStock" parameterType="map">
+		UPDATE product_count SET stock=stock+#{changeStock} WHERE product_id=#{productId} AND stock=#{oldStock} AND <![CDATA[stock+#{changeStock}>=`lock`]]>
+	</update>
+	
+	<update id="updateProductRemark" parameterType="map">
+		update product set remark = #{remark} where id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<delete id="deleteProductNewbie" parameterType="list">
+		delete from `product_newbie`  where product_id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<select id="findAllProductNewbie" parameterType="map" resultType="map">
+		SELECT
+			pn.id,
+			pn.product_id AS productId,
+			pn.sequence,
+			pn.is_display AS isDisplay,
+			pt.`name` AS productName,
+			pt.type AS productType,
+			pt.sales_price AS salesPrice,
+			pt.market_price AS marketPrice
+		FROM
+			product_newbie pn,
+			product pt
+		WHERE
+			pn.product_id = pt.id
+		<if test="productName != null">AND pt.`name` like #{productName}</if>
+		ORDER BY pn.sequence DESC,pn.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countProductNewbie" parameterType="map" resultType="int">
+		SELECT
+			COUNT(pn.id)
+		FROM
+			product_newbie pn,
+			product pt
+		WHERE
+			pn.product_id = pt.id
+		<if test="productName != null">AND pt.`name` like #{productName}</if>		
+	</select>
+	
+	<insert id="insertProductNewbie" parameterType="map">
+		INSERT INTO product_newbie(product_id,is_display) VALUES(#{productId},#{isDisplay})
+	</insert>
+	
+	<update id="updateProductNewbie" parameterType="map">
+		update product_newbie
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="productId != null">product_id=#{productId},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<select id="findProductByPara" resultMap="ProductMap">
+		SELECT 
+			* 
+		FROM
+			product
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="name != null">AND `name` LIKE #{name}</if>
+			<if test="code != null">AND `code`=#{code}</if>
+			<if test="likeCode != null">AND `code` LIKE #{likeCode}</if>
+			<if test="productBaseId != null">AND `product_base_id`=#{productBaseId}</if>
+			<if test="type != null">AND `type`=#{type}</if>
+			<if test="idList != null">AND id in <foreach collection="idList"  index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		</trim>
+		ORDER BY id
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="findProductIdsByPid" parameterType="int" resultType="int">
+		SELECT id FROM product WHERE product_base_id=#{id}
+	</select>
+
+	<!--  商品销量统计 -->
+	<select id="getSaleVolumeInfoByPayTime" resultType="map" parameterType="map">
+		SELECT
+			SUM(product_count) AS salesVolume,
+			product_id AS productId,
+			product.product_base_id AS productBaseId,
+			product.type AS productType
+		FROM
+			order_product op, `ygg_sale_platform`.`order`  o, product
+		WHERE
+			op.order_id = o.id AND product.id = op.product_id
+			AND o.status IN (2,3,4)
+		    <![CDATA[ AND o.pay_time >= #{startTime} AND o.pay_time < #{endTime} ]]>
+		GROUP BY op.product_id
+	</select>
+
+	<insert id="saveProductSaleVolume" parameterType="map">
+		  INSERT INTO product_sales_volume
+		  	(product_base_id,product_id,product_type,sales_day_hour,sales_volume,create_time)
+		  VALUES
+  			(#{productBaseId}, #{productId}, #{productType}, #{salesDayHour}, #{salesVolume}, NOW())
+	</insert>
+
+	<update id="updateProductSaleVolume" parameterType="map">
+		  UPDATE product_sales_volume
+		  <trim prefix="SET" suffixOverrides=",">
+			<if test="salesVolume != null">sales_volume=#{salesVolume},</if>
+		  </trim>
+		  where id=#{id}
+	</update>
+
+	<select id="selectSaleVolumeInfoByDays" parameterType="map">
+		  SELECT
+			  id,
+			  product_base_id,
+			  product_id,
+			  product_type,
+			  sales_day_hour,
+			  sales_volume
+		  FROM
+			  product_sales_volume
+		  <trim prefix="WHERE" prefixOverrides="AND|OR">
+			  <if test="idList != null">AND id in <foreach collection="idList"  index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		 	  <if test="productBaseId != null">AND product_base_id =  #{productBaseId}</if>
+			  <if test="productType != null">AND product_type = #{productType}</if>
+			  <if test="productId != null">AND product_id = #{productId}</if>
+			  <if test="salesDayHour != null"> <![CDATA[ AND sales_day_hour = #{salesDayHour} ]]></if>
+			  <if test="startDayHour != null"> <![CDATA[ AND sales_day_hour >= #{startDayHour} ]]></if>
+			  <if test="endDayHour != null"> <![CDATA[ AND sales_day_hour < #{endDayHour} ]]></if>
+		  </trim>
+		  <if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countSaleVolumeByDayHours" parameterType="map" resultType="int">
+		SELECT
+			COUNT(sales_volume)
+		FROM
+		product_sales_volume
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="idList != null">AND id in <foreach collection="idList"  index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+			<if test="productBaseId != null">AND product_base_id =  #{productBaseId}</if>
+			<if test="productType != null">AND product_type = #{productType}</if>
+			<if test="productId != null">AND product_id = #{productId}</if>
+			<if test="salesDayHour != null"> <![CDATA[ AND sales_day_hour = #{salesDayHour} ]]></if>
+			<if test="startDayHour != null"> <![CDATA[ AND sales_day_hour >= #{startDayHour} ]]></if>
+			<if test="endDayHour != null"> <![CDATA[ AND sales_day_hour < #{endDayHour} ]]></if>
+		</trim>
+	</select>
+
+	<update id="updateProductActivityWholesalePrice" parameterType="map">
+		UPDATE
+			product
+		SET
+			`activity_wholesale_price`=#{activityWholesalePrice},
+			`activity_wholesale_price_start_time`=#{activityWholesalePriceStartTime},
+			`activity_wholesale_price_end_time`=#{activityWholesalePriceEndTime}
+		WHERE
+			id=#{id}
+	</update>
+
+	<insert id="inserProductActivityWholesalePriceLog" parameterType="map">
+		INSERT  INTO product_activity_wholesale_price_log(`product_id`,`username`, `before`,`after`) VALUES (#{productId},#{username},#{before},#{after})
+	</insert>
+
+</mapper>  

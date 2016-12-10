@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FortuneWheelMapper">
+
+    <resultMap type="FortuneWheelEntity" id="FortuneWheelMap" >
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="is_available" property="isAvailable" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="share_image" property="shareImage" />
+        <result column="share_main_title" property="shareMainTitle" />
+        <result column="share_second_title" property="shareSecondTitle" />
+        <result column="background_color" property="backgroundColor" />
+        <result column="extend" property="extend" />
+        <result column="type" property="type" />
+        <result column="times_limit" property="timesLimit" />
+        <result column="times_font_color" property="timesFontColor" />
+        <result column="times_icon" property="timesIcon" />
+        <result column="point_used" property="pointUsed" />
+        <result column="point_font_color" property="pointFontColor" />
+        <result column="point_icon" property="pointIcon" />
+        <result column="own_point_font_color" property="ownPointFontColor" />
+        <result column="own_point_font_icon" property="ownPointFontIcon" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <insert id="save" parameterType="FortuneWheelEntity" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO `ygg_sale_platform`.`fortune_wheel` (
+          `name`,`is_available`,`start_time`,`end_time`,`share_image`,`share_main_title`,`share_second_title`,
+          `background_color`,`extend`,`type`,`times_limit`,`times_font_color`,`times_icon`,
+          `point_used`,`point_font_color`,`point_icon`,`own_point_font_color`,`own_point_font_icon`,`create_time`)
+        VALUES(
+          #{name},#{isAvailable},#{startTime},#{endTime},#{shareImage},#{shareMainTitle},#{shareSecondTitle},
+          #{backgroundColor},#{extend},#{type},#{timesLimit},#{timesFontColor},#{timesIcon},
+          #{pointUsed},#{pointFontColor},#{pointIcon},#{ownPointFontColor},#{ownPointFontIcon},NOW() )
+    </insert>
+
+    <update id="update" parameterType="FortuneWheelEntity" >
+        UPDATE `ygg_sale_platform`.`fortune_wheel`
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name=#{name},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable},</if>
+            <if test="startTime != null">start_time=#{startTime},</if>
+            <if test="endTime != null">end_time=#{endTime},</if>
+            <if test="shareImage != null">share_image=#{shareImage},</if>
+            <if test="shareMainTitle != null">share_main_title=#{shareMainTitle},</if>
+            <if test="shareSecondTitle != null">share_second_title=#{shareSecondTitle},</if>
+            <if test="backgroundColor != null">background_color=#{backgroundColor},</if>
+            <if test="extend != null">extend=#{extend},</if>
+            <if test="type != null">type=#{type},</if>
+            <if test="timesLimit != null">times_limit=#{timesLimit},</if>
+            <if test="timesFontColor != null">times_font_color=#{timesFontColor},</if>
+            <if test="timesIcon != null">times_icon=#{timesIcon},</if>
+            <if test="pointUsed != null">point_used=#{pointUsed},</if>
+            <if test="pointFontColor != null">point_font_color=#{pointFontColor},</if>
+            <if test="pointIcon != null">point_icon=#{pointIcon},</if>
+            <if test="ownPointFontColor != null">own_point_font_color=#{ownPointFontColor},</if>
+            <if test="ownPointFontIcon != null">own_point_font_icon=#{ownPointFontIcon},</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateByMapPara" parameterType="map" >
+        UPDATE `ygg_sale_platform`.`fortune_wheel`
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name=#{name},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable},</if>
+            <if test="startTime != null">start_time=#{startTime},</if>
+            <if test="endTime != null">end_time=#{endTime},</if>
+            <if test="shareImage != null">share_image=#{shareImage},</if>
+            <if test="shareMainTitle != null">share_main_title=#{shareMainTitle},</if>
+            <if test="shareSecondTitle != null">share_second_title=#{shareSecondTitle},</if>
+            <if test="backgroundColor != null">background_color=#{backgroundColor},</if>
+            <if test="extend != null">extend=#{extend},</if>
+            <if test="type != null">type=#{type},</if>
+            <if test="timesLimit != null">times_limit=#{timesLimit},</if>
+            <if test="timesFontColor != null">times_font_color=#{timesFontColor},</if>
+            <if test="timesIcon != null">times_icon=#{timesIcon},</if>
+            <if test="pointUsed != null">point_used=#{pointUsed},</if>
+            <if test="pointFontColor != null">point_font_color=#{pointFontColor},</if>
+            <if test="pointIcon != null">point_icon=#{pointIcon},</if>
+            <if test="ownPointFontColor != null">own_point_font_color=#{ownPointFontColor},</if>
+            <if test="ownPointFontIcon != null">own_point_font_icon=#{ownPointFontIcon},</if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <select id="findByPara" resultMap="FortuneWheelMap" parameterType="map">
+        SELECT id,name,is_available,start_time,end_time,share_image,share_main_title,share_second_title,
+          background_color,extend,type,times_limit,times_font_color,times_icon,
+          point_used,point_font_color,point_icon,own_point_font_color,own_point_font_icon,create_time
+        FROM fortune_wheel
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="id != null"> and id=#{id} </if>
+            <if test="name != null"> and name LIKE CONCAT('%', #{name}, '%') </if>
+            <if test="isAvailable != null"> and is_available=#{isAvailable} </if>
+            <if test="createTimeBegin != null"><![CDATA[  and create_time >= #{createTimeBegin}]]> </if>
+            <if test="createTimeEnd != null"> <![CDATA[  and create_time < #{createTimeEnd}]]> </if>
+            <if test="startTimeBegin != null"> and start_time >= #{startTimeBegin} </if>
+            <if test="startTimeEnd != null">  <![CDATA[ and start_time < #{startTimeEnd}]]> </if>
+            <if test="endTimeBegin != null"> and end_time >= #{endTimeBegin} </if>
+            <if test="endTimeEnd != null">  <![CDATA[ and end_time < #{endTimeEnd}]]> </if>
+        </trim>
+        ORDER BY id DESC
+        <if test="start != null">
+            LIMIT #{start},#{max}
+        </if>
+    </select>
+
+    <select id="countByPara" parameterType="map" resultType="int">
+        SELECT COUNT(1)
+        FROM fortune_wheel
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="id != null"> and id=#{id} </if>
+            <if test="name != null"> and name LIKE CONCAT('%', #{name}, '%') </if>
+            <if test="isAvailable != null"> and is_available=#{isAvailable} </if>
+            <if test="createTimeBegin != null"><![CDATA[  and create_time >= #{createTimeBegin}]]> </if>
+            <if test="createTimeEnd != null"> <![CDATA[  and create_time < #{createTimeEnd}]]> </if>
+            <if test="startTimeBegin != null"> and start_time >= #{startTimeBegin} </if>
+            <if test="startTimeEnd != null">  <![CDATA[ and start_time < #{startTimeEnd}]]> </if>
+            <if test="endTimeBegin != null"> and end_time >= #{endTimeBegin} </if>
+            <if test="endTimeEnd != null">  <![CDATA[ and end_time < #{endTimeEnd}]]> </if>
+        </trim>
+    </select>
+
+</mapper>

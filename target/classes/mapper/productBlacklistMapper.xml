@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ProductBlacklistMapper">
+
+	<select id="findAllProduct" parameterType="map" resultType="map">
+		SELECT 
+			id, 
+			product_id as productId
+		FROM 
+			product_blacklist
+		WHERE
+			1=1
+			<if test="type != null"> AND type=#{type}</if>
+			<if test="productId != null"> AND product_id=#{productId}</if>
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countAllProduct" parameterType="map" resultType="int">
+		SELECT 
+			count(id)
+		FROM 
+			product_blacklist
+		WHERE
+			1=1
+			<if test="type != null"> AND type=#{type}</if>
+			<if test="productId != null"> AND product_id=#{productId}</if>
+	</select>
+	
+	<insert id="add" parameterType="map">
+		insert into product_blacklist(product_id,type) values(#{productId},#{type})
+	</insert>
+	
+	<delete id="delete" parameterType="map">
+		delete from product_blacklist 
+		where 
+			type=#{type} 
+			AND product_id in 
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+      				#{item}
+      			</foreach>
+	</delete>
+	
+	<select id="findReduceOrderId" resultType="map">
+		SELECT 
+			o.id,
+			o.real_price AS realPrice,
+			o.account_id AS accountId,
+			a.available_point AS availablePoint
+		FROM 
+			`order` o,account a
+		WHERE 
+			o.account_id=a.id
+			AND o.status in(2,3,4)
+			AND o.id IN(SELECT op.order_id FROM order_product op WHERE op.product_id IN(SELECT product_id FROM product_blacklist WHERE type=1))
+	</select>
+
+</mapper>

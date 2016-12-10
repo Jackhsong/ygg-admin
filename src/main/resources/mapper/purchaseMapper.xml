@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PurchaseMapper">
+
+	<resultMap type="ProviderEntity" id="ProviderEntityMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="company_name" property="companyName" />
+		<result column="provider_brand" property="providerBrand" />
+		<result column="offices" property="offices" />
+		<result column="company_detail_address" property="companyDetailAddress" />
+		<result column="currency" property="currency" />
+		<result column="is_invoice" property="isInvoice" />
+		<result column="tax" property="tax" />
+		<result column="contact_person" property="contactPerson" />
+		<result column="contact_phone" property="contactPhone" />
+		<result column="qq" property="qq" />
+		<result column="email" property="email" />
+		<result column="purchase_submit_type" property="purchaseSubmitType" />
+		<result column="percent" property="percent" />
+		<result column="day" property="day" />
+		<result column="other" property="other" />
+		<result column="receive_bank_account" property="receiveBankAccount" />
+		<result column="receive_bank" property="receiveBank" />
+		<result column="receive_name" property="receiveName" />
+		<result column="swift_code" property="swiftCode" />
+		<result column="bank_address" property="bankAddress" />
+		<result column="remark" property="remark" />
+		<result column="contract_img_url" property="contractImgUrl" />
+		<result column="purchasing_leader" property="purchasingLeader" />
+		<result column="is_available" property="isAvailable" />
+		<result column="create_time" property="createTime" />
+		<result column="type" property="type" />
+	</resultMap>
+
+	<!-- 新增供应商商品信息 -->
+	<insert id="saveProviderProduct" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		insert into provider_product(brand_id,storage_id,name,barcode,specification,purchase_unit,selling_unit,ratio,box_specification,is_available,remark,create_time)
+		values
+		(#{formBrandId},#{formStorageId},#{name},#{barcode},#{specification},
+			#{purchaseUnit},#{sellingUnit},#{ratio},#{boxSpecification},#{isAvailable},#{remark},now())
+		<!-- <foreach collection="list" separator="," item="item">
+			(#{item.productBaseId},#{item.formBrandId},#{item.formStorageId},#{item.name},#{item.barcode},#{item.specification},
+			#{item.purchaseUnit},#{item.sellingUnit},#{item.ratio},#{item.boxSpecification},#{item.isAvailable},#{item.remark},now())
+		</foreach> -->
+	</insert>
+
+	<!-- 更新供应商商品信息 -->
+	<update id="updateProviderProduct" parameterType="map">
+		update provider_product
+		<set>
+			<if test="barcode!=null"> barcode=#{barcode},</if>
+			<if test="name!=null and name!=''"> name=#{name},</if>
+			<if test="specification!=null and specification!=''"> specification=#{specification},</if>
+			<if test="purchaseUnit!=null and purchaseUnit!=''"> purchase_unit=#{purchaseUnit},</if>
+			<if test="sellingUnit!=null"> selling_unit=#{sellingUnit},</if>
+			<if test="ratio!=null and ratio!=0"> ratio=#{ratio},</if>
+			<if test="boxSpecification!=null"> box_specification=#{boxSpecification},</if>
+			<if test="formStorageId!=null and formStorageId!=0"> storage_id=#{formStorageId},</if>
+			<if test="isAvailable!=null"> is_available=#{isAvailable},</if>
+			<if test="remark!=null"> remark=#{remark}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 根据条件查询供应商商品详细信息 -->
+	<select id="findProviderProductByParam" parameterType="map" resultType="map">
+		select distinct(a.id),a.brand_id as brandId,group_concat(b.provider_id) as providerId,
+		a.storage_id as storageId,a.barcode,a.name,group_concat(d.currency) as currency,a.specification,a.purchase_unit as purchaseUnit,
+		a.selling_unit as sellingUnit,a.ratio,a.box_specification as boxSpecification,group_concat(d.name) as providerName,c.name as storageName,a.remark,a.is_available as isAvailable
+		<include refid="findProviderProductByParamSql"></include>
+		group by a.id order by a.is_available desc,a.id desc
+		<if test="start!=null"> limit #{start},#{size}</if>
+	</select>
+	<sql id="findProviderProductByParamSql">
+		from provider_product a,relation_provider_storage_provider_product b,storage c,provider d
+		where a.id = b.provider_product_id and b.provider_id = d.id and a.storage_id = c.id 
+		<if test="id!=null"> and a.id=#{id}</if>
+		<if test="barcode!=null and barcode!=''"> and a.barcode=#{barcode}</if>
+		<if test="name!=null and name!=''"> and a.name like concat(concat('%',#{name}),'%')</if>
+		<if test="brandId!=null and brandId!=0"> and a.brand_id=#{brandId}</if>
+		<if test="type!=null"> and (c.type=#{type} or c.type = 3) and d.type=#{type}</if>
+		<if test="providerId!=null and providerId!=0"> and b.provider_id=#{providerId}</if>
+		<if test="storageId!=null and storageId!=0"> and a.storage_id=#{storageId}</if>
+		<if test="remark!=null and remark!=''"> and a.remark like concat(concat('%',#{remark}),'%')</if>
+	</sql>
+	<select id="countTotalProviderProductByParam" parameterType="map" resultType="int">
+		select count(1) from (
+			select count(1) <include refid="findProviderProductByParamSql"></include>
+			group by a.id
+		)t
+	</select>
+
+	<!-- 新增供应商信息 -->
+	<insert id="saveProvider" parameterType="ProviderEntity" useGeneratedKeys="true">
+		insert into provider (name,company_name,type,provider_brand,offices,company_detail_address,currency,is_invoice,tax,
+		contact_person,contact_phone,qq,email,purchase_submit_type,percent,day,other,receive_bank_account,receive_bank,
+		receive_name,swift_code,bank_address,remark,contract_img_url,purchasing_leader,is_available,create_time)
+		values
+		(#{name},#{companyName},#{type},#{providerBrand},#{offices},#{companyDetailAddress},#{currency},#{isInvoice},#{tax},
+		#{contactPerson},#{contactPhone},#{qq},#{email},#{purchaseSubmitType},#{percent},#{day},#{other},#{receiveBankAccount},#{receiveBank},
+		#{receiveName},#{swiftCode},#{bankAddress},#{remark},#{contractImgUrl},#{purchasingLeader},#{isAvailable},now())
+	</insert>
+
+	<!-- 更新供应商信息 -->
+	<update id="updateProvider" parameterType="ProviderEntity">
+		update provider
+		<set>
+			<if test="name!=null and name!=''"> name=#{name},</if>
+			<if test="companyName!=null"> company_name=#{companyName},</if>
+			<if test="type!=null"> type=#{type},</if>
+			<if test="providerBrand!=null and providerBrand!=''"> provider_brand=#{providerBrand},</if>
+			<if test="offices!=null and offices!=''"> offices=#{offices},</if>
+			<if test="companyDetailAddress!=null"> company_detail_address=#{companyDetailAddress},</if>
+			<if test="currency!=null and currency!=0"> currency=#{currency},</if>
+			<if test="isInvoice!=null"> is_invoice=#{isInvoice},</if>
+			<if test="tax!=null"> tax=#{tax},</if>
+			<if test="contactPerson!=null and contactPerson!=''"> contact_person=#{contactPerson},</if>
+			<if test="contactPhone!=null and contactPhone!=''"> contact_phone=#{contactPhone},</if>
+			<if test="qq!=null"> qq=#{qq},</if>
+			<if test="email!=null"> email=#{email},</if>
+			<if test="purchaseSubmitType!=null and purchaseSubmitType!=0"> purchase_submit_type=#{purchaseSubmitType},</if>
+			<if test="percent!=null"> percent=#{percent},</if>
+			<if test="day!=null"> day=#{day},</if>
+			<if test="other!=null"> other=#{other},</if>
+			<if test="receiveBankAccount!=null and receiveBankAccount!=''"> receive_bank_account=#{receiveBankAccount},</if>
+			<if test="receiveBank!=null and receiveBank!=''"> receive_bank=#{receiveBank},</if>
+			<if test="receiveName!=null and receiveName!=''"> receive_name=#{receiveName},</if>
+			<if test="swiftCode!=null"> swift_code=#{swiftCode},</if>
+			<if test="bankAddress!=null"> bank_address=#{bankAddress},</if>
+			<if test="remark!=null"> remark=#{remark},</if>
+			<if test="contractImgUrl!=null"> contract_img_url=#{contractImgUrl},</if>
+			<if test="purchasingLeader!=null and purchasingLeader!=''"> purchasing_leader=#{purchasingLeader},</if>
+			<if test="isAvailable!=null"> is_available=#{isAvailable}</if>
+		</set>
+		where id=#{id}
+	</update>
+	<!-- 根据条件查询供应商信息 -->
+	<select id="findProviderByParam" parameterType="map" resultMap="ProviderEntityMap">
+		select * from <include refid="findProviderByParamSql"></include>
+		order by id desc
+		<if test="start!=null"> limit #{start},#{size} </if>
+	</select>
+	<sql id="findProviderByParamSql">
+		provider where 1=1
+		<if test="id!=null and id!=0"> and id=#{id} </if>
+		<if test="purchaseSubmitType!=null and purchaseSubmitType!=0"> and purchase_submit_type=#{purchaseSubmitType} </if>
+		<if test="name!=null and name!=''"> and name=#{name} </if>
+		<if test="type!=null"> and type=#{type} </if>
+		<if test="remark!=null and remark!=''"> and remark like concat(concat('%',#{remark}),'%') </if>
+	</sql>
+	<!-- 统计供应商总条数 -->
+	<select id="countTotalProviderByParam" parameterType="map" resultType="int">
+		select count(1) from <include refid="findProviderByParamSql"></include>
+	</select>
+
+	<!-- 供应商列表 -->
+	<select id="findProviderList" resultType="map" parameterType="map">
+		select id,name from provider where is_available = 1 <if test="type!=null and type!=0"> and type = #{type}</if>
+	</select>
+
+	<!-- 更新分仓信息 -->
+	<update id="updateStorage" parameterType="map">
+		update storage
+		<set>
+			<if test="sellerId!=null">seller_id=#{sellerId},</if>
+			<if test="name!=null">name=#{name},</if>
+			<if test="type!=null">type=#{type},</if>
+			<if test="detailAddress!=null">detail_address=#{detailAddress},</if>
+			<if test="contactPerson!=null">contact_person=#{contactPerson},</if>
+			<if test="contactPhone!=null">contact_phone=#{contactPhone}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 保存分仓信息 -->
+	<insert id="saveStorage" parameterType="map" useGeneratedKeys="true">
+		insert into storage (seller_id,name,type,detail_address,contact_person,contact_phone,create_time)
+		values
+		(#{sellerId},#{name},#{type},#{detailAddress},#{contactPerson},#{contactPhone},now())
+	</insert>
+
+	<!-- 根据ID查询分仓信息 -->
+	<select id="findStorageByParam" resultType="map" parameterType="map">
+		select id,name,type,detail_address as detailAddress,contact_person as contactPerson,contact_phone as contactPhone,seller_id as sellerId from storage
+		where 1=1
+		<if test="id!=null and id!=0"> and id=#{id}</if>
+		<if test="sellerId!=null and sellerId!=0"> and seller_id = #{sellerId}</if>
+		<if test="name!=null"> and name = #{name}</if>
+		<if test="type!=null"> <![CDATA[ and (type = #{type} or type = 3) ]]></if>
+		order by id desc
+		<if test="start!=null"> limit #{start},#{size}</if>
+	</select>
+
+	<select id="findStorageList" resultType="map" parameterType="map">
+		select id, name from storage where 1 = 1 
+		<if test="type!=null and type!=0"> and (type = #{type} or type = 3)</if>
+		order by id desc
+	</select>
+
+	<!-- 根据条件进行统计分仓个数 -->
+	<select id="countStorageByParam" parameterType="map" resultType="int">
+		select count(1) from storage
+		where 1=1
+		<if test="name!=null and name!=''"> and name=#{name}</if>
+		<if test="sellerId!=null and sellerId!=0"> and seller_id = #{sellerId}</if>
+		<if test="countName!=null and id!=null"> and id!=#{id}</if>
+	</select>
+	
+	<!-- 根据条件查询采购单 -->
+	<select id="findOrderListInfoByParam" resultType="map" parameterType="map">
+		select a.id,a.purchase_code as purchaseCode,a.provider_id as providerId,a.storage_id as storageId,c.name as storageName,b.name as providerName,b.currency,
+			a.purchase_total_count as purchaseTotalCount,a.purchase_total_money as purchaseTotalMoney,a.freight_money as freightMoney,
+			a.total_money as totalMoney,a.payable_money as payableMoney,a.is_tax as isTax,a.remark,a.status,a.payable_money_remark as payableMoneyRemark,
+			a.`desc`,a.adjust_money as adjustMoney,a.real_money as realMoney,a.paid_money as paidMoney,a.unpaid_money as unpaidMoney,a.paid_RMB as paidRMB,
+			a.adjust_remark as adjustRemark,a.is_adjust_append_order as isAdjustAppendOrder,a.storing_remark as storingRemark,a.purchase_evidence_url as purchaseEvidenceUrl
+		<include refid="findOrderListInfoByParamSql"></include>
+		order by a.id desc
+		<if test="start!=null"> limit #{start},#{size}</if>
+	</select>
+	<sql id="findOrderListInfoByParamSql">
+		from purchase_order a,provider b,storage c
+			where a.provider_id = b.id and a.storage_id = c.id
+		<if test="id!=null"> and id=#{id}</if>
+		<if test="purchaseCode!=null and purchaseCode!=''"> and a.purchase_code=#{purchaseCode} </if>
+		<if test="status!=null and status!=0"> and a.status=#{status}</if>
+		<if test="type!=null"> and (c.type=#{type} or c.type = 3) and b.type=#{type}</if>
+		<if test="providerId!=null and providerId!=''"> and a.provider_id=#{providerId}</if>
+		<if test="storageId!=null and storageId!=''"> and a.storage_id=#{storageId}</if>
+		<if test="startTime!=null and startTime!=''"> <![CDATA[ and a.create_time >= #{startTime} ]]> </if>
+		<if test="endTime!=null and endTime!=''"> <![CDATA[ and a.create_time <= #{endTime} ]]> </if>
+	</sql>
+	<!-- 统计采购单总条数 -->
+	<select id="countTotalOrder" resultType="int" parameterType="map">
+		select count(1) <include refid="findOrderListInfoByParamSql"></include>
+	</select>
+	
+	<delete id="deleteOrderById" parameterType="int">
+		delete from purchase_order where id=#{orderId}
+	</delete>
+	<delete id="deleteOrderProductByOrderId" parameterType="int">
+		delete a from purchase_order_product a, purchase_order b where a.purchase_code = b.purchase_code and b.id=#{orderId}
+	</delete>
+	
+	<!-- 保存采购单 -->
+	<insert id="savePurchaseOrder" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		insert into purchase_order
+		(purchase_code,provider_id,storage_id,purchase_total_count,purchase_total_money,freight_money,total_money,is_tax,
+		payable_money,real_money,payable_money_remark,remark,`desc`,status,create_time)
+		values (#{purchaseCode},#{providerId},#{storageId},#{purchaseTotalCount},#{purchaseTotalMoney},#{freightMoney},#{totalMoney},#{isTax},
+		#{payableMoney},#{payableMoney},#{payableMoneyRemark},#{remark},#{desc},1,now())
+	</insert>
+	<!-- 更新采购单 -->
+	<update id="updatePurchaseOrder" parameterType="map">
+		update purchase_order
+		<set>
+			<if test="isAdjustAppendOrder!=null"> is_adjust_append_order=#{isAdjustAppendOrder},</if>
+			<if test="adjustMoney!=null"> adjust_money=#{adjustMoney},</if>
+			<if test="adjustRemark!=null"> adjust_remark=#{adjustRemark},</if>
+			<if test="isAdjustAppendOrder!=null and isAdjustAppendOrder==1"> real_money = real_money + #{adjustMoney},unpaid_money = real_money - paid_money,</if>
+			<if test="isAdjustAppendOrder!=null and isAdjustAppendOrder==0"> real_money = payable_money,unpaid_money = real_money - paid_money,</if>
+			<if test="realMoney!=null and realMoney!=0"> real_money=#{realMoney},unpaid_money = real_money - paid_money,</if>
+			<if test="storingRemark!=null"> storing_remark=#{storingRemark},</if>
+			<if test="purchaseEvidenceUrl!=null"> purchase_evidence_url=#{purchaseEvidenceUrl},</if>
+			<if test="purchaseTotalCount">purchase_total_count=#{purchaseTotalCount},</if>
+			<if test="purchaseTotalMoney!=null">purchase_total_money=#{purchaseTotalMoney},</if>
+			<if test="freightMoney!=null">freight_money=#{freightMoney},</if>
+			<if test="totalMoney!=null">total_money=#{totalMoney},</if>
+			<if test="isTax!=null">is_tax=#{isTax},</if>
+			<if test="payableMoney!=null">payable_money=#{payableMoney},</if>
+			<if test="payableMoneyRemark!=null">payable_money_remark=#{payableMoneyRemark},</if>
+			<if test="paidMoney!=null">paid_money=ROUND(paid_money+#{paidMoney}, 2),unpaid_money=real_money-paid_money,</if>
+			<if test="paidRMB!=null">paid_RMB=ROUND(paid_RMB+#{paidRMB}, 2),</if>
+			<if test="remark!=null">remark=#{remark},</if>
+			<if test="desc!=null">`desc`=#{desc},</if>
+			<if test="status!=null">status=#{status}</if>
+		</set>
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+		<if test="purchaseCode!=null"> and purchase_code=#{purchaseCode}</if>
+	</update>
+	<!-- 采购单商品列表 -->
+	<select id="findOrderProductListInfo" parameterType="map" resultType="map">
+		select a.id,a.purchase_code as purchaseCode,a.provider_product_id as providerProductId,a.barcode,b.name as productName,b.brand_id as brandId,
+			c.provider_brand as brandName,a.purchase_quantity as purchaseQuantity,
+			a.provider_price as providerPrice,a.total_price as totalPrice,a.manufacturer_date as manufacturerDate ,a.durability_period as durabilityPeriod,
+			b.specification,b.box_specification boxSpecification,b.purchase_unit as purchaseUnit,a.is_finished as isFinished,a.storing_count as storingCount,
+			a.share_freight_money as shareFreightMoney, a.provider_price_with_freight as providerPriceWithFreight
+		from purchase_order_product a,provider_product b,provider c,relation_provider_storage_provider_product d
+			where a.provider_product_id = b.id and b.id = d.provider_product_id and d.provider_id = c.id 
+		<if test="purchaseCode!=null"> and a.purchase_code = #{purchaseCode}</if>
+		<if test="barcode!=null and barcode!=''"> and a.barcode=#{barcode}</if>
+		<if test="isDetail!=null"> and not exists(select 1 from purchase_product_storing where purchase_code = #{purchaseCode} and a.provider_product_id=provider_product_id and status != 1)</if>
+		group by a.id order by a.id desc
+	</select>
+
+	<select id="findProviderProduct4OrderListInfo" parameterType="map" resultType="map">
+		select a.id,a.barcode,a.name,a.brand_id as brandId,b.provider_brand as providerBrand,b.currency,a.specification,c.name as storageName,
+			a.purchase_unit as purchaseUnit, a.selling_unit as sellingUnit,a.ratio,a.box_specification as boxSpecification,b.name as providerName,a.remark
+		from provider_product a, provider b, storage c,relation_provider_storage_provider_product d 
+			where a.id = d.provider_product_id and d.provider_id = b.id and a.storage_id = c.id and b.id = #{providerId} and a.is_available = 1
+			and not exists (select 1 from purchase_order_product where purchase_code = #{purchaseCode} and provider_product_id = a.id)
+			<if test="brandId!=null and brandId!=''"> and a.brand_id=#{brandId}</if>
+			<if test="productId!=null and productId!=''"> and b.id=#{productId}</if>
+			<if test="storageId!=null and storageId!=''"> and a.storage_id=#{storageId}</if>
+			<if test="barcode!=null and barcode!=''"> and a.barcode=#{barcode}</if>
+			<if test="productName!=null and productName!=''"> and a.name like concat('%',concat(#{productName}, '%'))</if>
+			order by a.id desc
+	</select>
+	
+	<select id="countTotalProviderProduct4OrderList" parameterType="map" resultType="int">
+		select count(1) from provider_product a, provider b,relation_provider_storage_provider_product d 
+			where a.id = d.provider_product_id and d.provider_id = b.id and b.id = #{providerId} and a.is_available = 1
+			and not exists (select 1 from purchase_order_product where purchase_code = #{purchaseCode} and provider_product_id = a.id)
+			<if test="brandId!=null and brandId!=''"> and a.brand_id=#{brandId}</if>
+			<if test="productId!=null and productId!=''"> and b.id=#{productId}</if>
+			<if test="storageId!=null and storageId!=''"> and a.storage_id=#{storageId}</if>
+			<if test="barcode!=null and barcode!=''"> and a.barcode=#{barcode}</if>
+			<if test="productName!=null and productName!=''"> and a.name like concat('%',concat(#{productName}, '%'))</if>
+	</select>
+	
+	<!-- 更新采购单商品 -->
+	<update id="updateOrderProduct" parameterType="map">
+		update purchase_order_product
+		<set>
+			<if test="barcode!=null and barcode!=''"> barcode=#{barcode},</if>
+			<if test="purchaseQuantity!=null and purchaseQuantity!=''"> purchase_quantity=#{purchaseQuantity},</if>
+			<if test="providerPrice!=null and providerPrice!=''"> provider_price=#{providerPrice},</if>
+			<if test="totalPrice!=null and totalPrice!=''"> total_price=#{totalPrice},</if>
+			<if test="manufacturerDate!=null and manufacturerDate!=''"> manufacturer_date=#{manufacturerDate},</if>
+			<if test="durabilityPeriod!=null and durabilityPeriod!=''"> durability_period=#{durabilityPeriod},</if>
+			<if test="storingCount!=null"> storing_count=storing_count+#{storingCount},</if>
+			<if test="isFinished!=null"> is_finished=#{isFinished},</if>
+			<if test="processShareFreightMoney!=null"> share_freight_money=convert(#{processShareFreightMoney} * (total_price / ${purchaseTotalMoney}), decimal(16,6)),
+			provider_price_with_freight=convert((share_freight_money + total_price) / storing_count, decimal(16,6)),
+			provider_price_rmb_with_freight=convert((#{paidRMB} * (total_price / ${purchaseTotalMoney})) / storing_count, decimal(16,6)),</if>
+		</set>
+		where 1 = 1
+		<if test="id!=null"> and id = #{id}</if>
+		<if test="purchaseCode!=null"> and purchase_code=#{purchaseCode}</if>
+	</update>
+	<!-- 保存采购单商品 -->
+	<insert id="saveOrderProduct" useGeneratedKeys="true">
+		insert into purchase_order_product (provider_product_id,purchase_code,barcode,create_time) 
+		select id,#{purchaseCode},barcode,now() from provider_product where id in
+		<foreach collection="list" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</insert>
+	<insert id="saveOrderProductForImport" useGeneratedKeys="true">
+		insert into purchase_order_product (provider_product_id,purchase_code,barcode,purchase_quantity,provider_price,total_price,manufacturer_date,durability_period,create_time) 
+		values 
+		<foreach collection="list" separator="," item="item">
+			(#{item.providerProductId},#{item.purchaseCode},#{item.barcode},#{item.purchaseQuantity},
+			#{item.providerPrice},#{item.totalPrice},#{item.manufacturerDate},#{item.durabilityPeriod},now())
+		</foreach>
+	</insert>
+	<!-- 删除采购单商品 -->
+	<delete id="removeOrderProduct">
+		delete from purchase_order_product where id in
+		<foreach collection="list" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+
+	<!-- 查询采购单编码 -->
+	<select id="findPurchaseCode" parameterType="string" resultType="int">
+		select code from purchase_code_sequence where `day`=#{day}
+	</select>
+	<!-- 更新采购单编码 -->
+	<update id="updatePurchaseCode" parameterType="map">
+		update purchase_code_sequence set code=#{code} where `day`=#{day}
+	</update>
+	<!-- 每天新增一条记录 -->
+	<insert id="savePurchaseCode" parameterType="String">
+		insert into purchase_code_sequence (`day`, code) values(#{day}, 2)
+	</insert>
+	
+<!-- 	查询付款明细 -->
+	<select id="findPurchasePayDetailByParam" parameterType="map" resultType="map">
+		select a.create_time as createTime, a.id,a.purchase_code as purchaseCode,c.status,c.payable_money as payableMoney,b.name,b.currency,a.provider_id as providerId,
+			a.type,a.remark,a.is_paid as isPaid,a.pay_money as payMoney,a.pay_RMB as payRMB,a.current_rate as currentRate,a.storage_id as storageId
+		from purchase_pay_detail a,provider b,purchase_order c
+			where a.purchase_code = c.purchase_code and a.provider_id = b.id
+			<if test="id!=null and id!=0"> and a.id=#{id}</if>
+			<if test="purchaseCode!=null and purchaseCode!=''">and a.purchase_code=#{purchaseCode}</if>
+			<if test="status!=null and status!=0">and c.status=#{status}</if>
+			<if test="providerId!=null and providerId!=''">and c.provider_id=#{providerId}</if>
+			<if test="startTime!=null and startTime!=''"> <![CDATA[ and c.create_time >= #{startTime} ]]> </if>
+			<if test="endTime!=null and endTime!=''"> <![CDATA[ and c.create_time <= #{endTime} ]]> </if>
+			order by a.id desc
+			<if test="start!=null"> limit #{start},#{size}</if>
+	</select>
+	<select id="countTotalPurchasePayDetail" parameterType="map" resultType="int">
+		select count(1)
+		from purchase_pay_detail a,provider b,purchase_order c
+			where a.purchase_code = c.purchase_code and a.provider_id = b.id
+			<if test="id!=null and id!=0"> and a.id=#{id}</if>
+			<if test="purchaseCode!=null and purchaseCode!=''">and a.purchase_code=#{purchaseCode}</if>
+			<if test="status!=null and status!=0">and c.status=#{status}</if>
+			<if test="providerId!=null and providerId!=''">and c.provider_id=#{providerId}</if>
+			<if test="startTime!=null and startTime!=''"> <![CDATA[ and c.create_time >= #{startTime} ]]> </if>
+			<if test="endTime!=null and endTime!=''"> <![CDATA[ and c.create_time <= #{endTime} ]]> </if>
+	</select>
+	
+	<delete id="deletePurchasePayDetail" parameterType="int">
+		delete from purchase_pay_detail where id=#{id}
+	</delete>
+	<select id="sumPurchasePayDetail" parameterType="string" resultType="map">
+		select sum(pay_money) as sumPaidMoney, sum(pay_RMB) as sumPaidMoneyRMB From purchase_pay_detail where purchase_code = #{purchaseCode} and is_paid = 1
+	</select>
+	<insert id="savePurchasePayDetail" parameterType="map" useGeneratedKeys="true">
+		insert into purchase_pay_detail (purchase_code,type,provider_id,storage_id,pay_money,current_rate,pay_RMB,remark,create_time)
+		values (#{purchaseCode},#{type},#{providerId},#{storageId},#{payMoney},#{currentRate},round(#{payRMB},2),#{remark},now())
+	</insert>
+	<update id="updatePurchasePayDetail" parameterType="map">
+		update purchase_pay_detail
+			<set>
+				<if test="type!=null"> type=#{type},</if>
+				<if test="payMoney!=null"> pay_money=#{payMoney},</if>
+				<if test="currentRate!=null"> current_rate=#{currentRate},</if>
+				<if test="payRMB!=null"> pay_RMB=#{payRMB},</if>
+				<if test="isPaid!=null"> is_paid=#{isPaid},</if>
+				<if test="remark!=null"> remark=#{remark},</if>
+			</set>
+			where id=#{id}
+	</update>
+<!-- 	商品入库相关操作 -->
+	<select id="findPurchaseProductStoring" parameterType="map" resultType="map">
+		select a.create_time as createTime,a.barcode,c.name,a.brand_name as brandName,a.storing_count as storingCount,a.purchase_quantity as purchaseQuantity,
+			a.provider_price as providerPrice,a.total_price as totalPrice,c.specification,c.purchase_unit as purchaseUnit,a.status,
+			c.box_specification as boxSpecification,a.manufacturer_date as manufacturerDate,a.durability_period as durabilityPeriod
+		from purchase_product_storing a,provider_product c
+			where a.provider_product_id = c.id
+			<if test="purchaseCode!=null"> and a.purchase_code=#{purchaseCode}</if>
+			order by a.id desc
+	</select>
+	<insert id="savePurchaseProductStoring" useGeneratedKeys="true">
+		insert into purchase_product_storing
+		(purchase_code,provider_product_id,barcode,brand_name,purchase_quantity,storing_count,provider_price,total_price,manufacturer_date,durability_period,status,create_time)
+		values 
+		<foreach collection="list" item="item" separator=",">
+			(#{item.purchaseCode},#{item.providerProductId},#{item.barcode},#{item.brandName},#{item.purchaseQuantity},#{item.storingCount},#{item.providerPrice},
+			#{item.totalPrice},#{item.manufacturerDate},#{item.durabilityPeriod},#{item.status},now())
+		</foreach>
+	</insert>
+	
+<!-- 	商品批次 -->
+	<select id="findBatchListInfo" parameterType="map" resultType="map">
+		select a.purchase_code as purchaseCode,a.provider_id as providerId,a.storage_id as storageId,a.create_time as createTime,c.barcode,
+			b.name,c.purchase_quantity as purchaseQuantity,c.storing_count as storingCount,c.provider_price as providerPrice,c.total_price as totalPrice,a.is_tax as isTax,
+			c.share_freight_money as shareFreightMoney,c.provider_price_with_freight as providerPriceWithFreight, c.provider_price_RMB_with_freight as providerPriceRMBWithFreight,
+			c.manufacturer_date as manufacturerDate,c.durability_period as durabilityPeriod,a.remark,a.storing_remark as storingRemark 
+		from purchase_order a,provider_product b,purchase_order_product c 
+		where c.purchase_code = a.purchase_code and b.id = c.provider_product_id and b.id = #{providerProductId} 
+		order by a.id desc
+		<if test="start!=null"> limit #{start},#{size}</if>
+	</select>
+	<select id="countTotalBatch" parameterType="map" resultType="int">
+		select count(1) 
+		from purchase_order a,provider_product b,purchase_order_product c 
+		where c.purchase_code = a.purchase_code and b.id = c.provider_product_id and b.id = #{providerProductId} 
+	</select>
+	<select id="findBatchStoringTime" parameterType="map" resultType="map">
+		select * From (
+			select purchase_code as purchaseCode,provider_product_id as providerProductId,create_time as storageTime from purchase_product_storing 
+				where provider_product_id = #{providerProductId} and purchase_code in
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+ 			order by create_time 
+		) t group by providerProductId,purchaseCode
+	</select>
+	
+	
+	<resultMap type="PurchaseOrderInfoEntity" id="exportPurchaseOrderMap">
+		<id property="id" column="id"/>
+        <result property="storageDetailAddress" column="detail_address"/>  
+        <result property="storageContactPerson" column="contact_person"/>
+    	<result property="storageContactPhone" column="contact_phone"/>
+    	<result property="providerName" column="providerName"/>
+    	<result property="providerCompanyName" column="company_name"/>
+    	<result property="providerContactPerson" column="providerContactPerson"/>
+    	<result property="providerContactPhone" column="providerContactPhone"/>
+    	<result property="providerReceiveBankAccount" column="receive_bank_account"/>
+    	<result property="providerReceiveBank" column="receive_bank"/>
+    	<result property="providerReceiveName" column="receive_name"/>
+    	<result property="createTime" column="create_time"/>
+    	<result property="freightMoney" column="freight_money"/>
+    	<result property="totalMoney" column="total_money"/>
+    	<result property="remark" column="remark"/>
+    	<result property="status" column="status"/>
+    	<result property="swiftCode" column="swift_code"/>
+    	<result property="purchasingLeader" column="purchasing_leader"/>
+    	<result property="providerBankAddress" column="bank_address"/>
+        <collection property="orderProductList" ofType="PurchaseOrderProductEntity">    
+            <result property="barcode" column="barcode"/>
+            <result property="name" column="productName"/>
+            <result property="specification" column="specification"/>
+            <result property="purchaseQuantity" column="purchase_quantity"/>
+            <result property="purchaseUnit" column="purchase_unit"/>
+            <result property="brandId" column="brand_id"/>
+            <result property="providerPrice" column="provider_price"/>
+            <result property="totalMoney" column="total_price"/>
+            <result property="manufacturerDate" column="manufacturer_date"/>
+            <result property="durabilityPeriod" column="durability_period"/>
+        </collection>
+    </resultMap>
+    
+	<select id="findExportPurchaseOrder" resultMap="exportPurchaseOrderMap" >
+		select a.name as providerName,a.company_name,a.contact_person as providerContactPerson,a.contact_phone as providerContactPhone,a.receive_bank,a.receive_name,a.receive_bank_account,a.swift_code,a.bank_address,a.purchasing_leader,
+			b.detail_address,b.contact_person,b.contact_phone,
+			d.freight_money,d.total_money,d.create_time,d.id,d.remark,d.status,
+			c.barcode,e.name as productName,e.specification,c.purchase_quantity,e.purchase_unit,e.brand_id,c.provider_price,c.total_price,c.manufacturer_date,c.durability_period
+		from provider a, `storage` b, purchase_order_product c, purchase_order d, provider_product e
+			where d.provider_id = a.id and d.storage_id = b.id and c.purchase_code = d.purchase_code and e.id = c.provider_product_id 
+			and d.id in
+			<foreach collection="list" separator="," item="item" open="(" close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findRelationProviderStorageProviderProductByParam" resultType="map" parameterType="map">
+		select * from relation_provider_storage_provider_product
+		where 1=1
+		<if test="barcode!=null"> and barcode=#{barcode}</if>
+		<if test="providerId!=null"> and provider_id=#{providerId}</if>
+		<if test="storageId!=null"> and storage_id=#{storageId}</if>
+		<if test="providerProductId!=null"> and provider_product_id=#{providerProductId}</if>
+	</select>
+	<insert id="saveRelationProviderStorageProviderProduct" useGeneratedKeys="true">
+		insert into relation_provider_storage_provider_product(`provider_product_id`,`provider_id`,`storage_id`,`barcode`)
+		values
+		<foreach collection="list" separator="," item="item">
+			(#{item.providerProductId},#{item.providerId},#{item.storageId},#{item.barcode})
+		</foreach>
+	</insert>
+	<delete id="deleteRelationProviderStorageProviderProduct" parameterType="string">
+		delete from relation_provider_storage_provider_product where barcode=#{barcode}
+	</delete>
+	<!-- 统计采购单中，指定商品入库数 -->
+	<select id="sumStoringCountByParam" resultType="int" parameterType="map">
+		select sum(storing_count) as storingCount from purchase_product_storing 
+		where 1=1
+		<if test="purchaseCode!=null"> and purchase_code=#{purchaseCode}</if>
+		<if test="providerProductId!=null"> and provider_product_id=#{providerProductId}</if>
+	</select>
+	
+	<select id="findAllProviderProduct" parameterType="map" resultType="map">
+		SELECT
+			pp.id,
+			pp.`name`,
+			pp.specification,
+			pp.purchase_unit AS purchaseUnit,
+			s.`name` AS storageName
+		FROM
+			provider_product pp,
+			`storage` s
+		WHERE
+			pp.storage_id = s.id
+		<if test="isAvailable != null">AND pp.is_available=#{isAvailable}</if>
+		ORDER BY pp.id		
+	</select>
+	
+	<select id="findStorageByBarCode" parameterType="string" resultType="map">
+		SELECT
+			s.id AS storageId,
+			s.`name` AS storageName
+		FROM
+			relation_provider_storage_provider_product rps,
+			`storage` s
+		WHERE
+			rps.storage_id = s.id
+		AND rps.barcode = #{barcode}
+		GROUP BY
+			storage_id		
+	</select>
+</mapper>

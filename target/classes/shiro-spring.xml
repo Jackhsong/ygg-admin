@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+				         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				         http://www.springframework.org/schema/context
+				         http://www.springframework.org/schema/context/spring-context-3.0.xsd
+				         http://www.springframework.org/schema/tx
+				         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+				         http://www.springframework.org/schema/aop 
+				         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	<!-- 会话Cookie模板 
+	sessionIdCookie：maxAge=-1表示浏览器关闭时失效此Cookie；
+	rememberMeCookie：即记住我的Cookie，保存时长30天；-->
+
+
+	<!-- 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
+	<!-- 配置以下两个bean即可实现此功能 -->
+	<!-- Enable Shiro Annotations for Spring-configured beans. Only run after the lifecycleBeanProcessor has run -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager"/>
+	</bean>
+
+	<bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">  
+	    <constructor-arg value="sid"/>  
+	    <property name="httpOnly" value="true"/>  
+	    <property name="maxAge" value="-1"/>  
+	</bean>  
+	<bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">  
+	    <constructor-arg value="rememberMe"/>  
+	    <property name="httpOnly" value="true"/>  
+	    <property name="maxAge" value="1296000"/>
+	</bean>
+	
+	<!-- rememberMe管理器 -->  
+	<bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">  
+		<property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>  
+	    <property name="cookie" ref="rememberMeCookie"/>  
+	</bean>
+	
+	<!-- 安全管理器 rememberMe为请求参数 -->
+	<bean id="formAuthenticationFilter" class="org.apache.shiro.web.filter.authc.FormAuthenticationFilter">  
+	    <property name="rememberMeParam" value="rememberMe"/>  
+	</bean>
+	
+	<!-- 继承自AuthorizingRealm的自定义Realm,即指定Shiro验证用户登录的类为自定义的ShiroDbRealm.java -->
+  	<bean id="myRealm" class="com.ygg.admin.shiro.AdminRealm">
+  		<property name="authorizationCachingEnabled" value="false"/>
+  	</bean>
+  	
+  	<!-- Shiro默认会使用Servlet容器的Session,可通过sessionMode属性来指定使用Shiro原生Session -->
+  	<!-- 即<property name="sessionMode" value="native"/>,详细说明见官方文档 -->
+  	<!-- 这里主要是设置自定义的单Realm应用,若有多个Realm,可使用'realms'属性代替 -->
+  	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+    	<property name="realm" ref="myRealm"/>
+    <!-- 	<property name="rememberMeManager" ref="rememberMeManager"/> -->
+  	</bean>
+	
+	<!-- Shiro主过滤器本身功能十分强大,其强大之处就在于它支持任何基于URL路径表达式的、自定义的过滤器的执行 -->
+  	<!-- Web应用中,Shiro可控制的Web请求必须经过Shiro主过滤器的拦截,Shiro对基于Spring的Web应用提供了完美的支持 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+	    <!-- Shiro的核心安全接口,这个属性是必须的 -->
+	    <property name="securityManager" ref="securityManager"/>
+	    <!-- 要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+	    <property name="loginUrl" value="/auth/tlogin"/>
+	    <!-- 登录成功后要跳转的连接(本例中此属性用不到,因为登录成功后的处理逻辑在LoginController里硬编码为main.jsp了) -->
+	    <!-- <property name="successUrl" value="/system/main"/> -->
+	    <!-- 用户访问未对其授权的资源时,所显示的连接 -->
+	    <property name="unauthorizedUrl" value="/auth/noPermission"/>
+	    <!-- Shiro连接约束配置,即过滤链的定义 -->
+	    <!-- 此处可配合我的这篇文章来理解各个过滤连的作用http://blog.csdn.net/jadyer/article/details/12172839 -->
+	    <!-- 下面value值的第一个'/'代表的路径是相对于HttpServletRequest.getContextPath()的值来的 -->
+	    <!-- anon：它对应的过滤器里面是空的,什么都没做,这里.do和.jsp后面的*表示参数,比方说login.jsp?main这种 -->
+	    <!-- authc：该过滤器下的页面必须验证后才能访问,它是Shiro内置的一个拦截器org.apache.shiro.web.filter.authc.FormAuthenticationFilter -->
+	    <property name="filterChainDefinitions">
+	    <!-- “/authenticated.jsp = authc”表示访问该地址用户必须身份验证通过（Subject. isAuthenticated()==true）；
+	    而“/** = user”表示访问该地址的用户是身份验证通过或RememberMe登录的都可以。-->
+      		<value><!--perms[1] 1为permission(表).permission(字段) == menuId-->
+				/common/**=anon
+				/account/**=anon
+				/simplify/**=anon
+				/admin/**=anon
+				/analyze/**=anon
+				/banner/**=anon
+				/birdex/**=anon
+				/brand/**=anon
+				/cache/**=anon
+				/category/**=anon
+				/couponCode/**=anon
+				/coupon/**=anon
+				/customActivities/**=anon
+				/customRegion/**=anon
+				/finance/**=anon
+				/game/**=anon
+				/gate/**=anon
+				/image/**=anon
+				/group/**=anon
+				/index/**=anon
+				/lotteryActivity/**=anon
+				/mallWindow/**=anon
+				/menu/**=anon
+				/notSendMsgProduct/**=anon
+				/orderManual/**=anon
+				/orderQuestion/**=anon
+				/delayDate/**=anon
+				/overseasOrder/**=anon
+				/pageCustom/**=anon
+				/partner/**=anon
+				/postage/**=anon
+				/productBase/**=anon
+				/productBlacklist/**=anon
+				/comment/**=anon
+				/product/**=anon
+				/refund/**=anon
+				/sale/**=anon
+				/flag/**=anon
+				/saleTag/**=anon
+				/indexSale/**=anon
+				/search/**=anon
+				/seller/**=anon
+				/signin/**=anon
+				/sms/**=anon
+				/special/**=anon
+				/channel/**=anon
+				/sysConfig/**=anon
+				/log/**=anon
+				/anon/**=anon
+				/order/list=anon
+				/order/orderSendGoods=anon
+				/order/detail/**=anon
+				/order/updateTradeStatus=anon
+				/order/unSendGoodsList=anon
+				/order/unSendGoodsListDetail=anon
+				/order/otherSourceList=anon
+				/order/fakeOrderList=anon
+				/order/settlementList=anon
+				/order/orderFreezeList=anon
+				/order/sellerSendGoods=anon
+				/order/orderSendTimeAnalyzeDetail=anon
+				/order/sellerSendTimeAnalyzeDetail=anon
+				/order/orderLogisticAnalyzeDetail=anon
+				/order/sellerLogisticAnalyzeDetail=anon
+				/order/problemOrderList=anon
+				/promotion/**=anon
+				/page/**=anon
+				/wechatGroup/**=anon
+				/customFunction/**=anon
+				/customCenter/**=anon
+				/wechatGroupData/**=anon
+				/edbOrder/**=anon
+				/sellerTip/**=anon
+				/qqbsSale/**=anon
+				/qqbsBanner/**=anon
+				/customerProblem/**=anon
+				/timeoutOrder/**=anon
+				/thirdProduct/**=anon
+				/gegetuan/**=anon
+				/member/**=anon
+				/customGGRecommend/**=anon
+				/activityManjian/**=anon
+				/purchase/**=anon
+				/customNavigation/**=anon
+				/sellerDeliverArea/**=anon
+				/spreaChannel/**=anon
+				/logisticsTimeout/**=anon
+				/activityOptionalPart/**=anon
+				/specialGroup/**=anon
+				/welfareGroup/**=anon
+				/brandRecommend/**=anon
+				/customRegion24/**=anon
+				/customGGRecommend24/**=anon
+				/sellerBlacklist/**=anon
+				/qqbsCash/**=anon
+				/cateGoryManager/**=anon
+				/categoryBanner/**=anon
+				/categoryClassification/**=anon
+				/categoryGGrecommend/**=anon
+				/categoryRecommend/**=anon
+				/categoryRegion/**=anon
+				/categorySale/**=anon
+				/saleBrand/**=anon
+				/saleSingle/**=anon
+				/indexNavigation/**=anon
+				/qqbsError/**=anon
+				/channelProManage/**=anon
+				/channel/**=anon
+				/channelOrder/**=anon
+				/channelStatistic/**=anon
+				/channelProStatistic/**=anon
+      		</value>
+    	</property>
+  </bean>
+
+  <!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+  <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+</beans>
+				         

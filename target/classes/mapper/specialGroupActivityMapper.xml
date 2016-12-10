@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SpecialGroupActivityMapper">
+	<select id="findAllSpecialGroupActivity" parameterType="map" resultType="map">
+		SELECT
+			id,
+			title,
+			is_available as isAvailable
+		FROM
+			special_activity_group
+		<trim prefix="where" prefixOverrides="AND">
+			<if test="id != null">AND id = #{id}</if>
+			<if test="title != null">AND title like #{title}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSpecialGroupActivity" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			special_activity_group
+		<trim prefix="where" prefixOverrides="AND">
+			<if test="id != null">AND id = #{id}</if>
+			<if test="title != null">AND title like #{title}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		</trim>		
+	</select>
+	
+	<insert id="saveSpecialGroup" parameterType="map">
+		INSERT INTO special_activity_group(title,is_available) VALUES(#{title},#{isAvailable})
+	</insert>
+	
+	<update id="updateSpecialGroup" parameterType="map">
+		UPDATE 
+			special_activity_group
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="title != null">title=#{title},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findSpecialGroupActivityProductByPara" parameterType="map" resultType="map">
+		SELECT
+			 * 
+		FROM 
+			special_activity_group_product
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="activityId != null">AND special_activity_group_id=#{activityId}</if>
+			<if test="type != null">AND type = #{type}</if>
+		</trim>
+		ORDER BY sequence DESC,id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSpecialGroupActivityProduct" parameterType="map" resultType="int">
+		SELECT
+			 COUNT(id) 
+		FROM 
+			special_activity_group_product
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="activityId != null">AND special_activity_group_id=#{activityId}</if>
+			<if test="type != null">AND type = #{type}</if>
+		</trim>		
+	</select>
+	
+	<insert id="insertSpecialGroupActivityProduct" parameterType="map">
+		INSERT INTO special_activity_group_product (
+			special_activity_group_id,
+			type,
+			layout_type,
+			one_remark,
+			one_image_url,
+			one_image_width,
+			one_image_height,
+			one_type,
+			one_display_id,
+			two_remark,
+			two_image_url,
+			two_image_width,
+			two_image_height,
+			two_type,
+			two_display_id,
+			product_id,
+			is_display
+		)
+		VALUES(
+			#{activityId},
+			#{type},
+			#{layoutType},
+			#{oneRemark},
+			#{oneImageUrl},
+			#{oneImageWidth},
+			#{oneImageHeight},
+			#{oneType},
+			#{oneDisplayId},
+			#{twoRemark},
+			#{twoImageUrl},
+			#{twoImageWidth},
+			#{twoImageHeight},
+			#{twoType},
+			#{twoDisplayId},
+			#{productId},
+			#{isDisplay}
+		)
+	</insert>
+	
+	<update id="updateSpecialGroupActivityProduct" parameterType="map">
+		update special_activity_group_product 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="layoutType != null">layout_type=#{layoutType},</if>
+			<if test="oneRemark != null">one_remark=#{oneRemark},</if>
+			<if test="oneImageUrl != null">one_image_url=#{oneImageUrl},</if>
+			<if test="oneImageWidth != null">one_image_width=#{oneImageWidth},</if>
+			<if test="oneImageHeight != null">one_image_height=#{oneImageHeight},</if>
+			<if test="oneType != null">one_type=#{oneType},</if>
+			<if test="oneDisplayId != null">one_display_id=#{oneDisplayId},</if>
+			<if test="twoRemark != null">two_remark=#{twoRemark},</if>
+			<if test="twoImageUrl != null">two_image_url=#{twoImageUrl},</if>
+			<if test="twoImageWidth != null">two_image_width=#{twoImageWidth},</if>
+			<if test="twoImageHeight != null">two_image_height=#{twoImageHeight},</if>
+			<if test="twoType != null">two_type=#{twoType},</if>
+			<if test="twoDisplayId != null">two_display_id=#{twoDisplayId},</if>
+			<if test="productId != null">product_id=#{productId},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteSpecialGroupActivityProduct" parameterType="int">
+		delete from special_activity_group_product where id=#{id}
+	</delete>
+</mapper>  

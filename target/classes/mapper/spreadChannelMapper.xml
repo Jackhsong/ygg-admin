@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SpreadChannelMapper">
+	
+	<select id="findAllSpreadChannels" parameterType="map" resultType="map">
+		SELECT
+			id,
+			channel_name AS channelName,
+			share_title AS shareTitle,
+			share_image AS shareImage,
+			share_content AS shareContent,
+			url,
+			receive_amount AS receiveAmount,
+			new_register AS registerAmount,
+			total_money AS totalMoney,
+			new_buyer_money AS newBuyerMoney,
+			is_send_msg AS isSendMsg,
+			msg_content AS msgContent,
+			is_available AS isAvailableCode
+		FROM
+			spread_channel
+		WHERE 1=1
+			<if test="id != null">AND id=#{id}</if>
+			<if test="channelName != null">AND channel_name like #{channelName}</if>
+			<if test="isAvailable != null">AND is_available=#{iAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSpreadChannels" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			spread_channel
+		WHERE 1=1
+			<if test="id != null">AND id=#{id}</if>
+			<if test="channelName != null">AND channel_name like #{channelName}</if>
+			<if test="isAvailable != null">AND is_available=#{iAvailable}</if>		
+	</select>
+	
+	<select id="findPrizeByChannelId" parameterType="int" resultType="map">
+		SELECT
+			coupon_id AS couponId,
+			coupon_amount AS couponAmount,
+			validity_date_type AS dateType,
+			days
+		FROM
+			spread_channel_prize
+		WHERE
+			spread_channel_id = #{channelId}
+		ORDER BY id		
+	</select>
+	
+	<insert id="addSpreadChannel" parameterType="SpreadChannelEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO spread_channel(channel_name,share_title,share_image,share_content,create_time)
+		VALUES(#{channelName},#{shareTitle},#{shareImage},#{shareContent},now())
+	</insert>
+	
+	<insert id="addSpreadChannelPrize" parameterType="map">
+		INSERT INTO spread_channel_prize(spread_channel_id,coupon_id,coupon_amount,validity_date_type,days,create_time)
+		VALUES(#{spreadChannelId},#{couponId},#{couponAmount},#{dateType},#{days},now())
+	</insert>
+	
+	<update id="updateSpreadChannelURL" parameterType="SpreadChannelEntity">
+		UPDATE spread_channel SET url=#{url} WHERE id=#{id}
+	</update>
+
+	<update id="updateSpreadChannel" parameterType="SpreadChannelEntity">
+		UPDATE spread_channel
+		<set>
+			<if test="channelName != null">channel_name=#{channelName},</if>
+			<if test="shareTitle != null">share_title=#{shareTitle},</if>
+			<if test="shareImage != null">share_image=#{shareImage},</if>
+			<if test="shareContent != null">share_content=#{shareContent}</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteSpreadChannelPrizeById" parameterType="int">
+		DELETE FROM spread_channel_prize WHERE spread_channel_id=#{channelId}
+	</delete>
+	
+	<delete id="deleteSpreadChannel" parameterType="int">
+		DELETE FROM spread_channel WHERE id=#{channelId} AND receive_amount=0
+	</delete>
+	
+	<update id="updateChannelStatus" parameterType="map">
+		UPDATE spread_channel 
+		<set>
+			<if test="isSendMsg != null">is_send_msg=#{isSendMsg},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+			<if test="msgContent != null">msg_content=#{msgContent}</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+</mapper>

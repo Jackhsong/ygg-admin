@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomGGRecommend24Mapper">
+
+	<resultMap type="CustomGGRecommendEntity" id="CustomGGRecommendMap">
+		<id column="id" property="id"/>
+		<result column="display_type" property="displayType"/>
+		<result column="one_image" property="oneImage"/>
+		<result column="one_type" property="oneType"/>
+		<result column="one_display_id" property="oneDisplayId"/>
+		<result column="one_remark" property="oneRemark"/>
+		<result column="one_width" property="oneWidth"/>
+		<result column="one_height" property="oneHeight"/>
+		<result column="two_image" property="twoImage"/>
+		<result column="two_type" property="twoType"/>
+		<result column="two_display_id" property="twoDisplayId"/>
+		<result column="two_remark" property="twoRemark"/>
+		<result column="two_width" property="twoWidth"/>
+		<result column="two_height" property="twoHeight"/>
+		<result column="start_time" property="startTime"/>
+		<result column="end_time" property="endTime"/>
+		<result column="sequence" property="sequence"/>
+		<result column="is_display" property="isDisplay"/>
+		
+	</resultMap>
+<!-- 查询列表 -->
+	<select id="findRecommendByParam" resultType="map" parameterType="map">
+		select a.id,a.id as `index`,a.display_type as displayType,a.one_image as oneImage,a.one_type as oneType,a.one_display_id as oneDisplayId,
+			a.one_remark as oneRemark, a.one_width as oneWidth,a.one_height as oneHeight,a.two_image as twoImage,a.two_type as twoType,
+			a.two_display_id as twoDisplayId,a.two_remark as twoRemark, a.two_width as twoWidth,a.two_height as twoHeight,
+			a.start_time as startTime,a.end_time as endTime,a.sequence,a.is_display as isDisplay
+		from custom_gege_recommend_24 a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="status!=null and status==1"> <![CDATA[and a.start_time <= now() and a.end_time >= now()]]> </if>
+		<if test="status!=null and status==2"> <![CDATA[and a.start_time > now()]]> </if>
+		<if test="status!=null and status==3"> <![CDATA[and a.end_time < now()]]> </if>
+		order by start_time desc,sequence desc
+		<if test="start">limit #{start},#{size}</if>
+	</select>
+<!-- 统计 -->
+	<select id="countRecommendByParam" resultType="int" parameterType="map">
+		select count(1) from custom_gege_recommend_24 a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="status!=null and status==1"> <![CDATA[and a.start_time <= now() and a.end_time >= now()]]> </if>
+		<if test="status!=null and status==2"> <![CDATA[and a.start_time > now()]]> </if>
+		<if test="status!=null and status==3"> <![CDATA[and a.end_time < now()]]> </if>
+	</select>
+<!-- 新增 -->
+	<insert id="saveRecommend" parameterType="map" useGeneratedKeys="true">
+		insert into custom_gege_recommend_24 (display_type,one_image,one_type,one_display_id,one_remark,one_width,one_height,two_image,two_type,two_display_id,
+			two_remark,two_width,two_height,start_time,end_time,is_display)
+		values
+		(#{displayType},#{oneImage},#{oneType},#{oneDisplayId},#{oneRemark},#{oneWidth},#{oneHeight},#{twoImage},#{twoType},#{twoDisplayId},
+			#{twoRemark},#{twoWidth},#{twoHeight},#{startTime},#{endTime},#{isDisplay})
+	</insert>
+<!-- 修改 -->
+	<update id="updateRecommend" parameterType="map">
+		update custom_gege_recommend_24
+		<set>
+			<if test="displayType!=null">display_type=#{displayType},</if>
+			<if test="oneImage!=null">one_image=#{oneImage},</if>
+			<if test="oneType!=null">one_type=#{oneType},</if>
+			<if test="oneDisplayId!=null">one_display_id=#{oneDisplayId},</if>
+			<if test="oneRemark!=null">one_remark=#{oneRemark},</if>
+			<if test="oneWidth!=null">one_width=#{oneWidth},</if>
+			<if test="oneHeight!=null">one_height=#{oneHeight},</if>
+			<if test="twoImage!=null">two_image=#{twoImage},</if>
+			<if test="twoType!=null">two_type=#{twoType},</if>
+			<if test="twoDisplayId!=null">two_display_id=#{twoDisplayId},</if>
+			<if test="twoRemark!=null">two_remark=#{twoRemark},</if>
+			<if test="twoWidth!=null">two_width=#{twoWidth},</if>
+			<if test="twoHeight!=null">two_height=#{twoHeight},</if>
+			<if test="startTime!=null">start_time=#{startTime},</if>
+			<if test="endTime!=null">end_time=#{endTime},</if>
+			<if test="sequence!=null">sequence=#{sequence}</if>
+			<if test="isDisplay!=null">is_display=#{isDisplay},</if>
+		</set>
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+	</update>
+	
+	<select id="findCustomGGRecommendById" parameterType="int" resultMap="CustomGGRecommendMap">
+		SELECT * FROM custom_gege_recommend_24 WHERE id=#{id}
+	</select>
+	
+</mapper>

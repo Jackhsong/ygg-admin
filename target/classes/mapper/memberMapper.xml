@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MemberMapper"> 
+    
+     <select id="findAllMemberLevel" parameterType="map"  resultType="map">
+		SELECT
+			id,
+			`level`,
+			low_price AS lowPrice,
+			high_price AS highPrice,
+			is_display AS isDisplay,
+			is_last_level AS isLastLevel
+		FROM
+			member_level
+		ORDER BY low_price ASC
+		<if test="start != null">LIMIT #{start},#{max}</if>    	
+     </select>
+     
+     <select id="countMemberLevel" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			member_level     	
+     </select>
+     
+     <update id="updateMemberLevelDisplayStatus" parameterType="map">
+     	update member_level set is_display=#{isDisplay} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <select id="findAllMemberProduct" parameterType="map" resultType="map">
+		SELECT
+			mlp.id,
+			mlp.is_display AS isDisplay,
+			p.id AS productId,
+			p.product_base_id AS productBaseId,
+			p.`code` AS CODE,
+			p.`name` AS productName,
+			p.short_name AS productShortName,
+			p.remark AS remark,
+			p.is_off_shelves AS isOffShelves,
+			c.sell AS sell,
+			c.stock AS stock,
+			p.market_price AS marketPrice,
+			p.sales_price AS salesPrice,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			p.type AS productType,
+			mlp.point,
+			mlp.limit_num AS limitNum,
+			mlp.is_support_cash_buy AS isSupportCashBuy,
+			mlp.sequence,
+			b.id,
+			b.`name` AS brandName
+		FROM
+			member_level_product mlp,
+			product p,
+			product_count c,
+			seller s,
+			brand b
+		WHERE
+			mlp.member_level_id = #{levelId}
+		AND mlp.product_id = p.id
+		AND p.id = c.product_id
+		AND p.seller_id = s.id
+		AND p.brand_id = b.id
+		<if test="productId != null"> AND p.id=#{productId}</if>
+		<if test="productCode != null">AND p.`code`=#{productCode}</if>
+		<if test="productName != null">AND p.`name` like #{productName}</if>
+		<if test="shortName != null">AND p.short_name like #{shortName}</if>
+		<if test="remark != null">AND p.remark like #{remark}</if>
+		<if test="brandId != null">AND b.id=#{brandId}</if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		ORDER BY mlp.sequence DESC
+		<if test="start != null"> LIMIT #{start},#{max}</if>     	
+     </select>
+     
+     <select id="countMemberProduct" parameterType="map" resultType="int">
+		SELECT
+			count(mlp.id)
+		FROM
+			member_level_product mlp,
+			product p,
+			product_count c,
+			seller s,
+			brand b
+		WHERE
+			mlp.member_level_id = #{levelId}
+		AND mlp.product_id = p.id
+		AND p.id = c.product_id
+		AND p.seller_id = s.id
+		AND p.brand_id = b.id
+		<if test="productId != null"> AND p.id=#{productId}</if>
+		<if test="productCode != null">AND p.`code`=#{productCode}</if>
+		<if test="productName != null">AND p.`name` like #{productName}</if>
+		<if test="shortName != null">AND p.short_name like #{shortName}</if>
+		<if test="remark != null">AND p.remark like #{remark}</if>
+		<if test="brandId != null">AND b.id=#{brandId}</if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>    	
+     </select>
+     
+     <insert id="insertMemberProduct" parameterType="map">
+     	INSERT INTO member_level_product(member_level_id,product_id,`level`,point,sequence,limit_num,is_support_cash_buy,create_time)VALUES(#{levelId},#{productId},#{level},#{point},#{sequence},#{limitNum},#{isSupportCashBuy},now())
+     </insert>
+     
+     <update id="updateMemberProduct" parameterType="map">
+     	UPDATE member_level_product
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="productId != null">product_id=#{productId},</if>
+     		<if test="point != null">point=#{point},</if>
+     		<if test="sequence != null">sequence=#{sequence},</if>
+     		<if test="limitNum != null">limit_num=#{limitNum},</if>
+     		<if test="isSupportCashBuy != null">is_support_cash_buy=#{isSupportCashBuy},</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+     
+     <delete id="deleteMemberProduct" parameterType="list">
+     	delete from member_level_product where id in
+     	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </delete>
+     
+     <update id="updateMemberProductDisplayStatus" parameterType="map">
+     	update member_level_product set is_display=#{isDisplay} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")" >
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <select id="findAllMemberBanner" parameterType="map" resultType="MemberBannerEntity">
+		SELECT
+			id,
+			type,
+			display_id AS displayId,
+			`desc`,
+			image,
+			is_display AS isDisplay,
+			sequence
+		FROM
+			member_banner
+		ORDER BY
+			sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <select id="countMemberBanner" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			member_banner     	
+     </select>
+     
+     <select id="findMemberLevelProductByProductId" parameterType="int" resultType="MemberLevelProductEntity">
+		SELECT
+			id,
+			member_level_id AS memberLevelId,
+			product_id AS productId,
+			`level`,
+			point,
+			sequence,
+			limit_num AS limitNum,
+			is_support_cash_buy AS isSupportCashBuy,
+			is_display AS isDisplay
+		FROM
+			member_level_product
+		WHERE
+			product_id = #{productId}
+     </select>
+     
+     <insert id="saveMemberBanner" parameterType="MemberBannerEntity">
+     	INSERT INTO member_banner(type,display_id,`desc`,image,is_display,sequence)VALUES(#{type},#{displayId},#{desc},#{image},#{isDisplay},#{sequence})
+     </insert>
+     
+     <update id="updateMemberBanner" parameterType="MemberBannerEntity">
+     	update member_banner
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="type != null">type=#{type},</if>
+     		<if test="displayId != null">display_id=#{displayId},</if>
+     		<if test="desc != null">`desc`=#{desc},</if>
+     		<if test="image != null">image=#{image},</if>
+     		<if test="isDisplay != null">is_display=#{isDisplay},</if>
+     		<if test="sequence != null">sequence=#{sequence},</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+     
+     <delete id="deleteMemberBanner" parameterType="list">
+     	delete from member_banner where id in
+     	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </delete>
+     
+     <update id="updateMemberBannerDisplayStatus" parameterType="map">
+     	update member_banner set is_display=#{isDisplay} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <update id="updateMemberBannerSequence" parameterType="map">
+     	update member_banner set sequence=#{sequence} where id=#{id}
+     </update>
+     
+     <select id="findMemberBannerById" parameterType="int" resultType="MemberBannerEntity">
+		SELECT
+			id,
+			type,
+			display_id AS displayId,
+			`desc`,
+			image,
+			is_display AS isDisplay,
+			sequence
+		FROM
+			member_banner
+		WHERE id=#{id}     
+     </select>
+</mapper>  

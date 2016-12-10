@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RelationDeliverAreaTemplateMapper">
+
+	<insert id="insertRelationDeliverAreaTemplate" useGeneratedKeys="true">
+		insert into relation_template_deliver_area(`seller_deliver_area_template_id`,`province_code`,`city_code`,`district_code`,`is_except`)values 
+		<foreach collection="list" index="index" item="item" separator=",">
+			(#{item.sellerDeliverAreaTemplateId},#{item.provinceCode},#{item.cityCode},#{item.districtCode},#{item.isExcept})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteRelationDeliverAreaTemplateByTemplateId" parameterType="int">
+		delete from relation_template_deliver_area where seller_deliver_area_template_id=#{templateId}
+	</delete>
+	
+	<select id="findRelationDeliverAreaTemplateByPara" parameterType="map" resultType="RelationDeliverAreaTemplateEntity">
+		SELECT
+			id,
+			seller_deliver_area_template_id AS sellerDeliverAreaTemplateId,
+			province_code AS provinceCode,
+			city_code AS cityCode,
+			district_code AS districtCode,
+			is_except AS isExcept
+		FROM
+			relation_template_deliver_area
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="sellerDeliverAreaTemplateId != null">AND seller_deliver_area_template_id=#{sellerDeliverAreaTemplateId}</if>
+			<if test="isExcept != null">AND is_except=#{isExcept}</if>
+		</trim>
+		ORDER BY id DESC
+	</select>
+	
+	<delete id="deleteRelationDeliverAreaTemplateByIdList" parameterType="list">
+		delete from relation_template_deliver_area where id in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

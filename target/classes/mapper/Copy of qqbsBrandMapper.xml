@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsBrandMapper">  
+
+	<!--新增品牌-->
+	<insert id="addBrand" parameterType="QqbsBrandEntity">
+		insert into qqbs_brand(`qqbs_brand_category_id`,`activities_common_id`,`name`,brand_id,`order`,`image`,is_display,create_time)
+		values(#{qqbsBrandCategoryId},#{activitiesCommonId},#{name},#{brandId},#{order},#{image},#{isDisplay},now())
+	</insert>
+	
+	<!-- 更新品牌 -->
+	<update id="updateBrand" parameterType="QqbsBrandEntity">
+		update qqbs_brand
+		<set>
+			<if test="qqbsBrandCategoryId!=null"> `qqbs_brand_category_id`=#{qqbsBrandCategoryId},</if>
+			<if test="activitiesCommonId!=null"> `activities_common_id`=#{activitiesCommonId},</if>
+			<if test="name!=null"> name=#{name}, </if>
+			<if test="brandId!=null"> `brand_id`=#{brandId},</if>
+			<if test="order!=null"> `order`=#{order},</if>
+			<if test="image!=null"> image=#{image}, </if>
+			<if test="isDisplay!=null"> is_display=#{isDisplay} </if>
+		</set>
+		where id=#{id}
+	</update>
+	
+		
+	<!-- 更新品牌展现与否 -->
+	<update id="updateBrandDisplay" parameterType="QqbsBrandEntity">
+		update qqbs_brand
+		<set>
+			<if test="isDisplay!=null"> is_display=#{isDisplay} </if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<!-- 查询品牌栏目列表信息 -->
+	<select id="findBrandInfo" parameterType="map" resultType="QqbsBrandEntity">
+		SELECT
+			qb.id as id,  
+			qb.`name` as `name`,
+			qb.image as image,
+			qb.`order` as `order`,
+			qb.brand_id as brandId,
+			qb.qqbs_brand_category_id as qqbsBrandCategoryId,
+			qb.activities_common_id as activitiesCommonId,
+			qb.is_display as isDisplay  
+			FROM    
+			qqbs_brand qb
+			<if test="categoryId!=null"> where qqbs_brand_category_id = #{categoryId}</if>
+		ORDER BY qb.`order` DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- 查询品牌列表信息 -->
+	<select id="countBrandInfo" parameterType="map" resultType="int">
+		SELECT
+			count(qb.id)
+			from qqbs_brand qb
+			<if test="categoryId!=null"> where qqbs_brand_category_id = #{categoryId}</if>
+	</select>
+	
+    <!-- 获取品牌馆名称 -->
+	<select id="getBrandCateName" parameterType="map" resultType="String">
+		SELECT
+			name 
+			from qqbs_brand_category qbc
+			<if test="categoryId!=null"> where qbc.id = #{categoryId}</if>
+	</select>
+	
+</mapper>  

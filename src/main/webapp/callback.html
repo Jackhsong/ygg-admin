@@ -1,0 +1,48 @@
+
+var xmlhttp;
+
+	// 1,获取文本框的value
+	// var userName = document.getElementByIdx_x("userName").value;
+	// 2,创建xmlhttpRequest对象
+	// 针对不同浏览器创建XmlHttpRequest对象方法不同
+	if (window.XMLHttpRequest) {
+		// 针对FirFox，Mozilla，Opera，Safari，IE7，IE8
+		xmlhttp = new XMLHttpRequest();
+		if (xmlhttp.overrideMimeType) {
+			// 针对Mozilla不同版本差别
+			xmlhttp.overrideMimeType("text/xml");
+		}
+	} else if (window.ActiveXObject) {
+		var activexml = [ "MSXML2.XMLHTTP", "Microsoft.XMLHTTP" ];
+		for (var i = 0; i < activexml.length; i++) {
+			try {
+				// 取出一个空间进行创建，如果创建成功，则终止
+				// 如果创建失败，回抛出异常，然后继续循环，继续创建
+				var xmlhttp = new ActiveXObject(activexml[i]);
+				break;
+			} catch (e) {
+			}
+		}
+	}
+
+	// 3,注册回调函数
+	xmlhttp.onreadystatechange = callback;
+	// 4,设置连接信息
+	// open方法第一个参数，表示http请求方式get和post
+	// 第二个参数，请求URL地址
+	// 第三个参数，异步还是同步提交，true为异步提交
+	xmlhttp.open("GET", cbUrl, true);
+	// 5，发送请求
+	// send参数为要发送数据，我们在URL中已经带上了username所以这里写成null
+	xmlhttp.send(null);
+	// 6,回调函数
+	function callback() {
+		if (xmlhttp.readyState == 4) {
+			// 判断对象状态
+			if (xmlhttp.status == 200) {
+				// 判断http交互是否成功
+				// 获得服务器返回数据(纯文本)
+			}
+		}
+	}
+

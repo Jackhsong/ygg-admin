@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ActivityManjianMapper">  
+    <resultMap type="ActivityManjianEntity" id="ActivityManjianMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="type" property="type" />
+    	<result column="type_id" property="typeId" />
+    	<result column="start_time" property="startTime" />
+    	<result column="end_time" property="endTime" />
+    	<result column="gradient_type" property="gradientType" />
+    	<result column="one_threshold" property="oneThreshold"/>
+    	<result column="one_reduce" property="oneReduce"/>
+    	<result column="two_threshold" property="twoThreshold"/>
+    	<result column="two_reduce" property="twoReduce"/>
+    	<result column="three_threshold" property="threeThreshold"/>
+    	<result column="three_reduce" property="threeReduce"/>
+    	<result column="four_threshold" property="fourThreshold"/>
+    	<result column="four_reduce" property="fourReduce"/>
+    	<result column="remark" property="remark" />
+    	<result column="is_available" property="isAvailable" />
+    </resultMap>
+    
+	<select id="findAllActivityManjian" parameterType="map" resultMap="ActivityManjianMap">
+		SELECT 
+			* 
+		FROM 
+			activities_manjian 
+		WHERE 
+			`type` in<foreach collection="typeList" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+			<if test="status == 0">
+				AND 1=2
+			</if>
+			<if test="status == 2">
+				AND <![CDATA[start_time<=#{nowTime} AND #{nowTime}<=end_time]]>
+			</if>
+			<if test="status == 3">
+				AND <![CDATA[start_time>#{nowTime}]]>
+			</if>
+			<if test="status == 4">
+				AND <![CDATA[end_time<#{nowTime}]]>
+			</if>
+			<if test="status == 5">
+				AND <![CDATA[((start_time<=#{nowTime} AND #{nowTime}<=end_time) OR start_time>#{nowTime})]]>
+			</if>
+			<if test="status == 6">
+				AND <![CDATA[((start_time<=#{nowTime} AND #{nowTime}<=end_time) OR end_time<#{nowTime})]]>
+			</if>
+			<if test="status == 7">
+				AND <![CDATA[(start_time>#{nowTime} OR (end_time<#{nowTime}))]]>
+			</if>
+			<if test="status == 8">
+				AND 1=1
+			</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countActivityManjian" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(id) 
+		FROM 
+			activities_manjian
+		WHERE
+			type in<foreach collection="typeList" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+			<if test="status == 0">
+				AND 1=2
+			</if>
+			<if test="status == 2">
+				AND <![CDATA[start_time<=#{nowTime} AND #{nowTime}<=end_time]]>
+			</if>
+			<if test="status == 3">
+				AND <![CDATA[start_time>#{nowTime}]]>
+			</if>
+			<if test="status == 4">
+				AND <![CDATA[end_time<#{nowTime}]]>
+			</if>
+			<if test="status == 5">
+				AND <![CDATA[((start_time<=#{nowTime} AND #{nowTime}<=end_time) OR start_time>#{nowTime})]]>
+			</if>
+			<if test="status == 6">
+				AND <![CDATA[((start_time<=#{nowTime} AND #{nowTime}<=end_time) OR end_time<#{nowTime})]]>
+			</if>
+			<if test="status == 7">
+				AND <![CDATA[(start_time>#{nowTime} OR (end_time<#{nowTime}))]]>
+			</if>
+			<if test="status == 8">
+				AND 1=1
+			</if>
+	</select>
+	
+	<select id="findProductIdByTypeAndTypeId" parameterType="map" resultType="int">
+		SELECT 
+			product_id 
+		FROM 
+			activities_relation_product 
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="type != null">AND type=#{type}</if>
+			<if test="typeId != null">AND type_id=#{typeId}</if>
+		</trim> 
+		ORDER BY id DESC
+	</select>
+	
+	<insert id="saveActivityManjian" parameterType="ActivityManjianEntity">
+		INSERT INTO activities_manjian(`name`,`type`,`type_id`,`start_time`,`end_time`,`gradient_type`,`one_threshold`,`one_reduce`,`two_threshold`,`two_reduce`,`three_threshold`,`three_reduce`,`four_threshold`,`four_reduce`,`remark`)		
+		VALUES(#{name},#{type},#{typeId},#{startTime},#{endTime},#{gradientType},#{oneThreshold},#{oneReduce},#{twoThreshold},#{twoReduce},#{threeThreshold},#{threeReduce},#{fourThreshold},#{fourReduce},#{remark})
+	</insert>
+	
+	<update id="updateActivityManjian" parameterType="ActivityManjianEntity">
+		UPDATE activities_manjian
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="name != null">`name`=#{name},</if>
+			<if test="type != null">`type`=#{type},</if>
+			<if test="typeId != null">`type_id`=#{typeId},</if>
+			<if test="startTime != null">`start_time`=#{startTime},</if>
+			<if test="endTime != null">`end_time`=#{endTime},</if>
+			<if test="gradientType != null">`gradient_type`=#{gradientType},</if>
+			<if test="oneThreshold != null">`one_threshold`=#{oneThreshold},</if>
+			<if test="oneReduce != null">`one_reduce`=#{oneReduce},</if>
+			<if test="twoThreshold != null">`two_threshold`=#{twoThreshold},</if>
+			<if test="twoReduce != null">`two_reduce`=#{twoReduce},</if>
+			<if test="threeThreshold != null">`three_threshold`=#{threeThreshold},</if>
+			<if test="threeReduce != null">`three_reduce`=#{threeReduce},</if>
+			<if test="fourThreshold != null">`four_threshold`=#{fourThreshold},</if>
+			<if test="fourReduce != null">`four_reduce`=#{fourReduce},</if>
+			<if test="remark != null">`remark`=#{remark},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findActivityManjianById" parameterType="int" resultMap="ActivityManjianMap">
+		select * from activities_manjian where id=#{id}
+	</select>
+	
+	<select id="findActivityManjianByMap" parameterType="map" resultMap="ActivityManjianMap">
+		SELECT 
+			* 
+		FROM 
+			activities_manjian
+		where 
+			<![CDATA[id<>#{id}]]>
+		AND (<![CDATA[(start_time <=#{startTime} AND #{startTime}<end_time)]]>
+		OR <![CDATA[(start_time<#{endTime} AND #{endTime}<=end_time)]]>
+		OR <![CDATA[(#{startTime}<=start_time AND end_time<=#{endTime})]]>)
+		AND is_available=#{isAvailable}
+		<if test="type != null">AND type=#{type}</if>
+	</select>
+	
+	<select id="findActivitiyRelationProduct" parameterType="map" resultType="ActivitiyRelationProductEntity">
+		SELECT
+			arp.id,
+			arp.type,
+			arp.type_id as typeId,
+			p.id as productId,
+			p.product_base_id as productBaseId,
+			p.code as code,
+			p.name as productName,
+			p.short_name as productShortName,
+			p.remark as remark,
+			p.is_off_shelves as isOffShelves,
+			c.sell as sell,
+			c.stock as stock,
+			p.market_price as marketPrice,
+			p.sales_price as salesPrice,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			p.type as productType
+		from 
+			activities_relation_product arp,
+			product p,
+			product_count c,
+			seller s 
+		where 
+			arp.type=#{type}
+			AND arp.type_Id=#{typeId}
+			AND arp.product_id=p.id 
+			AND p.id = c.product_id
+			AND p.seller_id = s.id 
+		ORDER BY arp.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countActivitiyRelationProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(arp.id)
+		FROM 
+			activities_relation_product arp,
+			product p,
+			product_count c,
+			seller s 
+		WHERE 
+			arp.type=#{type}
+			AND arp.type_Id=#{typeId}
+			AND arp.product_id=p.id 
+			AND p.id = c.product_id
+			AND p.seller_id = s.id		
+	</select>
+	
+	<select id="findProductForAddToActivityManjian" parameterType="map" resultType="ActivitiyRelationProductEntity">
+		SELECT 
+			p.id as productId,
+			p.code as code,
+			p.name as productName,
+			p.remark as remark,
+			pc.stock as stock,
+			p.market_price as marketPrice,
+			p.sales_price as salesPrice,
+			b.name as brandName,
+			b.id as brandId,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			s.warehouse as warehouse,
+			s.id as sellerId 
+		FROM 
+			product p, 
+			seller s, 
+			brand b, 
+			product_count pc 
+		WHERE 
+				p.seller_id=s.id  
+			AND p.brand_id=b.id  
+			AND pc.product_id=p.id 
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="idList != null">
+      			AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+			ORDER BY p.id DESC 
+      		LIMIT #{start},#{max}		
+	</select>
+	
+	<select id="countProductForAddToActivityManjian" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(p.id) 
+		FROM 
+			product p, 
+			seller s, 
+			brand b, 
+			product_count pc 
+		WHERE 
+				p.seller_id=s.id  
+			AND p.brand_id=b.id  
+			AND pc.product_id=p.id 
+			<if test="isAvailable != null">AND p.is_available=#{isAvailable}</if> 
+			<if test="isOffShelves != null">AND p.is_off_shelves=#{isOffShelves}</if>
+			<if test="name != null">AND p.name like #{name}</if> 
+			<if test="code != null">AND p.code=#{code}</if> 
+			<if test="brandId != null">AND p.brand_id=#{brandId}</if> 
+			<if test="sellerId != null">AND s.id=#{sellerId}</if>
+			<if test="productId != null">AND p.id=#{productId}</if>
+			<if test="remark != null">AND p.remark like #{remark}</if>
+			<if test="idList != null">
+      			AND p.id not in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>		
+	</select>
+	
+	<insert id="addProductForActivityManjian" parameterType="list">
+		INSERT INTO activities_relation_product(type,type_id,product_id)VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(#{item.type},#{item.typeId},#{item.productId})
+		</foreach>		
+	</insert>
+	
+	<delete id="deleteActivityManjianProduct" parameterType="list">
+		delete from activities_relation_product where id in
+		<foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateDisplayStatus" parameterType="map">
+		update activities_manjian set is_available=#{isAvailable} where id=#{id}
+	</update>
+</mapper>  

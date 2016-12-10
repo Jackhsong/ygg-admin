@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RefundReasonMapper">
+
+<insert id="saveRefundReason" parameterType="map" useGeneratedKeys="true">
+	insert into refund_reason(reason,is_available) values (#{reason},#{isAvailable})
+</insert>
+
+<select id="findRefundReasonList" parameterType="map" resultType="map">
+	select id,reason,is_available as isAvailable from refund_reason
+	where 1 = 1 
+	<if test="isAvailable!=null"> and is_available=#{isAvailable}</if>
+	<if test="id!=null"> and id=#{id}</if>
+	<if test="start!=null"> limit #{start},#{size}</if>
+</select>
+
+<select id="countRefundReason" resultType="int">
+	select count(id) from refund_reason
+</select>
+
+<update id="updateRefundReason" parameterType="map">
+	update refund_reason
+	<set>
+		<if test="isAvailable!=null">is_available=#{isAvailable}</if>
+	</set>
+	where id=#{id}
+</update>
+
+</mapper>  

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="YwCashMapper">
+
+	
+	<sql id="condition">
+		where 1=1
+			<if test="name != null and name != '' "> and ya.nickname like #{name}</if>
+			<if test="accountId !=null and accountId !=-1"> and ywl.account_id=#{accountId}</if>
+	</sql>
+	
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select 
+				ywl.id,
+				ywl.id as `index`,
+				ywl.account_id as accountId,
+				ya.nickname,
+				ywl.withdrawals,
+				ywl.`status`,
+				ya.open_id as openId,
+				ywl.create_time
+		from yw_withdrawals_log ywl
+					INNER JOIN yw_account ya on ywl.account_id=ya.account_id
+		<include refid="condition"></include>
+		order by STATUS asc,ywl.create_time DESC,id desc
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	
+	
+	<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) 
+			from yw_withdrawals_log ywl
+			INNER JOIN yw_account ya on ywl.account_id = ya.account_id
+		<include refid="condition"></include>
+	</select>
+	
+	<!-- 修改日志 -->
+	<update id="updateLog" parameterType="map">
+		update yw_withdrawals_log t set t.status = #{status} , t.update_time = now() where id=#{id}
+	</update>
+	
+     <sql id="query">
+		id as id,
+		account_id as accountId,
+		total_reward as totalReward,
+		already_cash as alreadyCash,
+		withdraw_cash as withdrawCash,
+		create_time as createTime,
+		update_time as updateTime
+     </sql>
+     <select id="getByAccountId" parameterType="string" resultType="YwRewardEntity">
+         SELECT
+          <include refid="query"></include>
+         FROM yw_reward WHERE account_id=#{accountId} for update
+     </select>
+     
+     <update id="updateYwReward" parameterType="YwRewardEntity">
+     <![CDATA[
+        update yw_reward 
+        ]]>
+        <set>
+             update_time = now(),
+            <if test="withdrawCash != null" >withdraw_cash = #{withdrawCash},</if>
+            <if test="alreadyCash != null" >already_cash = #{alreadyCash},</if>
+        </set>
+        where id=#{id}
+	</update>
+	
+	<select id="getInfoByLogId" parameterType="string" resultType="map">
+		SELECT ywl.account_id  as accountId, 
+				ywl.withdrawals as withdrawals,
+				ya.open_id as openId,
+				ywl.status as status 
+			from yw_withdrawals_log ywl 
+       		inner join  yw_account ya on ywl.account_id = ya.account_id
+			where ywl.id = #{id}
+     </select>
+</mapper>

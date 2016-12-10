@@ -1,0 +1,39 @@
+#center {
+	padding:5px
+}
+#center #searchQRCodeDiv{
+	height: 50px; 
+	padding: 15px
+}
+#center #qrCodeManageDiv{
+	padding:10px
+}
+#createQRCodePanel>div {
+    padding: 20px 10px
+}
+
+#createQRCodePanel>div label {
+    width: 100px;
+    float:left
+}
+
+#createQRCodePanel>div input {
+    width: 300px;
+}
+#createQRCodePanel>div #createButton{
+	width: 100px;
+	height:50px
+}
+#createQRCodePanel .createButtonDiv{
+	text-align:center
+}
+#createQRCodePanel.showQRCodeUrl .createButtonDiv{
+	display:none
+}
+#createQRCodePanel .qrCodeUrlDiv{
+	display:none
+}
+#createQRCodePanel.showQRCodeUrl .qrCodeUrlDiv{
+	display:block
+}
+

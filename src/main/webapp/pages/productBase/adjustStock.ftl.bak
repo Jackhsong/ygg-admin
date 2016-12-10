@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>换吧网络-后台管理</title>
+<link href="${rc.contextPath}/pages/js/jquery-easyui-1.4/themes/default/easyui.css" rel="stylesheet" type="text/css" />
+<link href="${rc.contextPath}/pages/js/jquery-easyui-1.4/themes/icon.css" rel="stylesheet" type="text/css" />
+<script src="${rc.contextPath}/pages/js/jquery-easyui-1.4/jquery.min.js"></script>
+<script src="${rc.contextPath}/pages/js/jquery-easyui-1.4/jquery.easyui.min.js"></script>
+<script src="${rc.contextPath}/pages/js/jquery-easyui-1.4/locale/easyui-lang-zh_CN.js"></script>
+<script src="${rc.contextPath}/pages/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+table .detailsStyle{
+    border-collapse: separate;
+    border-spacing: 10px; /* cellspacing */
+    *border-collapse: expression('separate', cellSpacing = '10px');
+}
+table td,th{
+	padding: 10px;
+	text-align:center;
+	
+}
+.tdTitle{
+	text-align:right;
+}
+.mini{
+	width:40px;
+}
+
+#saleProduct td{
+	padding: 20px;
+	text-align:center;
+}
+</style>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'center',title:'库存调整'" style="padding:5px;">
+		<div style="margin-left: 25px">
+		<input type="hidden" value="<#if base.id?exists && (base.id != 0)>${base.id?c}</#if>" id="productBaseId" name="id" />
+		<table id="baseInfo">
+			<tr>
+				<td class="tdTitle">商品名称：</td>
+				<td>
+					<#if base.name?exists>${base.name}</#if>
+				</td>
+				<td class="tdTitle">商品条码：</td>
+				<td>
+					<#if base.barcode?exists>${base.barcode}</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="tdTitle">商品编码：</td>
+				<td>
+					<#if base.code?exists>${base.code}</#if>
+				</td>
+				<td class="tdTitle">商家：</td>
+				<td>
+					<#if seller.sellerName?exists>${seller.sellerName}</#if>
+				</td>
+			</tr>
+			<tr>
+				<td class="tdTitle">发货类型：</td>
+				<td>
+					<#if sellerType?exists>${sellerType}</#if>
+					</td>
+				<td class="tdTitle">发货地：</td>
+				<td><#if seller.sendAddress?exists>${seller.sendAddress}</#if></td>
+			<tr>
+				<td class="tdTitle">分仓：</td>
+				<td><#if seller.warehouse?exists>${seller.warehouse}</#if></td>
+				<td class="tdTitle">剩余未分配总库存：</td>
+				<td><#if base.availableStock?exists>${base.availableStock}</#if></td>
+			</tr>
+			<tr>
+				<td class="tdTitle">增加库存：</td>
+				<td>
+					<input type="text" class="mini" name="totalStock" id="totalStock" value="" maxlength="10"/>
+					<input type="hidden" name="baseId" id="baseId" value="${base.id?c}" maxlength="10"/>
+					<a onclick="addStock();" href="javascript:;" class="easyui-linkbutton">增加</a>
+					<font color="red" style="italic">(注：减少可填负数)</font>
+				</td>
+			</tr>
+		</table>
+		
+		<table class="detailsStyle" >
+			<thead>
+				<tr>
+					<th>商品Id</th>
+					<th>商品名称</th>
+					<th>商品类型</th>
+					<th>商品备注</th>
+					<th>增加库存</th>
+					<th>剩余可用</th>
+					<th>已锁定</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody id="saleProduct">
+				<#list productInfoList as product>
+				<tr>
+					<td id="saleId_${product_index+1}">${product.id?c}</td>
+					<td>${product.name}</td>
+					<td>${product.type}</td>
+					<td>${product.remark}</td>
+					<td><input type="text" id="saleStock_${product_index+1}" value="" class="mini" maxlength="10"/></td>
+					<td>${product.stock}</td>
+					<td>${product.lock}</td>
+					<td><a onclick="viewDetail(${product.id?c})" href="javascript:;" class="easyui-linkbutton">查看</a></td>
+				</tr>
+				</#list>
+			</tbody>
+			<tfoot>
+			<tr>
+				<td colspan="8" style="text-align:left"><input style="width: 150px" type="button" id="saveButton" onclick="saveDate();" value="保存"/></td>
+			</tr>
+			</tfoot>
+		</table>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	function addStock(){
+		var totalStock = $("#totalStock").val();
+		if($.trim(totalStock)==''){
+			$.messager.alert("提示","请输入库存数量","error");
+		}else{
+			if(/^-?\d+$/.test(totalStock)){
+				$.ajax({
+					url:'${rc.contextPath}/productBase/addTotalStock',
+					type:'post',
+					data:{'stock':totalStock,'baseId':$("#baseId").val()},
+					dataType:'json',
+					success:function(data){
+						if(data.status==1){
+							$.messager.alert("提示", '保存成功', "info",function(){
+								window.location.reload();
+							});
+							
+						}else{
+							$.messager.alert("提示", '保存失败', "error");
+						}
+					},
+					error:function(){
+						
+					}
+				});
+			}else{
+				$.messager.alert("提示","库存数量只能为数字","error");
+			}
+		}
+	}
+	
+	function viewDetail(id){
+		var urlStr="${rc.contextPath}/product/edit/"+id;
+		window.open(urlStr,"_blank");
+	}
+	
+	function saveDate(){
+		var index = $("#saleProduct tr").length;
+		var saleIdAndStock = "";
+		for(i=1; i<=index; i++){
+			if($.trim($('#saleStock_'+i).val())==''){
+				$.messager.alert("提示", '第'+i+'行库存不能为空', "error");
+				return;
+			}else{
+				saleIdAndStock+=($("#saleId_"+i).text()+","+$('#saleStock_'+i).val()+":");
+			}
+		}
+		$.ajax({
+			url:'${rc.contextPath}/productBase/adjustStock',
+			type:'post',
+			data:{'saleIdAndStocks':saleIdAndStock,"baseId":$("#productBaseId").val()},
+			dataType:'json',
+			success:function(data){
+				if(data.status==1){
+					$.messager.alert("提示", '保存成功', "info",function(){
+						window.location.reload();							
+					});
+				}else{
+					$.messager.alert("提示", '保存失败', "error");
+				}
+			}
+		});
+	}
+
+
+</script>
+</html>

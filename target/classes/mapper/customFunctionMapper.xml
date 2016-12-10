@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomFunctionMapper"> 
+
+	<resultMap type="CustomFunctionEntity" id="CustomFunctionMap">
+		<result column="id" property="id"/>
+		<result column="one_image" property="oneImage"/>
+		<result column="one_type" property="oneType"/>
+		<result column="one_remark" property="oneRemark"/>
+		<result column="one_id" property="oneId"/>
+		<result column="two_image" property="twoImage"/>
+		<result column="two_type" property="twoType"/>
+		<result column="two_remark" property="twoRemark"/>
+		<result column="two_id" property="twoId"/>
+		<result column="three_image" property="threeImage"/>
+		<result column="three_type" property="threeType"/>
+		<result column="three_remark" property="threeRemark"/>
+		<result column="three_id" property="threeId"/>
+		<result column="four_image" property="fourImage"/>
+		<result column="four_type" property="fourType"/>
+		<result column="four_remark" property="fourRemark"/>
+		<result column="four_id" property="fourId"/>
+		<result column="five_image" property="fiveImage"/>
+		<result column="five_type" property="fiveType"/>
+		<result column="five_remark" property="fiveRemark"/>
+		<result column="five_id" property="fiveId"/>
+		<result column="remark" property="remark"/>
+		<result column="is_display" property="isDisplay"/>
+	</resultMap>
+	<select id="findAllCustomFunction" parameterType="map" resultMap="CustomFunctionMap">
+		SELECT
+			*
+		FROM
+			custom_function
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="remark != null">AND remark LIKE #{remark}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countCustomFunction" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			custom_function
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="remark != null">AND remark LIKE #{remark}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+		</trim>		
+	</select>
+	
+	<insert id="saveCustomFunction" parameterType="CustomFunctionEntity" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO custom_function(
+		one_image,one_type,one_remark,one_id,
+		two_image,two_type,two_remark,two_id,
+		three_image,three_type,three_remark,three_id,
+		four_image,four_type,four_remark,four_id,
+		five_image,five_type,five_remark,five_id,
+		remark,is_display) 
+		VALUES(
+		#{oneImage},#{oneType},#{oneRemark},#{oneId},
+		#{twoImage},#{twoType},#{twoRemark},#{twoId},
+		#{threeImage},#{threeType},#{threeRemark},#{threeId},
+		#{fourImage},#{fourType},#{fourRemark},#{fourId},
+		#{fiveImage},#{fiveType},#{fiveRemark},#{fiveId},
+		#{remark},#{isDisplay})		
+	</insert>
+	
+	<update id="updateCustomFunction" parameterType="map">
+		UPDATE custom_function
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="oneImage != null">one_image=#{oneImage},</if>
+			<if test="oneType != null">one_type=#{oneType},</if>
+			<if test="oneRemark != null">one_remark=#{oneRemark},</if>
+			<if test="oneId != null">one_id=#{oneId},</if>
+			<if test="twoImage != null">two_image=#{twoImage},</if>
+			<if test="twoType != null">two_type=#{twoType},</if>
+			<if test="twoRemark != null">two_remark=#{twoRemark},</if>
+			<if test="twoId != null">two_id=#{twoId},</if>
+			<if test="threeImage != null">three_image=#{threeImage},</if>
+			<if test="threeType != null">three_type=#{threeType},</if>
+			<if test="threeRemark != null">three_remark=#{threeRemark},</if>
+			<if test="threeId != null">three_id=#{threeId},</if>
+			<if test="fourImage != null">four_image=#{fourImage},</if>
+			<if test="fourType != null">four_type=#{fourType},</if>
+			<if test="fourRemark != null">four_remark=#{fourRemark},</if>
+			<if test="fourId != null">four_id=#{fourId},</if>
+			<if test="fiveImage != null">five_image=#{fiveImage},</if>
+			<if test="fiveType != null">five_type=#{fiveType},</if>
+			<if test="fiveRemark != null">five_remark=#{fiveRemark},</if>
+			<if test="fiveId != null">five_id=#{fiveId},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<update id="updateDisplayStatus" parameterType="map">
+		update custom_function set is_display=#{isDisplay} where id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findCustomFunctionById" parameterType="int" resultMap="CustomFunctionMap">
+		SELECT
+			*
+		FROM
+			custom_function
+		WHERE id=#{id}
+	</select>
+</mapper>  

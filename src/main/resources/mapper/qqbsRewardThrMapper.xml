@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsRewardThrMapper">
+
+    <select id="getAllRewardThr" parameterType="int" resultType="QqbsRewardThrEntity">
+    	SELECT
+			sum(qfo.real_price) AS realPrice,
+			qfo.account_id AS accountId,
+			date_format(qfo.create_time, '%Y-%m-%d') AS tradeDate,
+			qa.nickname AS nickName
+		FROM
+			qqbs_fans_order qfo,
+			qqbs_account qa
+		WHERE
+		<if test="accountId != null"> qa.account_id=#{accountId} and </if>
+			qfo.account_id = qa.account_id
+		GROUP BY
+			qfo.account_id,
+			date_format(qfo.create_time, '%Y-%m-%d')
+		ORDER BY
+			qa.account_id,
+			tradeDate DESC;
+    </select>
+    
+    <!-- 统计粉丝销售额 -->
+    <select id="getFansOrderPrice" parameterType="int" resultType="double">
+		SELECT COALESCE(SUM(real_price),0) FROM
+				qqbs_fans_order qfo
+		WHERE qfo.account_id = #{accountId}
+	</select>
+	
+	<!-- 统计所有粉丝数量、一级粉丝数量 -->
+    <select id="getFansNum" parameterType="map" resultType="map">
+		SELECT
+			sum(
+				CASE
+				WHEN qb.`level` = 1 THEN
+					1
+				ELSE
+					0
+				END
+			) AS levelOneNum,
+			count(1) AS levelAllNum,
+			qa.nickName AS nickName
+		FROM
+			qqbs_fans qb,qqbs_account qa
+		WHERE
+		<if test="accountId != null"> qb.account_id=#{accountId} and </if>
+		qa.account_id = qb.account_id
+	</select>
+    
+    
+</mapper>

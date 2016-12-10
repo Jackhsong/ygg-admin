@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomRegion24Mapper">
+	<resultMap type="CustomLayoutEntity" id="CustomLayoutMap">
+		<id column="id" property="id" />
+		<result column="display_type" property="displayType"/>
+		<result column="one_image" property="oneImage"/>
+		<result column="one_type" property="oneType"/>
+		<result column="one_display_id" property="oneDisplayId"/>
+		<result column="one_remark" property="oneRemark"/>
+		<result column="one_width" property="oneWidth"/>
+		<result column="one_height" property="oneHeight"/>
+		<result column="two_image" property="twoImage"/>
+		<result column="two_type" property="twoType"/>
+		<result column="two_display_id" property="twoDisplayId"/>
+		<result column="two_remark" property="twoRemark"/>
+		<result column="two_width" property="twoWidth"/>
+		<result column="two_height" property="twoHeight"/>
+		<result column="three_image" property="threeImage"/>
+		<result column="three_type" property="threeType"/>
+		<result column="three_display_id" property="threeDisplayId"/>
+		<result column="three_remark" property="threeRemark"/>
+		<result column="three_width" property="threeWidth"/>
+		<result column="three_height" property="threeHeight"/>
+		<result column="four_image" property="fourImage"/>
+		<result column="four_type" property="fourType"/>
+		<result column="four_display_id" property="fourDisplayId"/>
+		<result column="four_remark" property="fourRemark"/>
+		<result column="four_width" property="fourWidth"/>
+		<result column="four_height" property="fourHeight"/>
+		<result column="is_display" property="isDisplay"/>
+	</resultMap>
+	<select id="findAllCustomRegion" parameterType="map" resultType="map">
+		SELECT
+			t.id AS id,
+			t.title AS title,
+			t.remark AS remark,
+			t.is_available AS isAvailable,
+			t.is_display AS isDisplay,
+			t.sequence AS sequence
+		FROM
+			custom_region_24 t
+		WHERE
+			1 = 1
+		<if test="id != null">AND t.id = #{id}</if>
+		<if test="isAvailable != null">AND t.is_available = #{isAvailable}</if>
+		<if test="isDisplay != null">AND t.is_display = #{isDisplay}</if>
+		ORDER BY t.sequence DESC,t.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="findCustomRegionById" parameterType="int" resultType="CustomRegionEntity">
+		SELECT
+			t.id AS id,
+			t.title AS title,
+			t.remark AS remark,
+			t.is_available AS isAvailable,
+			t.is_display AS isDisplay,
+			t.sequence AS sequence
+		FROM
+			custom_region_24 t
+		WHERE
+			t.id=#{id}
+	</select>
+	
+	<select id="countCustomRegion" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t.id)
+		FROM
+			custom_region_24 t
+		WHERE
+			1 = 1
+		<if test="id != null">AND t.id = #{id}</if>
+		<if test="isAvailable != null">AND t.is_available = #{isAvailable}</if>
+		<if test="isDisplay != null">AND t.is_display = #{isDisplay}</if>
+	</select>
+	
+	<insert id="saveCustomRegion" parameterType="map">
+		INSERT INTO custom_region_24(title, remark, is_display, is_available, sequence)
+		VALUES(#{title},#{remark},#{isDisplay},#{isAvailable},#{sequence})
+	</insert>
+	
+	<update id="updateCustomRegion" parameterType="map">
+		UPDATE custom_region_24
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="title != null">title=#{title},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+			<if test="sequence != null">sequence=#{sequence},</if>
+		</trim>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateCustomRegionAvailableStatus" parameterType="map">
+		UPDATE custom_region_24 SET is_available=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateCustomRegionDisplayStatus" parameterType="map">
+		UPDATE custom_region_24 SET is_display=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+	
+	<select id="findMaxCustomRegionSequence" resultType="int">
+		SELECT MAX(sequence) FROM custom_region_24
+	</select>
+	
+	<select id="findAllCustomLayout" parameterType="map" resultType="map">
+		SELECT
+			t2.id AS id,
+			t1.id AS layoutId,
+			t1.display_type AS displayType,
+			t1.one_remark AS oneRemark,
+			t1.one_display_id AS oneDisplayId,
+			t1.one_type AS oneType,
+			t1.one_image AS oneImage,
+			t1.two_remark AS twoRemark,
+			t1.two_display_id AS twoDisplayId,
+			t1.two_type AS twoType,
+			t1.two_image AS twoImage,
+			t1.three_remark AS threeRemark,
+			t1.three_display_id AS threeDisplayId,
+			t1.three_type AS threeType,
+			t1.three_image AS threeImage,
+			t1.four_remark AS fourRemark,
+			t1.four_display_id AS fourDisplayId,
+			t1.four_type AS fourType,
+			t1.four_image AS fourImage,
+			t1.is_display AS isDisplay,
+			t2.`order` AS sequence
+		FROM
+			custom_layout_24 t1,
+			relation_custom_region_layout_24 t2
+		WHERE
+			t1.id = t2.custom_layout_24_id
+		<if test="regionId != null">AND t2.custom_region_24_id = #{regionId}</if>
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+		ORDER BY
+			t2.`order` DESC,t1.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>	
+	
+	
+	<select id="countCustomLayout" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t2.id)
+		FROM
+			custom_layout_24 t1,
+			relation_custom_region_layout_24 t2
+		WHERE
+			t1.id = t2.custom_layout_24_id
+		<if test="regionId != null">AND t2.custom_region_24_id = #{regionId}</if>
+		<if test="id != null">AND t1.id=#{id}</if>
+		<if test="isDisplay != null">AND t1.is_display=#{isDisplay}</if>
+	</select>
+	
+	<update id="updateCustomLayoutDisplayStatus" parameterType="map">
+		UPDATE custom_layout_24 SET is_display=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateCustomLayoutSequence" parameterType="map">
+		UPDATE relation_custom_region_layout_24 SET `order` = #{sequence} WHERE id=#{id}
+	</update>
+	
+	<insert id="addCustomLayout" parameterType="CustomLayoutEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO custom_layout_24 (
+			display_type,
+			one_image,
+			one_type,
+			one_display_id,
+			one_remark,
+			one_width,
+			one_height,
+			two_image,
+			two_type,
+			two_display_id,
+			two_remark,
+			two_width,
+			two_height,
+			three_image,
+			three_type,
+			three_display_id,
+			three_remark,
+			three_width,
+			three_height,
+			four_image,
+			four_type,
+			four_display_id,
+			four_remark,
+			four_width,
+			four_height,
+			is_display,
+			create_time
+		) VALUES(
+			#{displayType},
+			#{oneImage},
+			#{oneType},
+			#{oneDisplayId},
+			#{oneRemark},
+			#{oneWidth},
+			#{oneHeight},
+			#{twoImage},
+			#{twoType},
+			#{twoDisplayId},
+			#{twoRemark},
+			#{twoWidth},
+			#{twoHeight},
+			#{threeImage},
+			#{threeType},
+			#{threeDisplayId},
+			#{threeRemark},
+			#{threeWidth},
+			#{threeHeight},
+			#{fourImage},
+			#{fourType},
+			#{fourDisplayId},
+			#{fourRemark},
+			#{fourWidth},
+			#{fourHeight},
+			#{isDisplay},
+			now()
+		)	
+	</insert>
+	
+	<update id="updateCustomLayout" parameterType="CustomLayoutEntity">
+		update custom_layout_24 set
+			display_type=#{displayType},
+			one_image=#{oneImage},
+			one_type=#{oneType},
+			one_display_id=#{oneDisplayId},
+			one_remark=#{oneRemark},
+			one_width=#{oneWidth},
+			one_height=#{oneHeight},
+			two_image=#{twoImage},
+			two_type=#{twoType},
+			two_display_id=#{twoDisplayId},
+			two_remark=#{twoRemark},
+			two_width=#{twoWidth},
+			two_height=#{twoHeight},
+			three_image=#{threeImage},
+			three_type=#{threeType},
+			three_display_id=#{threeDisplayId},
+			three_remark=#{threeRemark},
+			three_width=#{threeWidth},
+			three_height=#{threeHeight},
+			four_image=#{fourImage},
+			four_type=#{fourType},
+			four_display_id=#{fourDisplayId},
+			four_remark=#{fourRemark},
+			four_width=#{fourWidth},
+			four_height=#{fourHeight},
+			is_display=#{isDisplay}
+		where id=#{id}
+	</update>
+	
+	<select id="getCustonLayoutMaxSequence" parameterType="int" resultType="int">
+		SELECT MAX( `order`) FROM relation_custom_region_layout_24 WHERE custom_region_24_id=#{regionId}
+	</select>
+	
+	<insert id="insertRelationCustomRegionLayout" parameterType="map">
+		INSERT INTO relation_custom_region_layout_24(custom_region_24_id, custom_layout_24_id, `order`, create_time) VALUES(#{regionId},#{layoutId},#{sequence},now())
+	</insert>
+	
+	<delete id="deleteCustomLayout" parameterType="int">
+		DELETE FROM relation_custom_region_layout_24 WHERE id=#{id}
+	</delete>
+	
+	<select id="findCustomLayoutById" parameterType="int" resultMap="CustomLayoutMap">
+		select * from  custom_layout_24 where id=#{id} and  is_display=1
+	</select>
+	
+	<select id="findCustomLayoutIdByCustomRegionId" parameterType="int" resultType="int">
+		select custom_layout_24_id from relation_custom_region_layout_24 where custom_region_24_id=#{id}
+	</select>
+</mapper>  

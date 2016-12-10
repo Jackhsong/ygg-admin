@@ -1,0 +1,75 @@
+### 发布时打包名称 ###
+build.warname=admin
+
+jdbc.url=jdbc:mysql://localhost:3306/ygg_sale_platform?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.urlread=jdbc:mysql://localhost:3306/ygg_sale_platform?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.admin.url=jdbc:mysql://localhost:3306/ygg_admin?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.username=root
+jdbc.password=123456
+jdbc.admin.username=root
+jdbc.admin.password=123456
+
+### 缓存 ###
+cache.type=memcache
+cache.host=121.40.160.90
+cache.port=11211
+
+### 系统配置 ###
+config.env.type=dev
+config.timer.switch=0
+config.email.switch=0
+config.admin.accountId=70
+log.path=.
+config.order.downloadDir=E:\\orderDownload
+config.image.uploadDir=E:\\adminUploadFile
+config.update.statusURL=http://localhost:8080/ygg/order/modifynopayorderstatus?orderIds=
+config.domain.name=http://localhost:8080/ygg-admin/
+config.kd100.callBack=http://121.40.160.90:8099/yggManagerTest/order/kd100Callback
+config.kd100.refund.callBack=http://121.40.160.90:8099/yggManagerTest/outCall/kd100Callback
+config.check.url=http://127.0.0.1:8081/ygg-seller-admin/
+config.sync.url=http://127.0.0.1:8082/sync-seller-product/
+
+### 搜索 elasticsearch ###
+config.search.elasticsearch.host=192.168.1.19
+config.search.elasticsearch.port=9300
+config.search.elasticsearch.cluster.name=yangege19
+
+config.search.elasticsearch.crm.host=114.215.198.55
+config.search.elasticsearch.crm.port=9300
+config.search.elasticsearch.cluster.crm.name=crm
+
+### 笨鸟订单相关 ###
+config.birdex.order.cancel.url=http://115.29.211.17:8100/overseasTest/order/cancel
+config.birdex.order.modify.address.url=http://115.29.211.17:8100/overseasTest/order/modifyAddressApply
+config.birdex.order.modify.idcard.url=http://115.29.211.17:8100/overseasTest/order/updateIdCardInfo
+config.birdex.stock.refresh.url=http://115.29.211.17:8100/overseasTest/stock/getAllInventory
+
+### 左岸城堡
+提现打款 ###
+qqbs.weixin.appid=wxff7d85e6ce5725cc
+qqbs.weixin.appsecret=09f20ca7c2a12d3fee1a92a4fa598f67
+qqbs.weixin.mchid=1335017201
+qqbs.weixin.key=8934e7d15453e97507ef794cf7b0519d
+qqbs.weixin.cash.url=https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers
+qqbs.weixin.cash.cert=D:\\apiclient_cert.p12
+qqbs.weixin.token.url=http://127.0.0.1:9080/ygg-hqbs/wechatToken
+qqbs.weixin.create.qrcode.url=https://api.weixin.qq.com/cgi-bin/qrcode/create
+qqbs.weixin.show.qrcode.url=https://mp.weixin.qq.com/cgi-bin/showqrcode
+
+### 左岸城堡
+退款相关 ###
+weixin.refund.cert.path=D:\\cert\\apiclient_cert_refund_
+### 左岸城堡游戏 ###
+gegetuan_game_url=test.gegejia.com/yggGroupPurchase/game/web/
+### 左岸城堡web地址 ###
+gegetuan_web_url=http://test.gegejia.com/yggGroupPurchase/
+
+### 燕网提现打款 ###
+yw.weixin.appid=wxb0f02eb20fec465f
+yw.weixin.mchid=1342715601
+yw.weixin.key=8934e7d15453e97507ef794cf7b051aa
+yw.weixin.cash.url=https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers
+yw.weixin.cash.cert=/mnt/server/p12/apiclient_cert.p12
+
+### 燕网退款相关 ###
+weixin.refund.cert.path=/mnt/server/p12/apiclient_cert_refund_

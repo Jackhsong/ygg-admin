@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MallCountryBrandMapper">
+
+    <insert id="create" parameterType="map">
+        INSERT INTO mall_country_brand (mall_country_id,brand_id,sequence,is_display,create_time)
+        VALUES(#{mallCountryId},#{brandId},#{sequence},#{isDisplay},NOW() )
+    </insert>
+
+    <select id="findAllMallCountryBrandByPara" parameterType="map" resultType="map">
+        SELECT
+            id,
+            mall_country_id AS mallCountryId,
+            brand_id AS brandId,
+            sequence,
+            is_display AS isDisplay
+        FROM mall_country_brand
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test=" id != null ">AND id = #{id}</if>
+            <if test=" mallCountryId != null ">AND mall_country_id = #{mallCountryId}</if>
+            <if test=" brandId != null ">AND brand_id = #{brandId}</if>
+            <if test=" isDisplay != null ">AND is_display = #{isDisplay}</if>
+        </trim>
+        ORDER BY sequence DESC
+        <if test="start != null ">LIMIT #{start}, #{max}</if>
+    </select>
+
+    <select id="jsonInfo" resultType="map" parameterType="map">
+        SELECT
+          mc.id AS mallCountryId,
+          mcb.id AS countryBrandId,
+          mcb.is_display AS isDisplay,
+          b.id AS brandId,
+          b.name AS brandName,
+          b.hot_spots AS hotSpots,
+          b.introduce,
+          b.image,
+          b.state_id AS stateId,
+          mc.sequence AS mallCountrySequence,
+          mcb.sequence AS countryBrandSequence
+        FROM
+          mall_country mc JOIN mall_country_brand mcb ON mc.id = mcb.mall_country_id
+          JOIN brand b ON mcb.brand_id = b.id
+        WHERE mc.id = #{mallCountryId}
+        <if test ="isDisplay != null">AND  mcb.is_display = #{isDisplay}</if>
+        ORDER BY mcb.sequence DESC
+        <if test="start != null ">LIMIT #{start}, #{max}</if>
+    </select>
+
+    <select id="countJsonInfo" parameterType="map" resultType="int">
+        SELECT
+            COUNT(mc.id)
+        FROM
+        mall_country mc JOIN mall_country_brand mcb ON mc.id = mcb.mall_country_id
+        JOIN brand b ON mcb.brand_id = b.id
+        WHERE mc.id = #{mallCountryId}
+        <if test ="isDisplay != null">AND  mcb.is_display = #{isDisplay}</if>
+        ORDER BY mcb.sequence DESC
+    </select>
+
+
+    <update id="update" parameterType="map">
+        UPDATE mall_country_brand
+        <set>
+            <if test=" mallCountryId!= null">mall_country_id = #{mallCountryId} ,</if>
+            <if test=" brandId != null">brand_id = #{brandId} ,</if>
+            <if test=" sequence != null ">sequence = #{sequence},</if>
+            <if test=" isDisplay != null ">is_display = #{isDisplay}</if>
+        </set>
+        WHERE id IN
+        <foreach collection="idList" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM mall_country_brand WHERE id = #{id} LIMIT 1
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PartnerMapper">
+	<select id="findJsonPartnerInfo" parameterType="map" resultType="map">
+		SELECT
+			a.id AS userId,
+			a.`name` AS username,
+			a.recommended_code AS inviteCode,
+			ap.`name` AS realname,
+			ap.remark,
+			ap.age,
+			ap.mobile_number AS mobileNumber,
+			ap.weixin_name AS wxAccount,
+			ap.weixin_friends_count AS wxFriendsAmount,
+			ap.job_type AS jobType,
+			ap.monthly_income_type AS monthlyIncomeType,
+			ap.recommended_reason AS reason,
+			a.partner_status AS partnerStatus
+		FROM
+			account a,
+			account_partner_apply ap
+		WHERE
+			a.id = ap.account_id
+		AND (
+			a.partner_status = 2
+			OR a.partner_status = 3
+		)
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="inviteCode != null">AND a.recommended_code like #{inviteCode}</if>
+		<if test="realName != null">AND ap.`name` like #{realName}</if>
+		ORDER BY ap.id DESC	
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<select id="findPartnerInfo" parameterType="map" resultType="map">
+		SELECT
+			`name` AS realname
+		FROM
+			account_partner_apply
+		WHERE
+			1=1
+		<if test="accountId != null">AND account_id=#{accountId}</if>
+	</select>
+	
+	<select id="countPartnerInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			account a,
+			account_partner_apply ap
+		WHERE
+			a.id = ap.account_id
+		AND (
+			a.partner_status = 2
+			OR a.partner_status = 3
+		)
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="inviteCode != null">AND a.recommended_code like #{inviteCode}</if>
+		<if test="realName != null">AND ap.`name` like #{realName}</if>	
+	</select>
+
+	<update id="updatePartnerStatus" parameterType="map">
+		UPDATE account SET partner_status = #{status} WHERE id=#{accountId}
+	</update>
+	
+	<insert id="insertPartnerApply" parameterType="map">
+	INSERT INTO 
+		account_partner_apply
+		(
+			account_id,
+			`name`,
+			mobile_number,
+			weixin_name,
+			is_apply,
+			remark,
+			create_time
+		)
+	VALUES
+		(
+			#{accountId},
+			#{realName},
+			#{username},
+			#{wxAccount},
+			#{isApply},
+			#{remark},
+			now()
+		)		
+	</insert>
+	
+	<select id="findJsonPartnerApplyInfo" parameterType="map" resultType="map">
+		SELECT
+			ap.create_time AS createTime,
+			ap.update_time AS updateTime,
+			a.id AS userId,
+			a.`name` AS username,
+			ap.`name` AS realname,
+			ap.age,
+			ap.mobile_number AS mobileNumber,
+			ap.weixin_name AS wxAccount,
+			ap.weixin_friends_count AS wxFriendsAmount,
+			ap.job_type AS jobType,
+			ap.monthly_income_type AS monthlyIncomeType,
+			ap.recommended_reason AS reason,
+			a.apply_partner_status AS applyStatus
+		FROM
+			account a,
+			account_partner_apply ap
+		WHERE
+			a.id = ap.account_id
+		AND a.apply_partner_status != 1
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="realName != null">AND ap.`name` like #{realName}</if>
+		<if test="auditStatus != null">AND a.apply_partner_status=#{auditStatus}</if>
+		ORDER BY ap.id DESC	
+		<if test="start != null"> LIMIT #{start},#{max} </if>	
+	</select>
+	
+	<select id="countPartnerApplyInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			account a,
+			account_partner_apply ap
+		WHERE
+			a.id = ap.account_id
+		AND a.apply_partner_status != 1
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="realName != null">AND ap.`name` like #{realName}</if>
+		<if test="auditStatus != null">AND a.apply_partner_status=#{auditStatus}</if>	
+	</select>
+	
+	<update id="passPartnerApply" parameterType="map">
+		UPDATE account SET partner_status=2,apply_partner_status = #{status} WHERE id=#{accountId}
+	</update>
+	
+	<update id="refusePartnerApply" parameterType="map">
+		UPDATE account SET apply_partner_status = #{status} WHERE id=#{accountId}
+	</update>
+	
+	<select id="findJsonInviteRelationInfo" parameterType="map" resultType="map">
+		SELECT
+			t2.father_account_id AS userId,
+			t1.`name` AS username,
+			t1.recommended_code AS inviteCode,
+			t1.partner_status AS partnerStatus,
+			t2.curr_account_id AS inviteId,
+			t3.`name` AS invitedName,
+			t2.create_time AS createTime,
+			t2.curr_is_partner AS isPartner
+		FROM
+			account t1,
+			account_recommend_relation t2,
+			account t3
+		WHERE
+			t1.id = t2.father_account_id
+		AND t2.curr_account_id = t3.id
+		<if test="accountId != null">AND t2.father_account_id=#{accountId}</if>
+		<if test="username != null">AND t1.`name` like #{username}</if>
+		<if test="inviteId != null">AND t2.curr_account_id=#{inviteId}</if>
+		<if test="inviteName != null">AND t3.`name` like #{inviteName}</if>
+		<if test="inviteCode != null">AND t1.recommended_code like #{inviteCode}</if>
+		ORDER BY t2.create_time DESC	
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<select id="countInviteRelationInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			account t1,
+			account_recommend_relation t2,
+			account t3
+		WHERE
+			t1.id = t2.father_account_id
+		AND t2.curr_account_id = t3.id
+		<if test="accountId != null">AND t2.father_account_id=#{accountId}</if>
+		<if test="username != null">AND t1.`name` like #{username}</if>
+		<if test="inviteId != null">AND t2.curr_account_id=#{inviteId}</if>
+		<if test="inviteName != null">AND t3.`name` like #{inviteName}</if>
+		<if test="inviteCode != null">AND t1.recommended_code like #{inviteCode}</if>
+	</select>
+	
+	<select id="findJsonReturnIntegralInfo" parameterType="map" resultType="map">
+		SELECT
+			a.id AS userId,
+			a.`name` AS username,
+			a.partner_status AS partnerStatus,
+			a.recommended_code AS inviteCode,
+			ar.point AS point,
+			ar.type AS type,
+			ar.create_time AS createTime,
+			ar.recommended_account_id AS recommendedAccountId,
+			b.`name` AS invitedName,
+			o.number AS orderNumber,
+			o.status,
+			o.total_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.id AS orderId
+		FROM
+			account a,
+			account_recommended_return_point ar,
+			`order` o,
+			account b
+		WHERE
+			a.id = ar.account_id
+			AND o.id = ar.order_id
+			AND ar.recommended_account_id = b.id
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="inviteCode != null">AND a.recommended_code like #{inviteCode}</if>
+		<if test="returnType != null">AND ar.type like #{returnType}</if>
+		<if test="invitedName != null">AND b.`name` like #{invitedName}</if>
+		ORDER BY ar.create_time DESC	
+		<if test="start != null"> LIMIT #{start},#{max} </if>	
+	</select>
+	
+	<select id="countJsonReturnIntegralInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			account a,
+			account_recommended_return_point ar,
+			`order` o,
+			account b
+		WHERE
+			a.id = ar.account_id
+			AND o.id = ar.order_id
+			AND ar.recommended_account_id = b.id
+		<if test="accountId != null">AND a.id=#{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="inviteCode != null">AND a.recommended_code like #{inviteCode}</if>
+		<if test="returnType != null">AND ar.type like #{returnType}</if>
+		<if test="invitedName != null">AND b.`name` like #{invitedName}</if>
+	</select>
+	
+	<select id="findJsonExchangeIntegralInfo" parameterType="map" resultType="map">
+		SELECT
+			apw.id AS id,
+			a.id AS accountId,
+			a.`name` AS accountName,
+			apw.point AS point,
+			apw.card_name AS realName,
+			apw.type AS type,
+			apw.bank_type AS bankType,
+			apw.card_name AS cardName,
+			apw.card_number AS cardNumber,
+			apw.`status` AS `status`,
+			apw.create_time AS createTime
+		FROM
+			account a,
+			account_point_withdrawals apw
+		WHERE
+			a.id = apw.account_id
+		AND a.partner_status = 2
+		<if test="accountId != null">AND a.id = #{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="status != null">AND apw.`status` = #{status}</if>
+		ORDER BY apw.create_time DESC	
+		<if test="start != null"> LIMIT #{start},#{max} </if>		
+	</select>
+	
+	<select id="countJsonExchangeIntegralInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			account a,
+			account_point_withdrawals apw
+		WHERE
+			a.id = apw.account_id
+		AND a.partner_status = 2
+		<if test="accountId != null">AND a.id = #{accountId}</if>
+		<if test="username != null">AND a.`name` like #{username}</if>
+		<if test="status != null">AND apw.`status` = #{status}</if>		
+	</select>
+	
+	<update id="dealWithExchange" parameterType="map">
+		UPDATE account_point_withdrawals SET financial_affairs_card_id=#{transferAccountId},`status`=#{status} WHERE id=#{id}
+	</update>
+	
+	<select id="findJsonOrderDetailInfo" parameterType="map" resultType="map">
+		SELECT
+			a.id AS accountId,
+			a.`name` AS accountName,
+			ar.point AS point,
+			ar.is_first_recommended AS isInvited,
+			o.id AS orderId,
+			o.`status` AS orderStatus,
+			o.number AS orderNumber,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.real_price AS realPrice
+		FROM
+			`order` o,
+			account_recommended_return_point ar,
+			account a
+		WHERE
+			ar.order_id = o.id
+		AND ar.account_id = a.id
+		AND a.id=#{accountId}
+		ORDER BY ar.create_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	
+	<select id="countJsonOrderDetailInfo" parameterType="map" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			`order` o,
+			account_recommended_return_point ar,
+			account a
+		WHERE
+			ar.order_id = o.id
+		AND ar.account_id = a.id
+		AND a.id=#{accountId}		
+	</select>
+	
+	<select id="findRecommendFriendsByAccountId" parameterType="int" resultType="map">
+		SELECT
+			t1.curr_account_id AS accountId,
+			t1.father_account_id AS parentId,
+			t1.curr_is_partner AS isPartner
+		FROM
+			account_recommend_relation t1
+		LEFT JOIN account_recommend_relation t2 ON t1.father_account_id = t2.curr_account_id
+		WHERE
+			t1.curr_account_id = #{accountId};
+	</select>
+	
+	<select id="findInvitedFriendsByAccountId" parameterType="int" resultType="map">
+		SELECT
+			t.curr_account_id AS accountId,
+			t.curr_is_partner AS isPartner
+		FROM
+			account_recommend_relation t
+		WHERE
+			t.father_account_id = #{accountId}	
+	</select>
+	
+	<insert id="insertAccountPartnerRelation" parameterType="map">
+		INSERT INTO account_partner_relation(curr_account_id,father_account_id) VALUES(#{accountId},#{parentId})
+	</insert>
+	
+	<delete id="deleteFromAccountPartnerRelation" parameterType="map">
+		DELETE from account_partner_relation WHERE curr_account_id=#{accountId} AND father_account_id=#{parentId}
+	</delete>
+	
+	<update id="updateAccountInvitedAmount">
+		UPDATE account
+		<set>
+          <if test="directInvite != null"> recommended_count=#{directInvite}, </if>
+          <if test="indirectInvite != null"> sub_recommended_count=#{indirectInvite}</if>
+     	</set>
+     	where id=#{accountId}
+	</update>
+	
+	<update id="updateAccountRecommendRelation" parameterType="int">
+		UPDATE account_recommend_relation SET curr_is_partner=1 WHERE curr_account_id=#{accountId}
+	</update>
+	
+	<update id="updateAccountIndirectInvitedAmount" parameterType="int">
+		UPDATE account set sub_recommended_count=sub_recommended_count+1 where id=#{accountId}
+	</update>
+	
+	<select id="findFatherAccountByAccountId" parameterType="int" resultType="int">
+		SELECT father_account_id FROM account_recommend_relation WHERE curr_account_id=#{id}
+	</select>
+	
+	<update id="updateAccountRecommendedCount" parameterType="int">
+		UPDATE account SET recommended_count=recommended_count-1 WHERE id=#{id} AND recommended_count>0
+	</update>
+	
+	<update id="updateAccountSubRecommendedCount" parameterType="int">
+		UPDATE account SET sub_recommended_count=sub_recommended_count-1 WHERE id=#{id} AND sub_recommended_count>0
+	</update>
+	
+	<select id="findAccountInfoByAccountRecommendedReturnPoint" parameterType="map" resultType="map">
+		SELECT
+			account_id as accountId,
+			id as id
+		FROM
+			account_recommended_return_point
+		WHERE
+			type=1
+			AND order_id IN 
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</select>
+	
+	<delete id="deleteAccountInfoByAccountRecommendedReturnPoint" parameterType="map">
+		DELETE FROM account_recommended_return_point WHERE id IN 
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+	</delete>
+	
+	<select id="findFatherPartnerAccountIdById" parameterType="int" resultType="int">
+		SELECT father_account_id FROM account_partner_relation WHERE curr_account_id=#{faterAccountId}
+	</select>
+	
+	<update id="updateAccountIsRecommend" parameterType="int">
+		UPDATE account SET is_recommended=1 WHERE id=#{accountId}
+	</update>
+	
+	<insert id="insertRecommendRelation" parameterType="map">
+		INSERT INTO account_recommend_relation(curr_account_id, father_account_id) VALUES(#{currentAccountId},#{faterAccountId})
+	</insert>
+	
+	<update id="updateAccountRecommendedCountAddOne" parameterType="int">
+		UPDATE account SET recommended_count=recommended_count+1 WHERE id=#{accountId}
+	</update>
+	
+	<select id="findRecommendRelationIsExist" parameterType="map" resultType="int">
+		SELECT COUNT(id) FROM account_recommend_relation WHERE curr_account_id=#{currentAccountId} AND father_account_id=#{faterAccountId}
+	</select>
+	
+	<select id="findRecommendRelationByFatherId" parameterType="int" resultType="AccountRecommendRelationEntity">
+		SELECT
+			id,
+			curr_account_id AS currentAccountId,
+			father_account_id AS fatherAccountId,
+			curr_is_partner AS currentIsPartner
+		FROM
+			account_recommend_relation
+		WHERE
+			father_account_id = #{accountId}
+		ORDER BY curr_account_id
+	</select>
+	
+	<select id="findRecommendRelationByCurrentId" parameterType="int"  resultType="AccountRecommendRelationEntity">
+		SELECT
+			id,
+			curr_account_id AS currentAccountId,
+			father_account_id AS fatherAccountId,
+			curr_is_partner AS currentIsPartner
+		FROM
+			account_recommend_relation
+		WHERE
+			curr_account_id = #{accountId}
+	</select>
+	
+	<update id="updateSubRecommendedCount" parameterType="map">
+		update account  set sub_recommended_count = sub_recommended_count + #{count} where id=#{accountId}
+	</update>
+	
+	<insert id="saveAccountPartnerTrainRelation" parameterType="map">
+		INSERT INTO account_partner_train_relation(father_account_id,curr_account_id) VALUES(#{fatherAccountId},#{currAccountId})
+	</insert>
+	
+	<update id="updateAccountRecommendedCountForAddOne" parameterType="int">
+		update account set recommended_count=recommended_count+1 where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ChannelMapper">  
+	<select id="findAllChannel" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			channel_name AS channelName,
+			is_available AS isAvailable
+		FROM
+			channel
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="name != null">AND channel_name LIKE #{name}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countChannel" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(id)
+		FROM
+			channel
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="name != null">AND channel_name LIKE #{name}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		</trim>		
+	</select>
+	
+	<insert id="saveChannel" parameterType="string">
+		INSERT INTO channel(channel_name) VALUES(#{name})
+	</insert>
+	
+	<update id="updateChannel" parameterType="map">
+		UPDATE channel
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="name != null">channel_name=#{name},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="deleteChannel" parameterType="int">
+		DELETE FROM channel WHERE id=#{id}
+	</delete>
+	
+	<select id="findChannelIdByName" parameterType="string" resultType="int">
+		SELECT id FROM channel WHERE channel_name=#{name}
+	</select>
+	
+</mapper>  

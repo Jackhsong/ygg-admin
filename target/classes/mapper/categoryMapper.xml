@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CategoryMapper">
+	<resultMap type="CategoryFirstEntity" id="CategoryFirstMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="image1" property="image1" />
+    	<result column="image2_new" property="image2" />
+    	<result column="sequence" property="sequence" />
+    	<result column="tag" property="tag" />
+    	<result column="color" property="color" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="is_show_in_app" property="isShowInApp" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+    
+	<resultMap type="CategorySecondEntity" id="CategorySecondMap">
+    	<id column="id" property="id" />
+    	<result column="first_category_id" property="categoryFirstId"/>
+    	<result column="name" property="name" />
+    	<result column="sequence" property="sequence" />
+    	<result column="order_type" property="orderType" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="is_isplay" property="isDisplay" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+    
+     <!-- 查询一级分类的全部信息 -->
+     <select id="findAllCategoryFirst" parameterType="map" resultMap="CategoryFirstMap">
+     	SELECT * FROM `category_first`
+     	<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and id = #{id}</if>
+	     	<if test="name != null"> and `name` like #{name} </if>
+	     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+	     	<if test="isShowInApp != null">and is_show_in_app=#{isShowInApp} </if>
+     	</trim>
+     	ORDER BY sequence DESC,id DESC
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+   	 <!-- 统计一级分类的全部信息 -->
+     <select id="countCategoryFirst" parameterType="map" resultType="int">
+     	SELECT COUNT(*) FROM `category_first` 
+		<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and id = #{id}</if>
+	     	<if test="name != null"> and name like #{name} </if>
+	     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+	     	<if test="isShowInApp != null">and is_show_in_app=#{isShowInApp} </if>
+     	</trim>
+     </select>
+     
+     <!-- 更新一级分类状态 -->
+     <update id="updateCategoryFirstStatus" parameterType="map">
+     	UPDATE category_first
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="isAvailable != null">is_available=#{isAvailable},</if>
+     		<if test="isShowInApp != null">is_show_in_app=#{isShowInApp}</if>
+     	</trim>
+     	WHERE id in
+     	<foreach collection="idList" index="index" item="item" open="(" close=")" separator=",">
+     		#{item}
+     	</foreach> 
+     </update>
+     
+     <!-- 查找一级分类最大排序值 -->
+     <select id="findCategoryFirstMaxSequence" resultType="int">
+     	SELECT MAX(sequence) FROM category_first;
+     </select>   
+    
+	<!-- 插入一级分类信息 -->
+    <insert id="insertCategoryFirst" parameterType="map">
+		INSERT INTO category_first(`name`,image1,image2,image2_new,tag,color,sequence,is_available,is_show_in_app)
+		VALUES(#{name},#{image1},#{image2},#{image2_new},#{tag},#{color},#{sequence},#{isAvailable},#{isShowInApp})
+    </insert>
+    
+    <!-- 更新一级分类 -->
+    <update id="updateCategoryFirst" parameterType="map">
+    	UPDATE category_first
+    	<trim prefix="SET" suffixOverrides=",">
+    		<if test="name != null">`name`=#{name},</if>
+    		<if test="image1 != null">`image1`=#{image1},</if>
+    		<if test="image2 != null">`image2_new`=#{image2},</if>
+    		<if test="tag != null">`tag`=#{tag},</if>
+    		<if test="color != null">`color`=#{color},</if>
+    		<if test="sequence != null">`sequence`=#{sequence},</if>
+    		<if test="isAvailable != null">`is_available`=#{isAvailable},</if>
+    		<if test="isShowInApp != null">`is_show_in_app`=#{isShowInApp}</if>
+    	</trim>
+    	WHERE id=#{id}
+    </update>
+    
+     
+     <!-- 查找所有二级分类 -->
+     <select id="findAllCategorySecond" parameterType="map" resultMap="CategorySecondMap">
+     	SELECT * FROM `category_second`
+     	<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and id = #{id}</if>
+	     	<if test="categoryFirstId != null">and first_category_id = #{categoryFirstId}</if>
+	     	<if test="name != null"> and `name`=#{name} </if>
+	     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+	     	<if test="isDisplay != null">and is_display=#{isDisplay} </if>		
+     	</trim>
+     	ORDER BY first_category_id DESC,sequence DESC,id DESC
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <select id="findAllCategorySecondInfo" parameterType="map" resultType="map">
+		 SELECT
+			cs.id,
+			cs.`name`,
+		    cs.image,
+			cs.is_available AS isAvailable,
+			cs.order_type AS orderType,
+			cs.sequence,
+			cs.is_display AS isDisplay,
+			cf.id AS fId,
+			cf.`name` AS fname
+		FROM
+			 category_second cs,category_first cf
+		WHERE cs.first_category_id = cf.id
+	     	<if test="id != null">and cs.id = #{id}</if>
+	     	<if test="categoryFirstId != null">and cs.first_category_id = #{categoryFirstId}</if>
+	     	<if test="name != null"> and cs.name like #{name} </if>
+	     	<if test="fname != null"> and cf.name like #{fname} </if>
+	     	<if test="isAvailable != null">and cs.is_available=#{isAvailable} </if>
+	     	<if test="isDisplay != null">and cs.is_display=#{isDisplay} </if>
+		ORDER BY cf.sequence DESC,cs.sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>  	
+     </select>
+     
+     <!-- 统计二级分类 -->
+     <select id="countCategorySecondInfo" parameterType="map" resultType="int">
+		 SELECT
+			COUNT(cs.id)
+		FROM
+			 category_second cs,category_first cf
+		WHERE cs.first_category_id = cf.id
+	     	<if test="id != null">and cs.id = #{id}</if>
+	     	<if test="categoryFirstId != null">and cs.first_category_id = #{categoryFirstId}</if>
+	     	<if test="name != null"> and cs.name like #{name} </if>
+	     	<if test="fname != null"> and cf.name like #{fname} </if>
+	     	<if test="isAvailable != null">and cs.is_available=#{isAvailable} </if>
+	     	<if test="isDisplay != null">and cs.is_display=#{isDisplay} </if>
+     </select>
+     
+     <select id="findCategorySecondMaxSequence" parameterType="int" resultType="int">
+     	SELECT MAX(sequence) FROM category_second WHERE first_category_id=#{firstId}
+     </select>
+     
+     <insert id="insertCategorySecond" parameterType="map">
+     	INSERT INTO category_second(first_category_id,`name`,image,order_type,sequence,is_available,is_display)
+     	VALUES(#{categoryFirstId},#{name},#{image},#{orderType},#{sequence},#{isAvailable},#{isDisplay})
+     </insert>
+     
+     <update id="updateCategorySecond" parameterType="map">
+     	UPDATE category_second
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="categoryFirstId != null">first_category_id = #{categoryFirstId},</if>
+     		<if test="name != null">`name` = #{name},</if>
+     		<if test="image != null">`image` = #{image},</if>
+     		<if test="orderType != null">`order_type` = #{orderType},</if>
+     		<if test="sequence != null">`sequence` = #{sequence},</if>
+     		<if test="isAvailable != null">`is_available` = #{isAvailable},</if>
+     		<if test="isDisplay != null">`is_display` = #{isDisplay}</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+     
+     <update id="updateCategorySecondStatus" parameterType="map">
+     	UPDATE category_second 
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="isAvailable != null">is_available=#{isAvailable},</if>
+     		<if test="isDisplay != null">is_display=#{isDisplay}</if>
+     	</trim>
+     	WHERE id in
+     	<foreach collection="idList" index="index" item="item" open="(" close=")" separator=",">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     
+     <select id="findAllCategoryThirdInfo" parameterType="map" resultType="map">
+		SELECT
+			ct.id,
+			ct.first_category_id AS fid,
+			ct.second_category_id AS sid,
+			ct.`name`,
+			ct.sequence,
+			ct.is_hot AS isHot,
+			ct.is_highlight AS isHighlight,
+			ct.is_available AS isAvailable,
+			ct.is_display AS isDisplay,
+			cs.`name` AS sname,
+			cs.order_type AS orderType,
+			cf.`name` AS fname,
+			ct.order_type as category_third_orderType
+		FROM
+			category_third ct
+		LEFT JOIN category_second cs ON ct.second_category_id = cs.id
+		LEFT JOIN category_first cf ON ct.first_category_id = cf.id
+		<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and ct.id = #{id}</if>
+	     	<if test="categoryFirstId != null">and cf.id = #{categoryFirstId}</if>
+	     	<if test="categorySecondId != null">and cs.id = #{categorySecondId}</if>
+	     	<if test="name != null"> and  ct.name like #{name} </if>
+	     	<if test="fname != null"> and cf.name like #{fname} </if>
+	     	<if test="sname != null"> and cs.name like #{sname} </if>
+	     	<if test="isAvailable != null">and ct.is_available=#{isAvailable} </if>
+		</trim>		
+		ORDER BY cf.sequence DESC, cs.sequence DESC,ct.sequence DESC,ct.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>    	
+     </select>
+     
+     <select id="countCategoryThirdInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(ct.id)
+		FROM
+			category_third ct
+		LEFT JOIN category_second cs ON ct.second_category_id = cs.id
+		LEFT JOIN category_first cf ON ct.first_category_id = cf.id
+		<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and ct.id = #{id}</if>
+	     	<if test="categoryFirstId != null">and cf.id = #{categoryFirstId}</if>
+	     	<if test="categorySecondId != null">and cs.id = #{categorySecondId}</if>
+	     	<if test="name != null"> and  ct.name like #{name} </if>
+	     	<if test="fname != null"> and cf.name like #{fname} </if>
+	     	<if test="sname != null"> and cs.name like #{sname} </if>
+	     	<if test="isAvailable != null">and ct.is_available=#{isAvailable} </if>
+		</trim>     	
+     </select>
+     
+     <select id="findAllCategoryThird" parameterType="map" resultType="CategoryThirdEntity">
+		SELECT
+			id,
+			first_category_id AS firstCategoryId,
+			second_category_id AS secondCategoryId,
+			`name`,
+			sequence,
+			is_hot AS isHot,
+			is_highlight AS isHighlight,
+			is_available AS isAvailable,
+			create_time AS createTime
+		FROM
+			category_third
+		<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null">and id = #{id}</if>
+	     	<if test="categoryFirstId != null">and first_category_id = #{categoryFirstId}</if>
+	     	<if test="categorySecondId != null">and second_category_id = #{categorySecondId}</if>
+	     	<if test="name != null"> and  `name`=#{name} </if>
+	     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+		</trim>
+		ORDER BY sequence DESC,id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>    	
+     </select>
+     
+     <insert id="insertCategoryThird" parameterType="map">
+     	INSERT INTO category_third(first_category_id,second_category_id,`name`,is_hot,is_highlight,is_available,is_display,order_type)VALUES(#{categoryFirstId},#{categorySecondId},#{name},#{isHot},#{isHighlight},#{isAvailable},#{isDisplay},#{orderType})
+     </insert>
+     
+     <update id="updateCategoryThird" parameterType="map">
+     	UPDATE category_third
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="categoryFirstId != null">first_category_id=#{categoryFirstId},</if>
+     		<if test="categorySecondId != null">second_category_id=#{categorySecondId},</if>
+     		<if test="name != null">`name`=#{name},</if>
+     		<if test="sequence != null">sequence=#{sequence},</if>
+     		<if test="isHot != null">is_hot=#{isHot},</if>
+     		<if test="isHighlight != null">is_highlight=#{isHighlight},</if>
+     		<if test="isAvailable != null">is_available=#{isAvailable},</if>
+     		<if test="isDisplay != null">is_display=#{isDisplay},</if>
+     		<if test="orderType != null">order_type=#{orderType},</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+     
+     <update id="updateCategoryThirdStatus" parameterType="map">
+     	update category_third set is_available=#{isAvailable} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <update id="updateCategoryThirdDisplay" parameterType="map">
+     	update category_third set is_display=#{isDisplay} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <select id="findAllCategoryFirstWindow" parameterType="map" resultType="CategoryFirstWindowEntity">
+		SELECT
+			t1.id,
+			t1.first_category_id AS firstCategoryId,
+			t2.`name` AS firstCategoryName,
+			t1.left_relation_type AS leftRelationType,
+			t1.left_relation_object_id AS leftRelationObjectId,
+			t1.left_image AS leftImage,
+			t1.left_image_width AS leftImageWidth,
+			t1.left_image_height AS leftImageHeight,
+			t1.right_relation_type AS rightRelationType,
+			t1.right_relation_object_id AS rightRelationObjectId,
+			t1.right_image AS rightImage,
+			t1.right_image_width AS rightImageWidth,
+			t1.right_image_height AS rightImageHeight,
+			t1.remark,
+			t1.sequence,
+			t1.is_available AS isAvailable
+		FROM
+			category_first_window t1,
+			category_first t2
+		WHERE
+			t1.first_category_id = t2.id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="categoryFirstId != null">AND t1.first_category_id=#{categoryFirstId}</if>
+			<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>
+		ORDER BY t1.sequence DESC,t2.sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if> 		
+     </select>
+     
+     <select id="countCategoryFirstWindow" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			category_first_window t1,
+			category_first t2
+		WHERE
+			t1.first_category_id = t2.id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="categoryFirstId != null">AND t1.first_category_id=#{categoryFirstId}</if>
+			<if test="isAvailable != null">AND t1.is_available=#{isAvailable}</if>
+     </select>
+     
+     <insert id="insertCategoryFirstWindow" parameterType="map">
+		INSERT INTO category_first_window (
+			first_category_id,
+			left_relation_type,
+			left_relation_object_id,
+			left_image,
+			left_image_width,
+			left_image_height,
+			right_relation_type,
+			right_relation_object_id,
+			right_image,
+			right_image_width,
+			right_image_height,
+			remark,
+			is_available
+		)
+		VALUES(
+			#{categoryFirstId},
+			#{leftRelationType},
+			#{leftRelationObjectId},
+			#{leftImage},
+			#{leftImageWidth},
+			#{leftImageHeight},
+			#{rightRelationType},
+			#{rightRelationObjectId},
+			#{rightImage},
+			#{rightImageWidth}, 
+			#{rightImageHeight},
+			#{remark},
+			#{isAvailable}
+		)     	
+     </insert>
+     
+     <update id="updateCategoryFirstWindow" parameterType="map">
+     	update category_first_window
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="categoryFirstId != null">first_category_id=#{categoryFirstId},</if>
+     		<if test="leftRelationType != null">left_relation_type=#{leftRelationType},</if>
+     		<if test="leftRelationObjectId != null">left_relation_object_id=#{leftRelationObjectId},</if>
+     		<if test="leftImage != null">left_image=#{leftImage},</if>
+     		<if test="leftImageWidth != null">left_image_width=#{leftImageWidth},</if>
+     		<if test="leftImageHeight != null">left_image_height=#{leftImageHeight},</if>
+     		<if test="rightRelationType != null">right_relation_type=#{rightRelationType},</if>
+     		<if test="rightRelationObjectId != null">right_relation_object_id=#{rightRelationObjectId},</if>
+     		<if test="rightImage != null">right_image=#{rightImage},</if>
+     		<if test="rightImageWidth != null">right_image_width=#{rightImageWidth},</if>
+     		<if test="rightImageHeight != null">right_image_height=#{rightImageHeight},</if>
+     		<if test="sequence != null">sequence=#{sequence},</if>
+     		<if test="remark != null">remark=#{remark},</if>
+     		<if test="isAvailable != null">is_available=#{isAvailable}</if>
+     	</trim>
+     	where id=#{id}
+     </update>
+     
+     <update id="updateCategoryFirstWindowStatus" parameterType="map">
+     	update category_first_window set is_available=#{isAvailable} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     
+     <select id="findAllCategoryActivity" parameterType="map" resultType="CategoryActivityEntity">
+		SELECT
+			id,
+			relation_type AS relationType,
+			relation_object_id AS relationObjectId,
+			image,
+			remark,
+			sequence,
+			is_available AS isAvailable,
+			create_time AS createTime
+		FROM
+			category_activity
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id = #{id}</if>
+			<if test="remark != null">AND remark like #{remark}</if>
+			<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		</trim> 
+		ORDER BY sequence DESC,id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>  	
+     </select>
+     
+     <select id="countCategoryActivity" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			category_activity
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id = #{id}</if>
+			<if test="remark != null">AND remark like #{remark}</if>
+			<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		</trim>    
+     </select>
+     
+     
+     <insert id="insertCategoryActivity" parameterType="map">
+     	INSERT INTO category_activity(relation_type,relation_object_id,image,image_width,image_height,remark,is_available)
+     	VALUES(#{relationType},#{relationObjectId},#{image},#{width},#{height},#{remark},#{isAvailable})
+     </insert>
+     
+     
+     <update id="updateCategoryActivity" parameterType="map">
+     	UPDATE category_activity
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="relationType != null">relation_type=#{relationType},</if>
+     		<if test="relationObjectId != null">relation_object_id=#{relationObjectId},</if>
+     		<if test="image != null">image=#{image},</if>
+     		<if test="width != null">image_width=#{width},</if>
+     		<if test="height != null">image_height=#{height},</if>
+     		<if test="sequence != null">sequence=#{sequence},</if>
+     		<if test="remark != null">remark=#{remark},</if>
+     		<if test="isAvailable != null">is_available=#{isAvailable}</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+     
+     <update id="updateCategoryActivityStatus" parameterType="map">
+     	update category_activity set is_available = #{isAvailable} where id in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <select id="findProductCategory" parameterType="map" resultType="CategoryEntity">
+		SELECT
+			t1.id,
+			t1.product_base_id AS productBaseId,
+			t1.category_first_id AS categoryFirstId,
+			t2.`name` AS categoryfirstName,
+			t1.category_second_id AS categorySecondId,
+			t3.`name` AS categorySecondName,
+			t1.category_third_id AS categoryThirdId,
+			t4.`name` AS categoryThirdName,
+			t4.sequence AS sequence
+		FROM
+			relation_category_and_product_base t1
+		LEFT JOIN category_first t2 ON t1.category_first_id = t2.id
+		LEFT JOIN category_second t3 ON t1.category_second_id = t3.id
+		LEFT JOIN category_third t4 ON t1.category_third_id = t4.id
+		WHERE
+			t1.product_base_id = #{baseId}
+		ORDER BY
+			t2.sequence DESC,
+			t3.sequence DESC,
+			t4.sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <select id="countProductCategory" parameterType="map" resultType="int">
+		SELECT
+			COUNT(t1.id)
+		FROM
+			relation_category_and_product_base t1
+		LEFT JOIN category_first t2 ON t1.category_first_id = t2.id
+		LEFT JOIN category_second t3 ON t1.category_second_id = t3.id
+		LEFT JOIN category_third t4 ON t1.category_third_id = t4.id
+		WHERE t1.product_base_id = #{productId}     	
+     </select>
+     
+     <insert id="insertCategory" parameterType="CategoryEntity" useGeneratedKeys="true" keyProperty="id">
+     	insert into relation_category_and_product_base(product_base_id,category_first_id,category_second_id,category_third_id)
+     	values(#{productBaseId},#{categoryFirstId},#{categorySecondId},#{categoryThirdId})
+     </insert>
+     
+     <delete id="deleteCategory" parameterType="map">
+     	delete from relation_category_and_product_base where product_base_id=#{productBaseId} and id not in
+     	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </delete>
+     
+     <update id="updateCategory" parameterType="CategoryEntity">
+     	UPDATE relation_category_and_product_base 
+     	SET 
+     		category_first_id=#{categoryFirstId},
+     		category_second_id=#{categorySecondId},
+     		category_third_id=#{categoryThirdId}
+     	WHERE id=#{id}
+     </update>
+     
+     <insert id="insertRelationCategoryAndProduct" parameterType="list">
+     	INSERT INTO relation_category_and_product(`product_base_id`,`product_id`,`category_third_id`) values
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.productBaseId},#{item.productId},#{item.categoryThirdId})
+     	</foreach>
+     </insert>
+     
+     <delete id="deleteRelationCategoryAndProduct" parameterType="map">
+     	delete from relation_category_and_product 
+     	<trim prefix="WHERE" prefixOverrides="AND">
+     		<if test="productId != null">AND product_id=#{productId}</if>
+     		<if test="productBaseId != null">AND product_base_id=#{productBaseId}</if>
+     	</trim>
+     </delete>
+     
+     <select id="findMallProductById" parameterType="int" resultType="map">
+		SELECT
+			product_base_id AS productBaseId,
+			product_id AS productId,
+			category_third_id AS categoryThirdId
+		FROM
+			relation_category_and_product
+		WHERE
+			product_id = #{id}     	
+     </select>
+     
+     <select id="findThirdCatetoryByProductId" parameterType="int" resultType="RelationCategoryAndProductEntity">
+		 SELECT
+		 	id,
+		 	product_base_id AS productBaseId,
+		 	product_id AS productId,
+			category_third_id AS categoryThirdId,
+			sequence
+		FROM
+			relation_category_and_product
+		WHERE
+			product_id = #{id}    	
+     </select>
+     
+    <select id="countThirdCatetoryByProductId" parameterType="int" resultType="int">
+		 SELECT
+		 	COUNT(id)
+		FROM
+			relation_category_and_product
+		WHERE
+			product_id = #{id}    	
+     </select>
+     
+     <update id="updateProductCategoryThirdSequence" parameterType="map">
+     	update relation_category_and_product set sequence=#{sequence} where id=#{id}
+     </update>
+     
+     <select id="checkProductBaseCategoryIsExist" parameterType="CategoryEntity" resultType="CategoryEntity">
+		SELECT
+			id,
+			product_base_id AS productBaseId,
+			category_first_id AS categoryFirstId,
+			category_second_id AS categorySecondId,
+			category_third_id AS categoryThirdId
+		FROM
+			relation_category_and_product_base
+		WHERE
+			product_base_id = #{productBaseId}
+		AND category_first_id = #{categoryFirstId}
+		AND category_second_id = #{categorySecondId}
+		AND category_third_id = #{categoryThirdId}     	
+     </select>
+     
+     <select id="checkProductCategoryIsExist" parameterType="map" resultType="RelationCategoryAndProductEntity">
+		 SELECT
+		 	id,
+		 	product_base_id AS productBaseId,
+		 	product_id AS productId,
+			category_third_id AS categoryThirdId,
+			sequence
+		FROM
+			relation_category_and_product
+		WHERE
+			product_base_id = #{productBaseId}
+		AND product_id = #{productId}
+		AND	category_third_id = #{categoryThirdId}
+     </select>
+     
+     <select id="findCategoryThirdIdByPara" parameterType="map" resultType="int">
+     	SELECT id FROM category_third WHERE second_category_id IN
+     	<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </select>
+     
+     <delete id="deleteRelationCategoryAndProductBaseByCategorySecondId" parameterType="map">
+     	DELETE FROM relation_category_and_product_base WHERE category_second_id IN
+     	<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </delete>
+     
+     <update id="updateRelationCategoryAndProductBaseByCategoryThirdId" parameterType="map">
+     	UPDATE relation_category_and_product_base SET category_third_id=0 WHERE category_third_id IN
+     	<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </update>
+     
+     <delete id="deleteRelationCategoryAndProductByCategoryThirdId" parameterType="map">
+     	DELETE FROM relation_category_and_product WHERE category_third_id IN
+     	<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+     		#{item}
+     	</foreach>
+     </delete>
+     
+     <select id="countCategoryThirdGroupByCategorySecondId" resultType="map">
+		SELECT
+			second_category_id AS categorySecondId,
+			COUNT(id) AS amount
+		FROM
+			category_third
+		GROUP BY
+			second_category_id     	
+     </select>
+
+
+	<select id="findCategoryThirdInfoByIds" parameterType="list" resultType="map">
+		SELECT id,name FROM category_third WHERE id IN
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findCategorySecondInfoByIds" parameterType="list" resultType="map">
+		SELECT id,name FROM category_second WHERE id IN
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findCategoryFirstNameBybid" parameterType="int" resultType="string">
+		SELECT
+			cf.`name`
+		FROM
+			category_first cf,
+			relation_category_and_product_base rc
+		WHERE
+			cf.id = rc.category_first_id
+		AND rc.product_base_id = #{id}
+		LIMIT 1	
+	</select>
+     
+</mapper>

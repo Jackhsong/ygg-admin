@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ActivitiesCommonMapper">
+	<resultMap type="ActivitiesCommonEntity" id="ActivitiesCommonMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="desc" property="desc" />
+		<result column="gegesay" property="gegesay" />
+		<result column="gege_image_id" property="gegeImageId" />
+		<result column="wx_share_title" property="wxShareTitle" />
+		<result column="image" property="image" />
+		<result column="is_available" property="isAvailable" />
+		<result column="new_image17" property="newImage17" />
+		<result column="type" property="type" />
+	</resultMap>
+
+	<!-- 插入通用专场 -->
+	<insert id="save" parameterType="ActivitiesCommonEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO activities_common
+		(`name`, `desc`, `gegesay`, `wx_share_title`, `image`,
+		`is_available`,`gege_image_id`,`new_image17`,`type`)
+		VALUES (#{name},
+		#{desc},#{gegesay},#{wxShareTitle}, #{image}, #{isAvailable},
+		#{gegeImageId},#{newImage17},#{type})
+	</insert>
+
+	<!-- 更新通用专场 -->
+	<update id="update" parameterType="map">
+		UPDATE `activities_common`
+		<set>
+			<if test="name != null"> name=#{name}, </if>
+			<if test="desc != null"> `desc`=#{desc}, </if>
+			<if test="gegesay != null"> `gegesay`=#{gegesay}, </if>
+			<if test="wxShareTitle != null"> `wx_share_title`=#{wxShareTitle}, </if>
+			<if test="image != null"> image=#{image}, </if>
+			<if test="isAvailable != null">is_available=#{isAvailable}, </if>
+			<if test="gegeImageId != null">gege_image_id=#{gegeImageId},</if>
+			<if test="newImage17 != null">new_image17=#{newImage17},</if>
+			<if test="type != null">type=#{type}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 查询通用专场 -->
+	<select id="findActivitiesCommon" parameterType="map"
+		resultMap="ActivitiesCommonMap">
+		SELECT
+		t1.*
+		FROM
+		activities_common t1
+		LEFT OUTER JOIN
+		relation_activities_common_and_product t2 ON t1.id
+		=
+		t2.activities_common_id
+		LEFT OUTER JOIN product t3 ON t2.product_id =
+		t3.id
+		WHERE
+		1=1
+		<if test="name != null">AND t1.name like #{name} </if>
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable} </if>
+		<if test="id != null"> AND t1.id=#{id} </if>
+		<if test="productId != null"> AND t2.product_id=#{productId} </if>
+		<if test="productName != null"> AND t3.`name` like #{productName} </if>
+		<if test="productCode != null"> AND t3.`code` like #{productCode} </if>
+		<if test="type != null"> AND t1.`type`=#{type} </if>
+		GROUP BY t1.id
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max} </if>
+	</select>
+
+	<!-- 统计通用专场数量 -->
+	<select id="countActivitiesCommon" parameterType="map"
+		resultType="int">
+		SELECT
+		count(DISTINCT(t1.id))
+		FROM
+		activities_common t1
+		LEFT OUTER JOIN
+		relation_activities_common_and_product t2 ON t1.id
+		=
+		t2.activities_common_id
+		LEFT OUTER JOIN product t3 ON t2.product_id =
+		t3.id
+		WHERE
+		1=1
+		<if test="name != null">AND t1.name like #{name} </if>
+		<if test="isAvailable != null">AND t1.is_available=#{isAvailable} </if>
+		<if test="id != null"> AND t1.id=#{id} </if>
+		<if test="productId != null"> AND t2.product_id=#{productId} </if>
+		<if test="productName != null"> AND t3.`name` like #{productName} </if>
+		<if test="type != null"> AND t1.`type`=#{type} </if>
+	</select>
+
+	<!-- 根据通用专场ID查询所有商品ID -->
+	<select id="findAllProductIdByActivitiesCommonId" parameterType="int"
+		resultType="int">
+		SELECT product_id from
+		relation_activities_common_and_product WHERE
+		activities_common_id=#{id} ORDER BY `order` DESC, id DESC
+	</select>
+
+	<select id="findProductIdByActivitiesCommonId" parameterType="int"
+		resultType="int">
+		SELECT product_id from
+		relation_activities_common_and_product WHERE
+		activities_common_id=#{id} and is_display=1 ORDER BY `order` DESC, id
+		DESC
+	</select>
+
+	<!-- 根据通用专场ID下商品数量 -->
+	<select id="countProductNumByActivitiesCommonId" parameterType="int"
+		resultType="int">
+		SELECT COUNT(id) FROM
+		relation_activities_common_and_product WHERE
+		activities_common_id=#{id}
+	</select>
+
+	<!-- 插入 通用专场与商品关联 表 -->
+	<insert id="saveRelationActivitiesCommonAndProduct"
+		parameterType="map">
+		INSERT INTO relation_activities_common_and_product
+		(`activities_common_id`, `product_id`, `order`)
+		VALUES
+		(#{activitiesCommonId}, #{productId}, #{order});
+	</insert>
+
+	<!-- 更新 通用专场关联的商品排序值 -->
+	<update id="updateOrder" parameterType="map">
+		UPDATE
+		relation_activities_common_and_product
+		SET `order`=#{order} WHERE
+		`id`=#{id};
+	</update>
+
+	<!-- 删除 通用专场关联的商品 记录 -->
+	<delete id="deleteRelationActivitiesCommonAndProduct"
+		parameterType="int">
+		DELETE FROM relation_activities_common_and_product WHERE
+		id=#{id}
+	</delete>
+
+	<!-- 查询通用专场ID关联的商品最大排序值 -->
+	<select id="findMaxOrderByActivitiesCommonId" parameterType="int"
+		resultType="int">
+		SELECT max(`order`) FROM
+		relation_activities_common_and_product WHERE
+		activities_common_id=#{id}
+	</select>
+
+	<update id="updateProductDisplayStatus" parameterType="map">
+		UPDATE relation_activities_common_and_product SET
+		is_display=#{isDisplay} WHERE id in
+		<foreach collection="idList" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="batchUpdateGroupProductTime" parameterType="map">
+		UPDATE
+		product
+		SET
+		start_time = #{startTime},
+		end_time = #{endTime}
+		WHERE
+		type = 1
+		AND id IN (
+		SELECT
+		rac.product_id
+		FROM
+		activities_common ac,
+		relation_activities_common_and_product rac
+		WHERE
+		ac.id =
+		rac.activities_common_id
+		AND ac.type = 1
+		AND ac.id=#{groupId}
+		)
+	</update>
+
+	<select id="findActivitiesCommonById" parameterType="int"
+		resultMap="ActivitiesCommonMap">
+		select * from activities_common where id=#{id} and
+		is_available=1
+	</select>
+
+	<select id="findProductsByActivityCommonId" parameterType="map" resultType="map">
+		select
+		p.id as id, p.name as name, p.sales_price as
+		salesPrice,p.bs_commision
+		as commision from product p,
+		relation_activities_common_and_product
+		racp
+		where
+		racp.activities_common_id =#{activityCommonId} and
+		p.id=racp.product_id and racp.is_display=1
+		LIMIT #{start},#{max}
+	</select>
+	<select id="countProductsByActivityCommonId" parameterType="int"
+		resultType="int">
+		select count(p.id) from product p,
+		relation_activities_common_and_product
+		racp where
+		racp.activities_common_id=#{activityCommonId} and
+		p.id=racp.product_id
+		and racp.is_display=1
+	</select>
+</mapper>  

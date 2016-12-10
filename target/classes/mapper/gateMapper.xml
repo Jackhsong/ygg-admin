@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="GateMapper">
+	
+	<select id="findAllGates" parameterType="map" resultType="map">
+		SELECT
+			t1.id,
+			t1.theme AS theme,
+			t1.answer AS answer,
+			t1.`desc` AS `desc`,
+			t1.valid_time_start AS validTimeStart,
+			t1.valid_time_end AS validTimeEnd,
+			t1.receive_amount AS receiveAmount,
+			t1.new_register AS registerAmount,
+			t1.total_money AS totalMoney,
+			t1.new_buyer_money AS newBuyerAmount,
+			t1.url AS url,
+			t1.is_display AS isDisplayCode,
+			t2.id AS prizeId,
+			t2.coupon_id AS couponId,
+			t2.valid_time_type AS validTimeType,
+			t2.days AS days
+		FROM
+			gate_activity t1,
+			gate_prize t2
+		WHERE
+			t1.id = t2.gate_activity_id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="answer != null">AND t1.answer like #{answer}</if>
+			<if test="desc != null">AND t1.`desc`=#{desc}</if>
+			<if test="isDisplay != null">AND t1.`is_display`=#{isDisplay}</if>
+		ORDER BY
+			id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countGates" parameterType="map" resultType="int">
+		SELECT
+			count(t1.id)
+		FROM
+			gate_activity t1,
+			gate_prize t2
+		WHERE
+			t1.id = t2.gate_activity_id
+			<if test="id != null">AND t1.id=#{id}</if>
+			<if test="answer != null">AND t1.answer like #{answer}</if>
+			<if test="desc != null">AND t1.`desc`=#{desc}</if>
+			<if test="isDisplay != null">AND t1.`is_display`=#{isDisplay}</if>		
+	</select>
+	
+	<insert id="addGate" parameterType="GateEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO gate_activity (
+			`theme`,
+			`answer`,
+			`desc`,
+			`valid_time_start`,
+			`valid_time_end`,
+			`receive_tip`,
+			`url`
+		)VALUES	(
+			#{theme},
+			#{answer},
+			#{desc},
+			#{validTimeStart},
+			#{validTimeEnd},
+			#{receiveTip},
+			#{url}
+		)	
+	</insert>
+	
+	<update id="updateGate" parameterType="GateEntity">
+		UPDATE gate_activity
+		<set>
+			<if test="theme != null">theme=#{theme},</if>
+			<if test="answer != null">answer=#{answer},</if>
+			<if test="desc != null">`desc`=#{desc},</if>
+			<if test="validTimeStart != null">`valid_time_start`=#{validTimeStart},</if>
+			<if test="validTimeEnd != null">`valid_time_end`=#{validTimeEnd},</if>
+			<if test="isDisplay != null">`is_display`=#{isDisplay},</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<insert id="addGatePrize" parameterType="map">
+		INSERT INTO gate_prize (gate_activity_id,coupon_id,valid_time_type,days)VALUES(#{gateId},#{couponId},#{validTimeType},#{days})		
+	</insert>
+	
+	<update id="updateGateStatus" parameterType="map">
+		UPDATE gate_activity SET is_display=#{isDisplay} where id=#{id} 
+	</update>
+	
+	<delete id="deleteGate" parameterType="int">
+		DELETE FROM gate_activity WHERE id=#{id} AND receive_amount=0
+	</delete>
+	
+	<delete id="deleteGatePrize" parameterType="int">
+		DELETE FROM gate_prize WHERE gate_activity_id=#{id}
+	</delete>
+</mapper>

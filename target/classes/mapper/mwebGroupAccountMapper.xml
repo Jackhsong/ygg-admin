@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mwebGroupAccountMapper">
+
+
+	<resultMap id="mwebGroupAccountEntityMap" type="mwebGroupAccountEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />
+		<result column="openid" property="openId" javaType="String"
+			jdbcType="VARCHAR" />
+		<result column="unionid" property="unionId" javaType="String"
+			jdbcType="VARCHAR" />
+		<result column="wechat_nick_name" property="wechatNickName"
+			javaType="String" jdbcType="VARCHAR" />
+		<result column="wechat_image" property="wechatImage" javaType="String"
+			jdbcType="VARCHAR" />
+		<result column="subscribe" property="subscribe" javaType="String"
+			jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime"/>
+		<result column="base_account_id" property="baseAccountId"/>
+		
+		<result column="app_open_id" property="appOpenId" javaType="String"
+			jdbcType="VARCHAR" />
+		
+		
+			<result column="type" property="type"/>
+	</resultMap>
+
+
+
+	<select id="findAccoun" parameterType="mwebGroupAccountEntity" resultMap="mwebGroupAccountEntityMap">
+    <![CDATA[
+    
+        select 
+        id, 
+        base_account_id as baseAccountId,
+        openid as openId,
+        unionid as unionId,
+        wechat_nick_name as wechatNickName,
+        wechat_image as wechatImage,
+        subscribe as subscribe,
+        create_time as createTime,
+        type as type,
+        app_open_id as appOpenId
+        from mweb_group_account 
+        ]]>
+		<where>
+			<if test="id!=null and id!=0"> id=#{id}</if>
+			<if test="openId!=null and openId!=''">and openid=#{openId}</if>
+		</where>
+
+	</select>
+	
+	
+	<select id="getAccounByOpenId" parameterType="java.lang.String" resultMap="mwebGroupAccountEntityMap">
+    <![CDATA[
+    
+        select 
+        id, 
+        base_account_id as baseAccountId,
+        openid as openId,
+        unionid as unionId,
+        wechat_nick_name as wechatNickName,
+        wechat_image as wechatImage,
+        subscribe as subscribe,
+        create_time as createTime,
+        type as type,
+         app_open_id as appOpenId
+        from mweb_group_account 
+        ]]>
+		<where>
+			openid=#{openId,jdbcType=VARCHAR}
+		</where>
+
+	</select>
+	
+	<select id="getAccounByUnionId" parameterType="java.lang.String" resultMap="mwebGroupAccountEntityMap">
+    <![CDATA[
+    
+        select 
+        id, 
+        base_account_id as baseAccountId,
+        openid as openId,
+        unionid as unionId,
+        wechat_nick_name as wechatNickName,
+        wechat_image as wechatImage,
+        subscribe as subscribe,
+        create_time as createTime,
+        type as type,
+         app_open_id as appOpenId
+        from mweb_group_account 
+        ]]>
+		<where>
+			unionid=#{unionId,jdbcType=VARCHAR}
+		</where>
+
+	</select>
+	
+	<select id="getAccounByBaseAccountId" parameterType="int" resultMap="mwebGroupAccountEntityMap">
+    <![CDATA[
+    
+        select 
+        id, 
+        base_account_id as baseAccountId,
+        openid as openId,
+        unionid as unionId,
+        wechat_nick_name as wechatNickName,
+        wechat_image as wechatImage,
+        subscribe as subscribe,
+        create_time as createTime,
+        type as type,
+         app_open_id as appOpenId
+        from mweb_group_account 
+        ]]>
+		<where>
+			base_account_id=#{baseAccountId}
+		</where>
+
+	</select>
+	
+	<select id="getAccounById" parameterType="int" resultMap="mwebGroupAccountEntityMap">
+    <![CDATA[
+    
+        select 
+        id, 
+        base_account_id as baseAccountId,
+        openid as openId,
+        unionid as unionId,
+        wechat_nick_name as wechatNickName,
+        wechat_image as wechatImage,
+        subscribe as subscribe,
+        create_time as createTime,
+        type as type,
+         app_open_id as appOpenId
+        from mweb_group_account 
+        ]]>
+		<where>
+			id=#{id}
+		</where>
+
+	</select>
+	
+
+	
+</mapper>

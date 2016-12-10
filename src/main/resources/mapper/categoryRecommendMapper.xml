@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CategoryRecommendMapper">
+
+	<resultMap type="CategoryRecommendEntity" id="BrandRecommend">
+		<id column="id" property="id"/>
+		<result column="page2_model_id" property="page2ModelId"/>
+		<result column="title" property="title"/>
+		<result column="image" property="image"/>
+		<result column="width" property="width"/>
+		<result column="height" property="height"/>
+		<result column="type" property="type"/>
+		<result column="display_id" property="displayId"/>
+		<result column="sequence" property="sequence"/>
+		<result column="is_display" property="isDisplay"/>
+	</resultMap>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select a.id,a.id as `index`,a.page2_model_id as page2ModelId, a.title as title,a.image as image,a.width as width,a.height as height,
+			a.type as type, a.display_id as displayId,a.sequence as sequence,a.is_display as isDisplay,a.brand_id as brandId
+		from page2_model_brand_recommend a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="title != null and title != '' "> and a.title=#{title}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="page2ModelId!=null and page2ModelId!=-1"> and a.page2_model_id=#{page2ModelId}</if>
+		order by sequence desc,id desc
+		<if test="start">limit #{start},#{size}</if>
+	</select>
+<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) from page2_model_brand_recommend a
+			where 1=1
+		<if test="id!=null and id!=0"> and a.id=#{id}</if>
+		<if test="title != null"> and a.title=#{title}</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and a.is_display=#{isDisplay}</if>
+		<if test="page2ModelId!=null and page2ModelId!=-1"> and a.page2_model_id=#{page2ModelId}</if>
+	</select>
+<!-- 新增 -->
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into page2_model_brand_recommend (title,page2_model_id,image,width,height,type,display_id,sequence,is_display,brand_id)
+		values
+		(#{title},#{modelId},#{image},#{width},#{height},#{type},#{displayId},#{sequence},#{isDisplay},#{brandId})
+	</insert>
+<!-- 修改 -->
+	<update id="update" parameterType="map">
+		update page2_model_brand_recommend
+		<set>
+			<if test="title!=null">title=#{title},</if>
+			<if test="image!=null">image=#{image},</if>
+			<if test="width!=null">width=#{width},</if>
+			<if test="height!=null">height=#{height},</if>
+			<if test="type!=null">type=#{type},</if>
+			<if test="displayId!=null">display_id=#{displayId},</if>
+			<if test="brandId!=null">brand_id=#{brandId},</if>
+			<if test="sequence!=null">sequence=#{sequence},</if>
+			<if test="isDisplay!=null">is_display=#{isDisplay},</if>
+		</set>
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+	</update>
+	
+	<select id="findCustomGGRecommendById" parameterType="int" resultMap="BrandRecommend">
+		SELECT * FROM page2_model_brand_recommend WHERE id=#{id}
+	</select>
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM page2_model_brand_recommend WHERE id=#{id}
+	</delete>
+</mapper>

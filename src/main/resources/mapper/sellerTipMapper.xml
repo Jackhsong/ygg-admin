@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerTipMapper">
+	
+	<insert id="save" useGeneratedKeys="true" parameterType="map">
+		insert into seller_tip(content,title,remark,status,create_time) values (#{content},#{title},#{remark},#{status},now())
+	</insert>
+	
+	<update id="update" parameterType="map">
+		update seller_tip
+		<set>
+			<if test="content!=null">content=#{content},</if>
+			<if test="title!=null">title=#{title},</if>
+			<if test="remark!=null">remark=#{remark},</if>
+			<if test="status!=null">status=#{status},</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<select id="findListInfo" parameterType="map" resultType="map">
+		select id,content,title,remark,`status` from seller_tip 
+		where 1=1
+		<if test="id!=null"> and id=#{id}</if>
+		<if test="title!=null"> and title=#{title}</if>
+		order by `status` desc,id desc
+		<if test="start!=null"> limit #{start}, #{size}</if>
+	</select>
+	
+	<select id="checkTitle" parameterType="map" resultType="int">
+		select count(id) from seller_tip 
+		where 1=1
+		<if test="id!=null"> and id!=#{id}</if>
+		<if test="title!=null"> and title=#{title}</if>
+	</select>
+	
+	<select id="checkStatus" resultType="int" parameterType="map">
+		select count(id) from seller_tip where status=1
+		<if test="id!=null"> and id!=#{id}</if>
+	</select>
+	
+	<select id="countList" parameterType="map" resultType="int">
+		select count(id) from seller_tip
+	</select>
+</mapper>

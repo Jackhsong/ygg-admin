@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="YwAccountMapper">
+    <resultMap type="YwAccountEntity" id="BrandMap">
+    	<id column="id" property="id" />
+    	<result column="account_id" property="accountId" />
+    	<result column="open_id" property="openId" />
+		<result column="union_id" property="unionId" />
+    	<result column="father_account_id" property="fatherAccountId" />
+    	<result column="image" property="image" />
+    	<result column="nickname" property="nickName" />
+    	<result column="spokes_person" property="spokesPerson" />
+    	<result column="subscribe" property="subscribe" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+     <sql id="AccountQuery">
+		id as id,
+		account_id as accountId ,
+		open_id as openId,
+		union_id as unionId,
+		father_account_id as fatherAccountId,
+		image as image,
+		nickname as nickName,
+		subscribe as subscribe,
+		spokes_person as spokesPerson,
+		create_time as createTime,
+		update_time as updateTime
+     </sql>
+	<select id="findAccountByAccountId" parameterType="int" resultType="YwAccountEntity">
+         SELECT
+          <include refid="AccountQuery"></include>
+         FROM yw_account WHERE account_id=#{accountId} LIMIT 1
+     </select>
+     <update id="updateAccounSpread" parameterType="map">
+        update yw_account set father_account_id = #{fatherAccountId} where id=#{id}
+	</update>
+</mapper>  

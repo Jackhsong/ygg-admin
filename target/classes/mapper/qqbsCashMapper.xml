@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsCashMapper">
+
+	
+	<sql id="condition">
+		where 1=1
+			<if test="name != null and name != '' "> and qa.nickname like #{name}</if>
+			<if test="accountId !=null and accountId !=-1"> and qwl.account_id=#{accountId}</if>
+	</sql>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select qwl.id,qwl.id as `index`,qwl.account_id as accountId,
+				qa.nickname,
+				qwl.withdrawals,
+				qwl.`status`,
+				qa.open_id as openId,
+				qwl.create_time
+		from qqbs_withdrawals_log qwl
+					INNER JOIN qqbs_account qa on qwl.account_id=qa.account_id
+		<include refid="condition"></include>
+		order by STATUS asc,qwl.create_time DESC,id desc
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) 
+			from qqbs_withdrawals_log qwl
+			INNER JOIN qqbs_account qa on qwl.account_id=qa.account_id
+		<include refid="condition"></include>
+	</select>
+	<!-- 修改日志 -->
+	<update id="updateLog" parameterType="map">
+		update qqbs_withdrawals_log t set t.status = #{status} , t.update_time = now() where id=#{id}
+	</update>
+	
+	<!-- <resultMap type="QqbsRewardEntity" id="BrandMap">
+    	<id column="id" property="id" />
+    	<result column="account_id" property="accountId" />
+    	<result column="total_reward" property="totalReward" />
+		<result column="already_cash" property="alreadyCash" />
+		<result column="withdraw_cash" property="withdrawCash" />
+    	<result column="create_time" property="createTime" />
+    </resultMap> -->
+     <sql id="query">
+		id as id,
+		account_id as accountId,
+		total_reward as totalReward,
+		already_cash as alreadyCash,
+		withdraw_cash as withdrawCash,
+		create_time as createTime,
+		update_time as updateTime
+     </sql>
+     <select id="getByAccountId" parameterType="string" resultType="QqbsRewardEntity">
+         SELECT
+          <include refid="query"></include>
+         FROM qqbs_reward WHERE account_id=#{accountId} for update
+     </select>
+     
+     <update id="updateHqbsReward" parameterType="QqbsRewardEntity">
+     <![CDATA[
+        update qqbs_reward 
+        ]]>
+        <set>
+             update_time = now(),
+            <if test="withdrawCash != null" >withdraw_cash = #{withdrawCash},</if>
+            <if test="alreadyCash != null" >already_cash = #{alreadyCash},</if>
+        </set>
+        where id=#{id}
+	</update>
+	
+	<select id="getInfoByLogId" parameterType="string" resultType="map">
+		SELECT qwl.account_id  as accountId, 
+				qwl.withdrawals as withdrawals,
+				qa.open_id as openId,
+				qwl.status as status 
+			from qqbs_withdrawals_log qwl 
+       		inner join  qqbs_account qa on qwl.account_id = qa.account_id
+			where qwl.id = #{id}
+     </select>
+</mapper>

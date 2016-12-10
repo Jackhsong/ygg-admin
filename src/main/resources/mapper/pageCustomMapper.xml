@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="PageCustomMapper">
+    
+    <resultMap type="PageCustomEntity" id="PageCustomEntityMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="desc" property="desc" />
+    	<result column="pc_detail" property="pcDetail" />
+    	<result column="mobile_detail" property="mobileDetail" />
+    	<result column="file_name" property="fileName" />
+    	<result column="mobile_url" property="mobileUrl" />
+    	<result column="pc_url" property="pcUrl" />
+    	<result column="is_available" property="isAvailable" />
+    </resultMap>
+    
+    <select id="findAllPageCustomForProduct" resultType="PageCustomEntity">
+      SELECT id as id,
+      	name as name
+      FROM page_custom 
+      WHERE is_available=1
+    </select>
+    
+   <insert id="save" parameterType="PageCustomEntity">
+		INSERT INTO page_custom (`name`, `desc`, `pc_detail`, `mobile_detail`, `file_name`,`pc_url`,`mobile_url`, `is_available`) 
+		VALUES (#{name}, #{desc}, #{pcDetail}, #{mobileDetail}, #{fileName},#{pcUrl},#{mobileUrl},#{isAvailable});
+   </insert>
+   
+   <update id="update" parameterType="map" >
+		UPDATE page_custom 
+		<set>
+	        <if test="name != null">
+	             name=#{name},
+	        </if>
+	        <if test="desc != null">
+	             `desc`=#{desc},
+	        </if>
+	        <if test="pcDetail != null">
+	             pc_detail=#{pcDetail},
+	        </if>
+	        <if test="mobileDetail != null">
+	             mobile_detail=#{mobileDetail},
+	        </if>
+	        <if test="fileName != null">
+	             file_name=#{fileName},
+	        </if>
+	        <if test="pcUrl != null">
+	             pc_url=#{pcUrl},
+	        </if>
+	        <if test="mobileUrl != null">
+	             mobile_url=#{mobileUrl},
+	        </if>
+	        <if test="isAvailable != null">
+	             is_available=#{isAvailable}
+	        </if>
+		</set>
+		WHERE id=#{id}
+    </update>
+   
+   <select id="findAllPageCustomByPara" parameterType="map"  resultMap="PageCustomEntityMap">
+		SELECT * 
+		FROM page_custom 
+		WHERE 1=1 
+		<if test="isAvailable != null">
+			and is_available=#{isAvailable} 
+		</if>
+		<if test="name != null">
+			and name like #{name} 
+		</if>
+		<if test="fileName != null">
+			and file_name like #{fileName} 
+		</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countPageCustom" parameterType="map"  resultType="int">
+		SELECT count(id) 
+		FROM page_custom 
+		WHERE 1=1 
+		<if test="isAvailable != null">
+			and is_available=#{isAvailable} 
+		</if>
+		<if test="name != null">
+			and name like #{name} 
+		</if>
+		<if test="fileName != null">
+			and file_name like #{fileName} 
+		</if>
+    </select>
+    
+	<select id="findPageCustomById" parameterType="int"  resultMap="PageCustomEntityMap">
+		SELECT * 
+		FROM page_custom 
+		WHERE id=#{id}
+    </select>    
+    
+<!-- 插入商品关联的自定义页面 -->
+	<insert id="saveRelationProductAndPageCustom" parameterType="RelationProductAndPageCustom">
+		INSERT INTO relation_product_and_page_custom (`product_id`, `page_custom_id`, `marks`)
+		VALUES (#{productId},#{pageCustomId},#{marks})
+	</insert>
+    
+<!-- 查询商品与自定义页面关系信息 -->
+	<select id="findRelationProductAndPageCustom" parameterType="map" resultType="RelationProductAndPageCustom">
+		SELECT
+		id as id,
+		product_id as productId,
+		page_custom_id as pageCustomId,
+		marks as marks
+		FROM relation_product_and_page_custom 
+		WHERE 1=1 
+		<if test="productId != null"> and product_id=#{productId} </if>
+		<if test="id != null"> and id=#{id} </if>
+	</select>
+	
+<!-- 更新商品关联的自定义页面关系信息 -->
+	<update id="updateRelationProductAndPageCustomById" parameterType="RelationProductAndPageCustom">
+		UPDATE relation_product_and_page_custom
+		SET
+		page_custom_id=#{pageCustomId} ,
+		marks=#{marks}
+		WHERE id=#{id}
+	</update>
+	
+<!--删除商品关联的自定义页面关系信息 -->
+	<delete id="deleteRelationProductAndPageCustomById" parameterType="int">
+		DELETE FROM relation_product_and_page_custom WHERE id=#{id}
+	</delete>
+   
+</mapper>  

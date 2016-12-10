@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderProductRefundReasonMapper">
+
+    <insert id="save" parameterType="map" useGeneratedKeys="true">
+	insert into order_product_refund_reason(reason,is_display) values (#{reason},#{isDisplay})
+</insert>
+
+    <select id="findOrderProductRefundReasonList" parameterType="map" resultType="map">
+        select
+        id,
+        reason,
+        is_display as isDisplay
+        from
+        order_product_refund_reason
+        <trim prefix="WHERE" suffixOverrides="AND|OR">
+            <if test="isDisplay!=null">and is_display=#{isDisplay}</if>
+            <if test="id!=null">and id=#{id}</if>
+        </trim>
+        ORDER BY id DESC
+        <if test="start!=null">limit #{start},#{max}</if>
+    </select>
+
+    <select id="countOrderProductRefundReason" resultType="int">
+        select
+        COUNT(id)
+        from
+        order_product_refund_reason
+        <trim prefix="WHERE" suffixOverrides="AND|OR">
+            <if test="isDisplay!=null">and is_display=#{isDisplay}</if>
+            <if test="id!=null">and id=#{id}</if>
+        </trim>
+    </select>
+
+    <update id="update" parameterType="map">
+        update
+        order_product_refund_reason
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reason!=null">reason=#{reason},</if>
+            <if test="isDisplay!=null">is_display=#{isDisplay},</if>
+        </trim>
+        where
+        id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM order_product_refund_reason WHERE id=#{id}
+    </delete>
+
+</mapper>  

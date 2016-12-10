@@ -1,0 +1,661 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RefundMapper">
+
+	<resultMap type="RefundEntity" id="RefundMap">
+    	<id column="id" property="id" />
+    	<result column="account_id" property="accountId" />
+    	<result column="account_card_id" property="accountCardId" />
+    	<result column="order_id" property="orderId" />
+    	<result column="order_product_id" property="orderProductId" />
+    	<result column="source_type" property="sourceType" />
+    	<result column="count" property="count" />
+    	<result column="type" property="type" />
+    	<result column="explain" property="explain" />
+    	<result column="refund_reason_id" property="refundReasonId"/>
+    	<result column="apply_money" property="applyMoney" />
+    	<result column="real_money" property="realMoney" />
+    	<result column="image1" property="image1" />
+    	<result column="image2" property="image2" />
+    	<result column="image3" property="image3" />
+    	<result column="create_time" property="createTime" />
+    	<result column="check_time" property="checkTime" />
+    	<result column="update_time" property="updateTime" />
+    	<result column="return_account_point" property="returnAccountPoint" />
+    	<result column="remove_account_point" property="removeAccountPoint" />
+    	<result column="card_type" property="cardType" />
+    	<result column="bank_type" property="bankType" />
+    	<result column="card_number" property="cardNumber" />
+    	<result column="card_name" property="cardName" />
+    	<result column="responsibility_side" property="responsibilitySide" />
+    	<result column="responsibility_money" property="responsibilityMoney" />
+    	<result column="is_settlement" property="isSettlement" />
+    	<result column="refund_pay_type" property="refundPayType" />
+    	<result column="status" property="status" />
+    	<result column="is_cancel_order" property="isCancelOrder" />
+    </resultMap>
+    
+    <resultMap type="OrderProductRefundTeackEntity" id="OrderProductRefundTeackMap">
+    	<id column="id" property="id" />
+    	<result column="order_product_refund_id" property="orderProductRefundId" />
+    	<result column="manager_id" property="managerId" />
+    	<result column="step" property="step" />
+    	<result column="content" property="content" />
+    	<result column="remark" property="remark" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+    
+<!-- 插入订单产品退款流程 -->
+    <insert id="saveOrderProductRefundTeack" parameterType="OrderProductRefundTeackEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_product_refund_teack (`order_product_refund_id`, `manager_id`, `step`, `remark`,`content`) 
+		VALUES (#{orderProductRefundId}, #{managerId}, #{step}, #{remark}, #{content})
+    </insert>
+    
+<!-- 更新订单产品退款流程 -->
+	<update id="updateOrderProductRefundTeack" parameterType="OrderProductRefundTeackEntity">
+		UPDATE order_product_refund_teack SET content=#{content} WHERE order_product_refund_id=#{orderProductRefundId}
+	</update>
+    
+<!-- 查询订单产品退款流程 -->
+    <select id="findOrderProductRefundTeack" parameterType="map" resultMap="OrderProductRefundTeackMap" >
+    	SELECT * 
+    	FROM 
+    		order_product_refund_teack
+    	WHERE
+    		1=1
+    	<if test="refundId != null"> AND order_product_refund_id=#{refundId} </if> 
+    	<if test="step != null"> AND step=#{step} </if> 
+    </select>
+
+<!-- 新增退款退货 -->
+	<insert id="saveRefund" parameterType="RefundEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_product_refund 
+			(`account_id`, `order_id`, `order_product_id`,`source_type`,`count`,`type`,`status`,`image1`,`image2`,`image3`,`create_time`,`apply_money`,`real_money`,`card_type`,`bank_type`,`card_number`,`card_name`, `refund_pay_type`, `financial_affairs_card_id`)
+		VALUES 
+			(#{accountId}, #{orderId}, #{orderProductId},#{sourceType},#{count},#{type},#{status},#{image1},#{image2},#{image3},#{createTime},#{applyMoney},#{realMoney},#{cardType},#{bankType},#{cardNumber},#{cardName}, #{refundPayType}, #{financialAffairsCardId})
+	</insert>
+
+<!-- 更新退款信息 -->
+	<update id="updateRefund" parameterType="map">
+		UPDATE `order_product_refund` 
+     	<set>
+          <if test="status != null"> `status`=#{status}, </if>
+          <if test="cancelOrder != null"> `is_cancel_order`=#{cancelOrder}, </if>
+          <if test="type != null"> `type`=#{type}, </if>
+          <if test="returnAccountPoint != null"> `return_account_point`=#{returnAccountPoint}, </if>
+          <if test="removeAccountPoint != null"> `remove_account_point`=#{removeAccountPoint}, </if>
+          <if test="realMoney != null"> `real_money`=#{realMoney}, </if>
+          <if test="cardType != null"> `card_type`=#{cardType}, </if>
+          <if test="bankType != null"> `bank_type`=#{bankType}, </if>
+          <if test="cardName != null"> `card_name`=#{cardName}, </if>
+          <if test="cardNumber != null"> `card_number`=#{cardNumber}, </if>
+          <if test="responsibilityMoney != null"> `responsibility_money`=#{responsibilityMoney}, </if>
+          <if test="responsibilitySide != null"> `responsibility_side`=#{responsibilitySide}, </if>
+          <if test="isSettlement != null"> `is_settlement`=#{isSettlement}, </if>
+          <if test="settlementComfirmDate != null"> `settlement_comfirm_date`=#{settlementComfirmDate}, </if>
+          <if test="checkTime != null"> `check_time`=#{checkTime}, </if>
+          <if test="refundReasonId != null and refundReasonId != 0"> `refund_reason_id`=#{refundReasonId} </if>
+     	</set>
+     	where id=#{id}
+	</update>
+
+<!-- 根据用户信息查询订单ids，包括用户名，收货人信息 -->
+    <select id="findAllOrderIdsByUserInfo" parameterType="map" resultType="int">
+	    SELECT 
+			o.id
+		FROM 
+			`order` o,
+			account a,
+			order_receive_address ora
+		WHERE
+			o.account_id=a.id
+			AND o.receive_address_id=ora.id
+			<if test="number != null"> AND o.number=#{number} </if>
+			<if test="name != null"> AND a.name = #{name} </if>
+			<if test="receiveName != null"> AND ora.full_name = #{receiveName} </if>
+			<if test="mobileNumber != null"> AND ora.mobile_number = #{mobileNumber} </if>
+			<if test="start != null">
+		     	LIMIT #{start},#{max}
+	     	</if>
+    </select>
+    
+<!-- 查询退款表 -->
+	<select id="findAllRefundByPara" parameterType="map" resultMap="RefundMap">
+		SELECT opr.*
+		FROM 
+			order_product_refund opr
+				left join `order` o on opr.order_id=o.id
+		WHERE
+			1=1
+		<if test="idList != null">
+			AND opr.order_id IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="startTime != null"> <![CDATA[AND opr.create_time >= #{startTime} ]]> </if>
+		<if test="id != null"> AND opr.id=#{id} </if>
+		<if test="financialAffairsCardId != null"> AND opr.financial_affairs_card_id=#{financialAffairsCardId} </if>
+		<if test="orderProductId != null"> AND opr.order_product_id=#{orderProductId} </if>
+		<if test="orderId != null"> AND opr.order_id=#{orderId} </if>
+		<if test="endTime != null"> <![CDATA[AND opr.create_time < #{endTime} ]]> </if>
+		<if test="startCheckTime != null"> <![CDATA[AND opr.check_time >= #{startCheckTime} ]]> </if>
+		<if test="endCheckTime != null"> <![CDATA[AND opr.check_time < #{endCheckTime} ]]> </if>
+		<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+		<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="appChannel != null"> and o.app_channel=#{appChannel} </if>
+		<if test="orderType != null">and o.type=#{orderType}</if>
+		<if test="sellerIdList != null">
+			and o.seller_id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="statusList != null">
+			AND opr.`status` IN 
+			<foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="type != null"> <![CDATA[AND opr.type=#{type} ]]> </if>
+		<if test="isReceive == 1"><!-- 未收货 -->
+			AND NOT EXISTS (select 1 FROM order_product_refund_logistics WHERE order_product_refund_id=opr.id AND is_receive=1)
+		</if>
+		<if test="isReceive == 2"><!-- 已收货 -->
+			AND EXISTS (select 1 FROM order_product_refund_logistics WHERE order_product_refund_id=opr.id AND is_receive=1)
+		</if>
+		<if test="refundProportionStatus == 0"><!-- 未分摊-->
+			AND NOT EXISTS (select 1 FROM refund_proportion WHERE refund_id=opr.id)
+		</if>
+		<if test="refundProportionStatus == 1"><!-- 已分摊-->
+			AND EXISTS (select 1 FROM refund_proportion WHERE refund_id=opr.id)
+		</if>
+		<if test="logisticsStatus != null and logisticsStatus == 1"><!-- 有物流 -->
+			AND EXISTS (SELECT 1 FROM order_logistics ol,logistics_detail ld  WHERE ol.order_id=o.id and ol.channel=ld.logistics_channel and ol.number=ld.logistics_number)
+		</if>
+		<if test="logisticsStatus != null and logisticsStatus == 0"><!-- 无物流 -->
+			AND o.`status`=3
+			AND NOT EXISTS (SELECT 1 FROM order_logistics ol,logistics_detail ld  WHERE ol.order_id=o.id and ol.channel=ld.logistics_channel and ol.number=ld.logistics_number)
+		</if>
+		ORDER BY opr.id DESC
+		<if test="start != null">
+     		LIMIT #{start},#{max}
+     	</if>
+	</select>
+
+<!-- count 退款 数量   -->
+<select id="countAllRefundByPara" parameterType="map" resultType="int">
+		SELECT count(opr.id)
+		FROM
+			order_product_refund opr
+			left join `order` o on opr.order_id=o.id
+		WHERE
+			1=1
+			<if test="idList != null">
+				AND opr.order_id IN
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="startTime != null"> <![CDATA[AND opr.create_time >= #{startTime} ]]> </if>
+			<if test="id != null"> AND opr.id=#{id} </if>
+			<if test="financialAffairsCardId != null"> AND opr.financial_affairs_card_id=#{financialAffairsCardId} </if>
+			<if test="orderProductId != null"> AND opr.order_product_id=#{orderProductId} </if>
+			<if test="orderId != null"> AND opr.order_id=#{orderId} </if>
+			<if test="endTime != null"> <![CDATA[AND opr.create_time < #{endTime} ]]> </if>
+			<if test="startCheckTime != null"> <![CDATA[AND opr.check_time >= #{startCheckTime} ]]> </if>
+			<if test="endCheckTime != null"> <![CDATA[AND opr.check_time < #{endCheckTime} ]]> </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="appChannel != null"> and o.app_channel=#{appChannel} </if>
+			<if test="orderType != null">and o.type=#{orderType}</if>
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="statusList != null">
+				AND opr.`status` IN
+				<foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="type != null"> <![CDATA[AND opr.type=#{type} ]]> </if>
+			<if test="isReceive == 1"><!-- 未收货 -->
+				AND NOT EXISTS (select 1 FROM order_product_refund_logistics WHERE order_product_refund_id=opr.id AND is_receive=1)
+			</if>
+			<if test="isReceive == 2"><!-- 已收货 -->
+				AND EXISTS (select 1 FROM order_product_refund_logistics WHERE order_product_refund_id=opr.id AND is_receive=1)
+			</if>
+			<if test="refundProportionStatus == 0"><!-- 未分摊-->
+				AND NOT EXISTS (select 1 FROM refund_proportion WHERE refund_id=opr.id)
+			</if>
+			<if test="refundProportionStatus == 1"><!-- 已分摊-->
+				AND EXISTS (select 1 FROM refund_proportion WHERE refund_id=opr.id)
+			</if>
+			<if test="logisticsStatus != null and logisticsStatus == 1"><!-- 有物流 -->
+				AND EXISTS (SELECT 1 FROM order_logistics ol,logistics_detail ld  WHERE ol.order_id=o.id and ol.channel=ld.logistics_channel and ol.number=ld.logistics_number)
+			</if>
+			<if test="logisticsStatus != null and logisticsStatus == 0"><!-- 无物流 -->
+				AND o.`status`=3
+				AND NOT EXISTS (SELECT 1 FROM order_logistics ol,logistics_detail ld  WHERE ol.order_id=o.id and ol.channel=ld.logistics_channel and ol.number=ld.logistics_number)
+			</if>
+	</select>
+
+<!-- 根据ID列表 查询 商品名称、购买数量 -->
+	<select id="findAllOrderProductInfoByIds" parameterType="map" resultType="map">
+		SELECT 
+			op.id AS id,
+			op.order_id AS orderId,
+			op.product_id AS productId,
+			op.product_count AS productCount,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.`name` AS productName,
+			p.`code` AS productCode,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress
+		FROM 
+			order_product op,
+			product p,
+			seller s
+		WHERE
+			op.product_id=p.id
+		AND s.id = p.seller_id
+		<if test="idList != null">
+			AND op.id IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+<!-- 根据ID列表 查询 收货状态 -->
+	<select id="findAllRefundIsReceiveStatusByIds" parameterType="map" resultType="map">
+		SELECT 
+			order_product_refund_id AS refundId,
+			is_receive AS isReceive,
+			channel AS ologChannel,
+			number AS ologNumber
+		FROM 
+			order_product_refund_logistics
+		WHERE
+			1=1
+		<if test="idList != null">
+			AND order_product_refund_id IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+<!-- 根据OrderId列表 查询 购买人 收货人信息  -->
+	<select id="findAllOrderReceiveInfoByIds" parameterType="map" resultType="map">
+		SELECT 
+			o.id AS orderId,
+			o.number AS number,
+			o.status,
+			o.type AS orderType,
+			o.app_channel AS appChannel,
+			o.pay_time AS payTime,
+			o.seller_id AS sellerId,
+			a.`name` AS `name`,
+			ora.full_name AS fullName,
+			ora.mobile_number AS mobileNumber
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			account a
+		WHERE 
+			o.receive_address_id=ora.id
+			and o.account_id=a.id
+		<if test="idList != null">
+			AND o.id IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+<!-- 根据id查询订单商品信息 order_product_refund -->
+	<select id="findOrderProductInfoByOrderProductId" parameterType="int" resultType="map">
+		SELECT 
+			p.id AS id,
+			p.`code` AS `code`,
+			p.`name` AS `name`,
+			op.product_count AS productCount,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.seller_type AS sellerType
+		FROM
+			order_product op,	
+			product p,
+			seller s
+		WHERE 
+			op.product_id=p.id
+			and p.seller_id=s.id
+			and op.id=#{id}
+	</select>
+
+<!-- 根据id查询 退款用户信息 卡号信息 -->
+	<select id="findAccountCardById" parameterType="int" resultType="map">
+		SELECT 
+			type,
+			bank_type AS bankType,
+			card_number AS cardNumber,
+			card_name AS cardName
+		FROM 
+			account_card ac
+		WHERE
+			id=#{id}
+	</select>
+	
+<!-- 插入财务打款账户 -->
+	<insert id="saveFinancialAffairsCard" parameterType="map">
+		INSERT INTO financial_affairs_card(type, bank_type, card_number, card_name)
+		VALUES(#{type},#{bankType},#{cardNumber},#{cardName})
+	</insert>
+	
+<!-- 删除财务打款账户 -->
+	<delete id="deleteFinancialAffairsCardById" parameterType="map">
+		DELETE FROM financial_affairs_card 
+		WHERE
+			id IN 
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</delete>
+
+<!-- 查询 财务打款账户 信息 -->
+	<select id="findAllFinancialAffairsCard" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			type,
+			bank_type AS bankType,
+			card_name AS cardName,
+			card_number AS cardNumber,
+			create_time AS createTime
+		FROM 
+			financial_affairs_card
+		<if test="start != null">
+     		LIMIT #{start},#{max}
+     	</if>
+	</select>
+	
+<!-- count 财务打款账户 数量 -->
+	<select id="countAllFinancialAffairsCard" parameterType="map" resultType="int">
+		SELECT 
+			count(id)
+		FROM 
+			financial_affairs_card
+	</select>
+
+<!-- 查询退款退货物流单号信息 -->
+	<select id="findRefundLogisticsByRefundId" parameterType="int" resultType="map">
+		SELECT 
+			oprl.channel,
+			oprl.number,
+			oprl.order_product_refund_id AS refundId,
+			oprl.is_receive AS isReceive
+		FROM 
+			order_product_refund_logistics oprl
+		WHERE 
+			oprl.order_product_refund_id=#{id}
+	</select>
+
+<!-- 插入退款退货物流单号 -->
+	<insert id="saveRefundLogistics" parameterType="map">
+     	INSERT INTO order_product_refund_logistics (`order_product_refund_id`, `channel`, `number`) 
+     	VALUES (#{orderProductRefundId}, #{channel}, #{number})
+     </insert>
+
+<!-- 根据para查询退款退货物流单号信息 -->
+	<select id="findRefundLogisticsByPara" parameterType="map" resultType="map">
+		SELECT 
+			oprl.channel,
+			oprl.number,
+			oprl.order_product_refund_id AS refundId
+		FROM 
+			order_product_refund_logistics oprl
+		WHERE 
+			order_product_refund_id !=#{orderProductRefundId}
+			<if test="channel != null"> AND channel=#{channel} </if>
+			<if test="number != null"> AND number=#{number} </if>
+	</select>
+	
+<!-- 根据refundId  -->
+	<update id="updateRefundLogistics" parameterType="map">
+		UPDATE `order_product_refund_logistics` 
+     	<set>
+          <if test="isReceive != null"> `is_receive`=#{isReceive}, </if>
+          <if test="status != null"> `status`=#{status}, </if>
+          <if test="trackInfo != null"> `track_info`=#{trackInfo} </if>
+     	</set>
+     	where order_product_refund_id=#{refundId}
+	</update>
+	
+	<select id="findAllFinancialAffairsCardById" parameterType="int" resultType="map">
+		SELECT * FROM financial_affairs_card WHERE id = #{id}
+	</select>
+
+	<select id="findFinancialAffairsCardById" parameterType="int" resultType="FinancialAffairsCardEntity">
+		SELECT
+			id,
+			type,
+			bank_type AS bankType,
+			card_number AS cardNumber,
+			card_name AS cardName
+		FROM
+			financial_affairs_card
+		WHERE
+			id = #{id}
+	</select>
+	
+	<select id="findRefundProportionByRefundId" parameterType="int" resultType="RefundProportionEntity">
+		SELECT
+			id,
+			refund_id AS refundId,
+			seller_money AS sellerMoney,
+			gegejia_money AS gegejiaMoney,
+			seller_postage_money AS sellerPostageMoney,
+			gegejia_postage_money AS gegejiaPostageMoney,
+			seller_difference_money AS sellerDifferenceMoney,
+			gegejia_difference_money AS gegejiaDifferenceMoney,
+			type AS type,
+			create_time AS createTime
+		FROM 
+			refund_proportion 
+		WHERE 
+			refund_id=#{refundId}
+	</select>
+	
+	<select id="findAllRefundProportionByPara" parameterType="map" resultType="RefundProportionEntity">
+		SELECT
+			id,
+			refund_id AS refundId,
+			seller_money AS sellerMoney,
+			gegejia_money AS gegejiaMoney,
+			seller_postage_money AS sellerPostageMoney,
+			gegejia_postage_money AS gegejiaPostageMoney,
+			seller_difference_money AS sellerDifferenceMoney,
+			gegejia_difference_money AS gegejiaDifferenceMoney,
+			type AS type,
+			create_time AS createTime
+		FROM 
+			refund_proportion 
+		WHERE 
+			1=1
+			<if test="idList != null">
+      			AND refund_id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+	</select>
+	
+	<update id="updateRefundProportionByRefundId" parameterType="map" >
+		UPDATE `refund_proportion` 
+     	<set>
+          <if test="type != null"> `type`=#{type}, </if>
+          <if test="sellerMoney != null"> `seller_money`=#{sellerMoney}, </if>
+          <if test="gegejiaMoney != null"> `gegejia_money`=#{gegejiaMoney}, </if>
+          <if test="sellerPostageMoney != null"> `seller_postage_money`=#{sellerPostageMoney}, </if>
+          <if test="gegejiaPostageMoney != null"> `gegejia_postage_money`=#{gegejiaPostageMoney}, </if>
+          <if test="sellerDifferenceMoney != null"> `seller_difference_money`=#{sellerDifferenceMoney}, </if>
+          <if test="gegejiaDifferenceMoney != null"> `gegejia_difference_money`=#{gegejiaDifferenceMoney} </if>
+     	</set>
+     	WHERE id=#{id}
+	</update>
+	
+	<insert id="saveRefundProportionByRefundId" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO refund_proportion(refund_id, seller_money, gegejia_money, seller_postage_money,gegejia_postage_money,seller_difference_money,gegejia_difference_money,type)
+		VALUES(#{refundId},#{sellerMoney},#{gegejiaMoney},#{sellerPostageMoney},#{gegejiaPostageMoney},#{sellerDifferenceMoney},#{gegejiaDifferenceMoney},#{type})
+	</insert>
+	
+	<select id="findOrderProductCostById" parameterType="int" resultType="map">
+		SELECT cost FROM order_product WHERE id=#{id}
+	</select>
+	
+	<select id="findOtherNotExistsRefund" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(id) 
+		FROM 
+			order_product op 
+		WHERE 
+			order_id IN
+			<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			AND NOT EXISTS (SELECT 1 FROM order_product_refund WHERE order_product_id=op.id AND (`status` IN(2,3,4) or id=#{refundId}))
+	</select>
+	
+	<select id="findOtherNotExistsRefundForCancelOrder" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(id) 
+		FROM 
+			order_product op 
+		WHERE 
+			order_id=#{orderId}
+			AND NOT EXISTS (SELECT 1 FROM order_product_refund WHERE order_product_id=op.id AND (`status`=4 or id=#{refundId}))
+	</select>
+
+	<select id="findOtherNotExistsRefundForCancelOrderForStep1" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			order_product op
+		WHERE
+			order_id=#{orderId}
+			AND NOT EXISTS (SELECT 1 FROM order_product_refund WHERE order_product_id=op.id AND is_cancel_order=1 AND `status` IN (2,3,4))
+	</select>
+
+	<select id="countRefundByOrderProductId" parameterType="int" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			order_product_refund
+		WHERE
+			order_product_id=#{orderProductId}
+			AND status IN (1,2,3,4)
+	</select>
+	
+	<!-- 日退款率统计 -->
+	<select id="findRefundForEveryday" parameterType="map" resultType="map">
+		select type,sum(real_money) as realMoney, date 
+			from (
+				select a.type,a.real_money as real_money,date_format(b.pay_time, '%Y-%m-%d') as date 
+					from order_product_refund a,`order` b
+				where a.status in(1,2,3,4) and b.id = a.order_id and b.type = 1 and b.status in (2,3,4)
+				<if test="startTime!= null"><![CDATA[ and b.pay_time > #{startTime} ]]> </if>
+				<if test="endTime!= null"><![CDATA[ and b.pay_time < #{endTime} ]]> </if>
+				group by b.id) t
+			group by date,type
+	</select>
+	
+	<!-- 商家退款率统计 -->
+	<select id="findRefundSellerIdForSeller" parameterType="map" resultType="map">
+		select t1.sellerId,t2.realMoney,t1.realPrice from
+			(select sum(o.real_price) as realPrice,o.seller_id as sellerId from `order` o 
+				where o.status in (2,3,4) and o.type = 1
+				<if test="sellerId!=null"> and o.seller_id = #{sellerId} </if>
+				<if test="startTime!=null"><![CDATA[ and o.pay_time > #{startTime} ]]> </if>
+				<if test="endTime!=null"><![CDATA[ and o.pay_time < #{endTime} ]]> </if>
+				group by o.seller_id
+			) t1,
+			(select sum(real_money) as realMoney,seller_id as sellerId 
+				from (
+					select a.real_money as real_money,b.seller_id as seller_id 
+						from order_product_refund a,`order` b
+					where a.status in(1,2,3,4) and b.type = 1 and b.id = a.order_id and b.status in (2,3,4)
+					<if test="sellerId!=null"> and b.seller_id = #{sellerId} </if>
+					<if test="startTime!=null"><![CDATA[ and b.pay_time > #{startTime} ]]> </if>
+					<if test="endTime!=null"><![CDATA[ and b.pay_time < #{endTime} ]]> </if>
+					group by b.id
+				) t group by sellerId
+			) t2
+		where t1.sellerId = t2.sellerId
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	
+	<!-- 商家退款率统计条数 -->
+	<select id="countRefundSellerIdForSeller" parameterType="map" resultType="int">
+		select count(1) from 
+			(select count(b.seller_id)
+				from order_product_refund a,`order` b
+			where a.status in(1,2,3,4) and b.type = 1 and b.id = a.order_id and b.status in (2,3,4)
+			<if test="sellerId!=null"> and b.seller_id = #{sellerId} </if>
+			<if test="startTime!=null"><![CDATA[ and b.pay_time > #{startTime} ]]> </if>
+			<if test="endTime!=null"><![CDATA[ and b.pay_time < #{endTime} ]]> </if>
+			group by b.seller_id) t
+	</select>
+	
+	<!-- 商家退款率统计 -->
+	<select id="findRefundForSeller" parameterType="map" resultType="map">
+		select a.type,sum(a.real_money) as realMoney,b.seller_id as sellerId
+			from order_product_refund a,`order` b
+		where a.status in(1,2,3,4) and b.type = 1 and b.id = a.order_id and b.status in (2,3,4) and b.seller_id in
+		<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		<if test="type!=null"> and a.type=#{type}</if>
+		<if test="startTime!=null"><![CDATA[ and b.pay_time > #{startTime} ]]> </if>
+		<if test="endTime!=null"><![CDATA[ and b.pay_time < #{endTime} ]]> </if>
+		group by sellerId order by realMoney desc
+	</select>
+	
+	
+	<select id="findMwebAutomaticRefund" parameterType="map" resultType="MwebAutomaticRefundEntity">
+		 select 
+		 t.id,
+		 t.order_id as orderId,
+		 t.number,
+		 t.order_channel as orderChannel,
+		 t.account_id as accountId,
+		 t.order_time as orderTime,
+		 t.pay_time as payTime,
+		 t.pay_tid as payTid,
+		 t.pay_mark as payMark,
+		 t.pay_channel as payChannel,
+		 t.real_price as realPrice,
+		 t.total_price as totalPrice,
+		 t.refund_price as refundPrice,
+		 t.payment_account as paymentAccount,
+		 t.create_time as createTime
+
+		 from mweb_automatic_refund t 
+		 
+		 where
+		 DATE_FORMAT(t.create_time, '%Y-%m-%d') BETWEEN DATE_FORMAT(#{startTime}, '%Y-%m-%d') AND DATE_FORMAT(#{endTime}, '%Y-%m-%d')
+	</select>
+	
+
+</mapper>  

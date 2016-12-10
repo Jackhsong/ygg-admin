@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SpecialActivityMapper">  
+	<select id="findAllSpecialActivity" parameterType="map" resultType="map">
+		SELECT
+			id,
+			title,
+			`desc`,
+			image,
+			image_width AS imageWidth,
+			image_height AS imageHeight,
+			is_available AS isAvailable,
+			create_time AS createTime
+		FROM
+			special_activity
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="title != null">AND title LIKE #{title}</if>
+		<if test="desc != null">AND `desc` LIKE #{desc}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countSpecialActivity" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			special_activity
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="title != null">AND title LIKE #{title}</if>
+		<if test="desc != null">AND `desc` LIKE #{desc}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+	</select>
+	
+	<insert id="saveSpecialActivity" parameterType="SpecialActivityEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO special_activity(`title`, `desc`, `image`,`image_width`,`image_height`,`is_available`) 
+		VALUES(#{title},#{desc},#{image},#{imageWidth},#{imageHeight},#{isAvailable})
+	</insert>
+	
+	<update id="updateSpecialActivity" parameterType="SpecialActivityEntity">
+		UPDATE special_activity set 
+			`title`=#{title}, 
+			`desc`=#{desc}, 
+			`image`=#{image},
+			`image_width`=#{imageWidth},
+			`image_height`=#{imageHeight},
+			`is_available`=#{isAvailable}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateSpecialActivityAvailableStatus" parameterType="map">
+		UPDATE special_activity SET is_available=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+	
+	<select id="findAllSpecialActivityLayout" parameterType="map" resultType="map">
+		SELECT
+			id,
+			special_activity_id AS saId,
+			short_title AS shortTitle,
+			long_title AS longTitle,
+			`desc`,
+			is_display AS isDisplay,
+			sequence,
+			create_time AS createTime
+		FROM
+			special_activity_layout
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="activityId != null">AND special_activity_id = #{activityId}</if>
+			
+		ORDER BY sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countSpecialActivityLayout" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			special_activity_layout
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="activityId != null">AND special_activity_id = #{activityId}</if>	
+	</select>
+	
+	<select id="findMaxSpecialActivityLayoutSequenceByActivityId" parameterType="int" resultType="int">
+		SELECT MAX(sequence) FROM special_activity_layout where special_activity_id=#{id}
+	</select>
+	
+	<update id="updateSpecialActivityLayoutDisplayStatus" parameterType="map">
+		UPDATE special_activity_layout SET is_display=#{code} where id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+        	#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateSpecialActivityLayoutSequence" parameterType="map">
+		UPDATE special_activity_layout SET `sequence` = #{sequence} WHERE id=#{id}
+	</update>
+	
+	<insert id="saveSpecialActivityLayout" parameterType="map">
+		INSERT INTO special_activity_layout(special_activity_id,short_title,long_title,`desc`,is_display,sequence)VALUES(#{saId},#{shortTitle},#{longTitle},#{desc},#{isDisplay},#{sequence})	
+	</insert>
+	
+	<update id="updateSpecialActivityLayout" parameterType="map">
+		update special_activity_layout
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="shortTitle != null">short_title=#{shortTitle},</if>
+			<if test="longTitle != null">long_title=#{longTitle},</if>
+			<if test="desc != null">`desc`=#{desc},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+			<if test="sequence != null">sequence=#{sequence}</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<select id="findSpecialActivityLayouProduct" parameterType="map" resultType="map">
+		SELECT
+			id,
+			special_activity_layout_id AS layoutId,
+			display_type AS displayType,
+			one_image AS oneImage,
+			one_type AS oneType,
+			one_display_id AS oneDisplayId,
+			one_desc AS oneDesc,
+			one_height AS oneHeight,
+			one_width AS oneWidth,
+			two_image AS twoImage,
+			two_type AS twoType,
+			two_display_id AS twoDisplayId,
+			two_desc AS twoDesc,
+			two_width AS twoWidth,
+			two_height AS twoHeight,
+			sequence AS sequence,
+			is_display AS isDisplay
+		FROM
+			special_activity_layout_product
+		WHERE special_activity_layout_id = #{layoutId}
+		ORDER BY sequence DESC
+		<if test="start !=null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countSpecialActivityLayouProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			special_activity_layout_product
+		WHERE special_activity_layout_id = #{layoutId}		
+	</select>
+	
+	<update id="updateSpecialActivityLayoutProduct" parameterType="map">
+		update special_activity_layout_product 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="displayType != null">display_type=#{displayType},</if>
+			<if test="oneImage != null">one_image=#{oneImage},</if>
+			<if test="oneType != null">one_type=#{oneType},</if>
+			<if test="oneDisplayId != null">one_display_id=#{oneDisplayId},</if>
+			<if test="oneDesc != null">one_desc=#{oneDesc},</if>
+			<if test="oneWidth != null">one_width=#{oneWidth},</if>
+			<if test="oneHeight != null">one_height=#{oneHeight},</if>
+			<if test="twoImage != null">two_image=#{twoImage},</if>
+			<if test="twoType != null">two_type=#{twoType},</if>
+			<if test="twoDisplayId != null">two_display_id=#{twoDisplayId},</if>
+			<if test="twoDesc != null">two_desc=#{twoDesc},</if>
+			<if test="twoWidth != null">two_width=#{twoWidth},</if>
+			<if test="twoHeight != null">two_height=#{twoHeight},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+			<if test="sequence != null">sequence=#{sequence}</if>
+		</trim>
+		where id=#{id}		
+	</update>
+	
+	<select id="findSpecialActivityLayoutProduct" parameterType="int" resultType="map">
+		SELECT
+			id,
+			special_activity_layout_id AS layoutId,
+			display_type AS displayType,
+			one_image AS oneImage,
+			one_type AS oneType,
+			one_display_id AS oneDisplayId,
+			one_desc AS oneDesc,
+			one_height AS oneHeight,
+			one_width AS oneWidth,
+			two_image AS twoImage,
+			two_type AS twoType,
+			two_display_id AS twoDisplayId,
+			two_desc AS twoDesc,
+			two_width AS twoWidth,
+			two_height AS twoHeight,
+			sequence AS sequence,
+			is_display AS isDisplay
+		FROM
+			special_activity_layout_product
+		WHERE id = #{id}		
+	</select>
+	
+	<insert id="insertSpecialActivityLayoutProduct" parameterType="map">
+		INSERT INTO special_activity_layout_product (
+			special_activity_layout_id,
+			display_type,
+			one_image,
+			one_type,
+			one_display_id,
+			one_desc,
+			one_width,
+			one_height,
+			two_image,
+			two_type,
+			two_display_id,
+			two_desc,
+			two_width,
+			two_height,
+			sequence,
+			is_display
+		)
+		VALUES(
+			#{layoutId},
+			#{displayType},
+			#{oneImage},
+			#{oneType},
+			#{oneDisplayId},
+			#{oneDesc},
+			#{oneWidth},
+			#{oneHeight},
+			#{twoImage},
+			#{twoType},
+			#{twoDisplayId},
+			#{twoDesc},
+			#{twoWidth},
+			#{twoHeight},
+			#{sequence},
+			#{isDisplay}
+		)		
+	</insert>
+	
+	<select id="findMaxSpecialActivityLayoutProductSequenceByActivityId" parameterType="int" resultType="int">
+		 SELECT max(sequence) FROM special_activity_layout_product where special_activity_layout_id=#{layoutId} 
+	</select>
+
+	<select id="findSpecialActivityLayouProductBySpecialActivityId" parameterType="int" resultType="map">
+		SELECT
+			display_type AS displayType,
+			one_type AS oneType,
+			one_display_id AS oneDisplayId,
+			two_type AS twoType,
+			two_display_id AS twoDisplayId
+		FROM
+			special_activity_layout_product
+		WHERE
+			is_display=1
+			AND special_activity_layout_id IN (
+				SELECT id FROM special_activity_layout WHERE special_activity_id=#{id} AND is_display=1
+			)
+	</select>
+	
+</mapper>  

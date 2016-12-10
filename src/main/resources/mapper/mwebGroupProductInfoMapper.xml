@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MwebGroupProductInfoMapper">
+
+
+
+    <resultMap id="mwebGroupProductInfoEntityMap" type="mwebGroupProductInfoEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_product_id" property="mwebGroupProductId" javaType="int" jdbcType="INTEGER" />
+		<result column="team_number_limit" property="teamNumberLimit" javaType="int" jdbcType="INTEGER" />
+		<result column="current_number" property="currentNumber" javaType="int" jdbcType="INTEGER" />	
+		<result column="status" property="status" javaType="Byte" jdbcType="TINYINT" />
+		<result column="team_end_time" property="teamEndTime"/>
+	    <result column="type" property="type" javaType="Byte" jdbcType="TINYINT" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+
+    <resultMap id="mwebGroupProductAccountEntityMap" type="mwebGroupProductAccountEntity">
+		<id column="id" property="id" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_product_id" property="mwebGroupProductId" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_product_info_id" property="mwebGroupProductInfoId" javaType="int" jdbcType="INTEGER" />
+		<result column="mweb_group_account_id" property="mwebGroupAccountId" javaType="int" jdbcType="INTEGER" />	
+		<result column="type" property="type" javaType="Byte" jdbcType="TINYINT" />
+		<result column="status" property="status" javaType="Byte" jdbcType="TINYINT" />
+
+		<result column="create_time" property="createTime" />
+
+	</resultMap>
+	
+	
+	
+	
+	<select id="getGroupProductByUser" parameterType="map" resultType="map">
+    <![CDATA[
+           SELECT 
+              i.mweb_group_product_id as mwebGroupProductId,
+              i.current_number as currentNumber,
+              i.team_number_limit as teamNumberLimit,
+              i.`status`,
+              i.team_end_time as teamEndTime,
+              a.mweb_group_product_info_id as mwebGroupProductInfoId,
+              a.type,
+              a.create_time as createTime
+           FROM mweb_group_product_info i,mweb_group_product_account a 
+        ]]>
+		<where>
+		    i.id=a.mweb_group_product_info_id
+		    AND a.mweb_group_product_info_id=#{mwebGroupProductInfoId}
+            AND a.mweb_group_account_id=#{mwebGroupAccountId}
+		</where>
+
+	</select>
+	
+	
+	<select id="getGroupProductInfo" parameterType="mwebGroupProductInfoEntity" resultMap="mwebGroupProductInfoEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.current_number AS currentNumber,
+	          t.team_number_limit AS teamNumberLimit,
+	          t.`status`,
+	          t.type,
+	          t.team_end_time AS teamEndTime,
+              t.create_time as createTime,
+              t.update_time as updateTime
+          FROM
+	           mweb_group_product_info t
+        ]]>
+		<where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>           
+		</where>
+	</select>
+	
+	
+	<select id="getGroupProductInfoById" parameterType="int" resultMap="mwebGroupProductInfoEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.current_number AS currentNumber,
+	          t.team_number_limit AS teamNumberLimit,
+	          t.`status`,
+	          t.type,
+	          t.team_end_time AS teamEndTime,
+              t.create_time as createTime,
+              t.update_time as updateTime
+          FROM
+	           mweb_group_product_info t
+        ]]>
+		<where>
+             t.id=#{id}
+		</where>
+	</select>
+	
+	
+	<select id="getGroupProductInfo_forUpdate" parameterType="int" resultMap="mwebGroupProductInfoEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.current_number AS currentNumber,
+	          t.team_number_limit AS teamNumberLimit,
+	          t.`status`,
+	          t.team_end_time AS teamEndTime,
+              t.create_time as createTime,
+              t.update_time as updateTime
+          FROM
+	           mweb_group_product_info t
+        ]]>
+		<where>
+            t.id=#{id}
+		</where>
+			FOR UPDATE
+	</select>
+	
+	
+	
+	<select id="findGroupProductInfo" parameterType="map" resultMap="mwebGroupProductInfoEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.current_number AS currentNumber,
+	          t.team_number_limit AS teamNumberLimit,
+	          t.`status`,
+	          t.team_end_time AS teamEndTime,
+              t.create_time as createTime,
+              t.update_time as updateTime
+          FROM
+	           mweb_group_product_info t
+        ]]>
+		<where>
+	        <if test="status!=null and status!=0"> AND t.status=#{status}</if>
+            <if test="isAfterNow!=null and isAfterNow!=''"> AND t.team_end_time&lt;= NOW()</if>
+		</where>
+	
+	</select>
+	
+	
+	
+	
+	
+	<select id="findGroupProductAccount" parameterType="mwebGroupProductAccountEntity" resultMap="mwebGroupProductAccountEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.mweb_group_product_info_id AS mwebGroupProductInfoId,
+	          t.mweb_group_account_id AS mwebGroupAccountId,
+	          t.`status`,
+	          t.type,
+              t.create_time as createTime
+
+          FROM
+	            mweb_group_product_account t
+        ]]>
+		<where>
+            <if test="id!=null and id!=0">  t.id=#{id}</if>
+            <if test="mwebGroupProductId!=null and mwebGroupProductId!=0"> AND t.mweb_group_product_id=#{mwebGroupProductId}</if>
+            <if test="mwebGroupProductInfoId!=null and mwebGroupProductInfoId!=0"> AND t.mweb_group_product_info_id=#{mwebGroupProductInfoId}</if>
+            <if test="mwebGroupAccountId!=null and mwebGroupAccountId!=0"> AND t.mweb_group_account_id=#{mwebGroupAccountId}</if>
+		</where>
+	</select>
+	
+	
+	
+	<select id="countAutoJoinTeamAccount" parameterType="int" resultType="int">
+    <![CDATA[
+         SELECT 
+	          count(t.id)
+
+          FROM
+	            mweb_group_product_account t
+        ]]>
+		<where>
+
+          t.mweb_group_product_info_id=#{mwebGroupProductInfoId}
+          AND t.type=3
+		</where>
+	</select>
+	
+	
+	
+	<insert id="addGroupProductInfo" parameterType="mwebGroupProductInfoEntity"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_product_info(type,mweb_group_product_id,team_number_limit,current_number,team_end_time,create_time) values(#{type},#{mwebGroupProductId},#{teamNumberLimit},#{currentNumber},#{teamEndTime},#{createTime})
+        ]]>
+	</insert>
+	
+	
+	<insert id="addGroupProductAccount" parameterType="mwebGroupProductAccountEntity"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_product_account(mweb_group_product_info_id,mweb_group_product_id,mweb_group_account_id,type) values(#{mwebGroupProductInfoId},#{mwebGroupProductId},#{mwebGroupAccountId},#{type})
+        ]]>
+	</insert>
+	
+	
+	
+	<update id="updateGroupProductInfo" parameterType="mwebGroupProductInfoEntity">
+     <![CDATA[
+        update mweb_group_product_info 
+        ]]>
+        <set>
+            <if test="currentNumber != null" >current_number = #{currentNumber},</if>
+            <if test="status != null" >status = #{status},</if>
+            <if test="teamEndTime != null" >team_end_time = #{teamEndTime},</if>
+            <if test="teamNumberLimit != null" >team_number_limit = #{teamNumberLimit},</if>
+        </set>
+        <where>
+          id=#{id}
+        </where>
+	</update>
+	
+	
+	<update id="updateGroupProductAccount" parameterType="mwebGroupProductAccountEntity">
+     <![CDATA[
+        update mweb_group_product_account 
+        ]]>
+        <set>
+            <if test="status != null" >status = #{status},</if>
+        </set>
+        <where>
+          mweb_group_product_info_id=#{mwebGroupProductInfoId}
+        </where>
+	</update>
+	
+	
+	<select id="findAutoTeamList" parameterType="map" resultType="com.alibaba.fastjson.JSONObject">
+    <![CDATA[
+         SELECT
+             t.id,
+             t.mweb_group_product_id as mwebGroupProductId,
+	         t.mweb_group_product_info_id AS mwebGroupProductInfoId,
+	         t.short_name AS shortName,
+             t.is_open_auto_join_team AS isOpenAutoJoinTeam,
+             t.team_number_limit as teamNumberLimit,
+             t.random_start_second AS randomStartSecond,
+             t.random_end_second AS randomEndSecond,
+	         t.auto_join_team_number_limit AS autoJoinTeamNumberLimit,
+	         t.team_valid_hour AS teamValidHour,
+	         t.start_team_time AS startTeamTime,
+	         t.auto_join_team_time as autoJoinTeamTime,
+	         (select count(a.id) from mweb_group_product_account a where a.type IN (1,2) and a.mweb_group_product_info_id=t.mweb_group_product_info_id)AS actualNumber,
+	         (select count(a.id) from mweb_group_product_account a where a.type=3 and a.mweb_group_product_info_id=t.mweb_group_product_info_id) AS currentAutoNumber,
+	         (select count(a.id) from mweb_group_product_account a where a.mweb_group_product_info_id=t.mweb_group_product_info_id) AS currentNumber
+
+            FROM
+	          mweb_group_auto_team_config t
+
+           GROUP BY
+	          t.mweb_group_product_info_id
+	          
+	       ORDER BY create_time desc
+        ]]>
+		 
+	<if test="start!=null">limit #{start},#{max}</if>
+	</select>
+	
+	<select id="findAutoTeamListByMwebGroupProductInfoId" parameterType="int" resultType="com.alibaba.fastjson.JSONObject">
+    <![CDATA[
+         SELECT
+             t.id,
+             t.mweb_group_product_id as mwebGroupProductId,
+	         t.mweb_group_product_info_id AS mwebGroupProductInfoId,
+	         t.short_name AS shortName,
+             t.is_open_auto_join_team AS isOpenAutoJoinTeam,
+             t.team_number_limit as teamNumberLimit,
+             t.random_start_second AS randomStartSecond,
+             t.random_end_second AS randomEndSecond,
+	         t.auto_join_team_number_limit AS autoJoinTeamNumberLimit,
+	         t.team_valid_hour AS teamValidHour,
+	         t.start_team_time AS startTeamTime,
+	         t.auto_join_team_time as autoJoinTeamTime
+            FROM
+	          mweb_group_auto_team_config t
+        ]]>
+		 
+	    <where>
+          t.mweb_group_product_info_id=#{mwebGroupProductInfoId}
+        </where>
+	</select>
+	
+	<select id="getAutoTeamConfigById" parameterType="int" resultType="com.alibaba.fastjson.JSONObject">
+    <![CDATA[
+         SELECT
+             t.id,
+             t.mweb_group_product_id as mwebGroupProductId,
+	         t.mweb_group_product_info_id AS mwebGroupProductInfoId,
+	         t.short_name AS shortName,
+             t.is_open_auto_join_team AS isOpenAutoJoinTeam,
+             t.team_valid_hour AS teamValidHour,
+             t.team_number_limit as teamNumberLimit,
+             t.random_start_second AS randomStartSecond,
+             t.random_end_second AS randomEndSecond,
+	         t.auto_join_team_number_limit AS autoJoinTeamNumberLimit,
+	         t.team_valid_hour AS teamValidHour,
+	         t.start_team_time AS startTeamTime,
+	         t.auto_join_team_time as autoJoinTeamTime
+            FROM
+	          mweb_group_auto_team_config t
+        ]]>
+        <where>
+          t.id=#{id}
+        </where>
+
+	</select>
+	
+	
+	<update id="updateAutoTeamConfig" parameterType="map">
+     <![CDATA[
+        update mweb_group_auto_team_config 
+        ]]>
+        <set>
+          <if test="randomStartSecond != null" >random_start_second = #{randomStartSecond},</if>
+          <if test="randomEndSecond != null" >random_end_second = #{randomEndSecond},</if>
+          <if test="isOpenAutoJoinTeam != null" >is_open_auto_join_team = #{isOpenAutoJoinTeam},</if>
+          <if test="autoJoinTeamNumberLimit != null" >auto_join_team_number_limit = #{autoJoinTeamNumberLimit},</if>
+          
+          <if test="teamValidHour != null" >team_valid_hour = #{teamValidHour},</if>
+          <if test="teamNumberLimit != null" >team_number_limit = #{teamNumberLimit},</if>
+          <if test="startTeamTime != null" >start_team_time = #{startTeamTime},</if>
+          <if test="shortName != null" >short_name = #{shortName},</if>
+          
+        </set>
+        <where>
+           id=#{id}
+        </where>
+	</update>
+	
+	
+	 
+	
+	<insert id="addAutoTeamConfig" parameterType="map"
+		useGeneratedKeys="true" keyProperty="id">
+ <![CDATA[
+        insert into mweb_group_auto_team_config(short_name,mweb_group_product_info_id,mweb_group_product_id,team_valid_hour,team_number_limit,start_team_time,create_time) 
+        values(#{shortName},#{mwebGroupProductInfoId},#{mwebGroupProductId},#{teamValidHour},#{teamNumberLimit},#{startTeamTime},NOW())
+        ]]>
+	</insert>
+	
+	
+	<select id="findAutoGroupProductInfoByMwebGroupProductId" parameterType="int" resultMap="mwebGroupProductInfoEntityMap">
+    <![CDATA[
+         SELECT 
+	          t.id,
+	          t.type,
+              t.mweb_group_product_id AS mwebGroupProductId,
+	          t.current_number AS currentNumber,
+	          t.team_number_limit AS teamNumberLimit,
+	          t.`status`,
+	          t.team_end_time AS teamEndTime,
+              t.create_time as createTime,
+              t.update_time as updateTime
+          FROM
+	           mweb_group_product_info t
+        ]]>
+		<where>
+	         t.mweb_group_product_id=#{mwebGroupProductId}
+	         and t.type=1
+	         
+		</where>
+	
+	</select>
+</mapper>

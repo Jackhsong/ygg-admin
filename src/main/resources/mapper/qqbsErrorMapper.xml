@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="QqbsErrorMapper">
+
+	
+	<sql id="condition">
+		where 1=1
+			<if test="tuiAccountId != null and tuiAccountId != -1 "> and qwl.tui_account_id = #{tuiAccountId}</if>
+			<if test="accountId !=null and accountId !=-1"> and qwl.account_id=#{accountId}</if>
+	</sql>
+	<!-- 查询列表 -->
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select qwl.id,qwl.id as `index`,qwl.account_id as accountId,
+				qwl.tui_account_id as tuiAccountId,
+				qwl.operator as operator,
+				qwl.remark as remark,
+				qwl.create_time as createTime
+		from qqbs_account_rela_change_log qwl
+		<include refid="condition"></include>
+		order by qwl.create_time DESC,id desc
+		<if test="start != null">limit #{start},#{size}</if>
+	</select>
+	<!-- 统计 -->
+	<select id="getCountByParam" resultType="int" parameterType="map">
+		select count(1) 
+			from qqbs_account_rela_change_log qwl
+		<include refid="condition"></include>
+	</select>
+	<insert id="insert" parameterType="QqbsAccountRelaChangeLogEntity" useGeneratedKeys="true" keyProperty="id">
+ 		<![CDATA[
+        	insert into qqbs_account_rela_change_log(account_id,tui_account_id,operator,remark,create_time) 
+        	values(#{accountId},#{tuiAccountId},#{operator},#{remark},now())
+        ]]>
+	</insert>
+</mapper>

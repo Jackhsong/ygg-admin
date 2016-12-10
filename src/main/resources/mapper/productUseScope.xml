@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductUseScopeMapper">
+    <insert id="insertProductUseScope" parameterType="map" >
+        INSERT INTO `ygg_sale_platform`.`product_use_scope`
+        (`name`,`is_available`,`create_time`)
+        VALUES(#{name},#{isAvailable},NOW())
+    </insert>
+
+    <update id="updateProductUserScope" parameterType="map">
+        UPDATE product_use_scope
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name=#{name},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable}</if>
+        </trim>
+        AND id IN
+        <foreach collection="idList" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteProductUseScopeById" parameterType="int">
+        DELETE FROM product_use_scope WHERE id = #{id}
+    </delete>
+
+    <select id="findProductUseScope" resultType="map" parameterType="map" >
+        SElECT id, name,  is_available AS isAvailable FROM product_use_scope
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test = "idList != null">
+                AND id IN
+                <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+        </trim>
+        <if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+
+    <select id="countListInfo" resultType="int" parameterType="map">
+        SElECT count(id) FROM product_use_scope
+        <trim prefix="WHERE" suffixOverrides="AND">
+            <if test = "idList != null">
+                AND id IN
+                <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+        </trim>
+    </select>
+
+</mapper>

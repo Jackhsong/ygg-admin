@@ -1,0 +1,126 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+<!--  配置调度程序quartz -->
+	<!-- 使用MethodInvokingJobDetailFactoryBean，任务类可以不实现Job接口，通过targetMethod指定调用方法 -->
+	<!-- 定义目标bean和bean中的方法 -->
+	<bean id="updateElasticsearchIndexJob" class="com.ygg.admin.job.UpdateElasticsearchIndexJob" /> 
+	<bean id="sendOrderSignMessageJob" class="com.ygg.admin.job.SendOrderSignMessageJob" />
+	<bean id="updateEdbIsPushStatusJob" class="com.ygg.admin.job.UpdateEdbIsPushStatusJob" />
+
+	<!--&lt;!&ndash; ======================== 执行任务 ======================== &ndash;&gt;-->
+	<bean id="updateElasticsearchIndexJobTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="updateElasticsearchIndexJob"/>
+		</property>
+		<property name="targetMethod">  
+			<value>execute</value>
+		</property>
+	</bean>
+
+	<bean id="sendOrderSignMessageJobTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="sendOrderSignMessageJob"/>
+		</property>
+		<property name="targetMethod">  <!-- 要执行的方法名称 -->
+			<value>execute</value>
+		</property>
+		<property name="concurrent">  <!-- 取消并发执行 -->
+			<value>false</value>
+		</property>
+	</bean>
+
+	<bean id="updateEdbIsPushStatusJobTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="updateEdbIsPushStatusJob"/>
+		</property>
+		<property name="targetMethod">  <!-- 要执行的方法名称 -->
+			<value>execute</value>
+		</property>
+		<property name="concurrent">  <!-- 取消并发执行 -->
+			<value>false</value>
+		</property>
+	</bean>
+	
+	
+	<bean id="cacheCrmPhonenumberJobTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject"><bean class="com.ygg.admin.service.impl.CrmServiceImpl"></bean></property>
+		<property name="targetMethod">
+			<value>cacheMobileNumber</value>
+		</property>
+		<property name="concurrent">
+			<value>false</value>
+		</property>
+	</bean>
+	
+	<bean id="sendMessageTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject"><bean class="com.ygg.admin.service.impl.CrmServiceImpl"></bean></property>
+		<property name="targetMethod">
+			<value>sendMessageTask</value>
+		</property>
+		<property name="concurrent">
+			<value>false</value>
+		</property>
+	</bean>
+
+	<!--&lt;!&ndash; ======================== 调度触发器 ======================== &ndash;&gt;-->
+	<!--更新搜索索引-->
+	<bean id="updateElasticsearchIndexJobDoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="updateElasticsearchIndexJobTask" />
+		<property name="cronExpression" value="5 13,43 9-23 * * ?" />
+		<!--<property name="cronExpression" value="0 */1 * * * ?" />-->
+	</bean>
+
+	<!--发送签收短信-->
+	<bean id="sendOrderSignMessageJobDoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sendOrderSignMessageJobTask" />
+		<property name="cronExpression" value="5 0/10 10-20 * * ?" />
+	</bean>
+
+	<!--更新EDB订单是否推送任务-->
+	<bean id="updateEdbIsPushStatusJobDoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="updateEdbIsPushStatusJobTask" />
+		<property name="cronExpression" value="15 21,51 * * * ?" />
+		<!--<property name="cronExpression" value="15 * * * * ?" />-->
+	</bean>
+
+
+	<bean id="cacheCrmPhonenumberJobTaskDoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+    	<property name="jobDetail" ref="cacheCrmPhonenumberJobTask" />  
+    	<property name="cronExpression" value="0 0 3 * * ?" />  
+    </bean>
+
+	<bean id="sendMessageTaskDoTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+    	<property name="jobDetail" ref="sendMessageTask" />  
+    	<property name="cronExpression" value="0 0/1 * * * ?" />  
+    </bean>  
+
+	<!--&lt;!&ndash; ======================== 调度工厂 ========================   &ndash;&gt;-->
+	<bean id="startQuertz" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="updateElasticsearchIndexJobDoTime"/>
+				<ref bean="sendOrderSignMessageJobDoTime"/>
+				<ref bean="updateEdbIsPushStatusJobDoTime"/>
+				<ref bean="cacheCrmPhonenumberJobTaskDoTime"/>
+				<ref bean="sendMessageTaskDoTime"/>
+			</list>
+		</property>
+	</bean>
+
+	<task:annotation-driven/>
+	<task:executor id="executor" pool-size="10"/>
+	<bean id="applicationEventMulticaster"
+		  class="org.springframework.context.event.SimpleApplicationEventMulticaster">
+		<property name="taskExecutor" ref="executor"/>
+	</bean>
+
+</beans>
+				         

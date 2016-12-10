@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerAdminOrderMapper">
+	<select id="findSellerOrderList" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`status`,
+			pay_time AS payTime,
+			send_time AS sendTime,
+			expire_time AS expireTime,
+			is_timeout AS isTimeout
+		FROM
+			`order`
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="sellerId != null">AND seller_id=#{sellerId}</if>
+			<if test="beginDate != null">AND <![CDATA[pay_time>=#{beginDate}]]></if>
+			<if test="endDate != null">AND <![CDATA[pay_time<#{endDate}]]></if>
+			<if test="isTimeout != null">AND is_time=#{isTimeout}</if>
+			<if test="checkStatusList != null">AND check_status in
+				<foreach collection="checkStatusList" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="sellerIdList != null">AND seller_id in
+				<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</trim>
+		ORDER BY id DESC
+	</select>
+	
+	<select id="findSellerOrderQuestionInfo" parameterType="map" resultType="map">
+		SELECT
+			oq.id AS questionId,
+			oq.question_template_id AS questionTemplateId,
+			oq.`desc` AS questionDesc,
+			oq.customer_deal_detail AS customerDealDetail,
+			oq.seller_deal_detail AS sellerDealDetail,
+			oq.seller_feedback_detail AS sellerFeedbackDetail,
+			oq.seller_feedback_end_time as sellerFeedbackEndTime,
+			oqt.`name` AS templateName,
+			o.id AS orderId,
+			o.number AS orderNo,
+			o.`status` AS oStatus,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress
+		FROM
+			order_question oq,
+			order_question_template oqt,
+			`order` o,
+			seller s
+		WHERE
+			oq.order_id = o.id
+		AND oq.question_template_id = oqt.id
+		AND o.seller_id = s.id
+		AND oq.is_push=1
+		AND (oq.customer_status=1 OR oq.seller_status=1)
+		<if test="orderNo != null">AND o.number = #{orderNo}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="createUser != null">AND oq.create_user = #{createUser}</if>
+		<if test="templateId != null">AND oqt.id =  #{templateId}</if>
+		<if test="questionId != null">AND oq.id =  #{questionId}</if>
+		<if test="questionDesc != null">AND oq.`desc` LIKE  #{questionDesc}</if>
+		<if test="sellerIdList != null">AND s.id in
+			<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY oq.update_time DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countSellerOrderQuestionInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(oq.id)
+		FROM
+			order_question oq,
+			order_question_template oqt,
+			`order` o,
+			seller s
+		WHERE
+			oq.order_id = o.id
+		AND oq.question_template_id = oqt.id
+		AND o.seller_id = s.id
+		AND oq.is_push=1
+		AND (oq.customer_status=1 OR oq.seller_status=1)
+		<if test="orderNo != null">AND o.number = #{orderNo}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="createUser != null">AND oq.create_user = #{createUser}</if>
+		<if test="templateId != null">AND oqt.id =  #{templateId}</if>
+		<if test="questionId != null">AND oq.id =  #{questionId}</if>
+		<if test="questionDesc != null">AND oq.`desc` LIKE  #{questionDesc}</if>
+		<if test="sellerIdList != null">AND s.id in
+			<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>		
+	</select>
+	
+	<select id="findSellerLogisticsOrderList" parameterType="map" resultType="map">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			order_id AS orderId,
+			send_time AS sendTime,
+			expire_time AS expireTime,
+			logistics_time AS logisticsTime,
+			logistics_number AS logisticsNumber,
+			logistics_company AS logisticsCompany,
+			is_timeout AS isTimeout
+		FROM
+			logistics_timeout
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="sendTimeBegin != null"><![CDATA[AND send_time>=#{sendTimeBegin}]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[AND send_time<=#{sendTimeEnd}]]></if>
+			<if test="sellerId != null">AND seller_id=#{sellerId}</if>
+			<if test="sellerIdList != null">AND seller_id in
+			<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</if>
+		</trim>			
+	</select>
+	
+	<select id="findSendTimeoutComplainOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id AS id,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.expire_time AS expireTime,
+			o.is_timeout AS isTimeout,
+			o.`number` AS number,
+			o.`status` AS status,
+			o.total_price+adjust_price AS totalPrice,
+			o.adjust_price AS adjustPrice,
+			o.real_price AS realPrice,
+			o.app_channel AS appChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId,
+			o.receive_address_id AS receiveAddressId,
+			o.seller_id AS sellerId,
+			o.is_freeze AS isFreeze,
+			o.check_status AS checkStatus,
+			o.type AS  orderType,
+			otc.`status` as complainStatus,
+			otc.`timeout_reason_id` as reasonId
+		FROM
+			`order` o,order_timeout_complain_result otc
+		WHERE
+			o.id = otc.order_id
+			<if test="orderId != null">AND o.id=#{orderId}</if>
+			<if test="orderNumber != null">AND o.number=#{orderNumber}</if>
+			<if test="complainStatus != null">AND otc.`status`=#{complainStatus}</if>
+			<if test="sellerId != null">AND o.seller_id=#{sellerId}</if>
+			<if test="isTimeout != null">AND o.is_timeout=#{isTimeout}</if>
+			<if test="sellerIdList != null">AND o.seller_id in
+				<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		ORDER BY otc.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countSendTimeoutComplainOrder" parameterType="map" resultType="int">
+		SELECT
+			COUNT(o.id)
+		FROM
+			`order` o,order_timeout_complain_result otc
+		WHERE
+			o.id = otc.order_id
+			<if test="orderId != null">AND o.id=#{orderId}</if>
+			<if test="orderNumber != null">AND o.number=#{orderNumber}</if>
+			<if test="complainStatus != null">AND otc.`status`=#{complainStatus}</if>
+			<if test="sellerId != null">AND o.seller_id=#{sellerId}</if>
+			<if test="isTimeout != null">AND o.is_timeout=#{isTimeout}</if>
+			<if test="sellerIdList != null">AND o.seller_id in
+				<foreach collection="sellerIdList" item="item" index="index" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>			
+	</select>
+</mapper>  

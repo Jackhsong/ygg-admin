@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ThirdPartyProductMapper">  
+	<select id="findAllThirdPartyProduct" parameterType="map" resultType="map">
+		SELECT
+			ptp.id,
+			ptp.product_code AS productCode,
+			ptp.provider_product_id AS providerProductId,
+			ptp.total_stock AS totalStock,
+			ptp.available_stock AS availableStock,
+			ptp.total_sales AS totalSales,
+			ptp.group_count AS groupCount,
+			ptp.is_available AS isAvailable,
+			ptp.storage_id AS storageId,
+			c.id AS channelId,
+			c.channel_name AS channelName
+		FROM
+			product_third_party ptp,
+			channel c
+		WHERE
+			c.id = ptp.channel_id
+		<if test="id != null">AND ptp.id=#{id}</if>
+		<if test="channelId != null">AND c.id=#{channelId}</if>
+		<if test="productCode != null">AND ptp.product_code=#{productCode}</if>
+		<if test="ppId != null">AND ptp.provider_product_id=#{ppId}</if>
+		<if test="ppIdList != null"> AND ptp.provider_product_id IN
+			<foreach collection="ppIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countThirdPartyProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(ptp.id)
+		FROM
+			product_third_party ptp,
+			channel c
+		WHERE
+			c.id = ptp.channel_id
+		<if test="id != null">AND ptp.id=#{id}</if>
+		<if test="channelId != null">AND c.id=#{channelId}</if>
+		<if test="productCode != null">AND ptp.product_code=#{productCode}</if>
+		<if test="ppId != null">AND ptp.provider_product_id=#{ppId}</if>
+		<if test="ppIdList != null"> AND ptp.provider_product_id IN
+			<foreach collection="ppIdList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>		
+	</select>
+	
+	<insert id="saveThirdPartyProduct" parameterType="ThirdPartyProductEntity">
+		insert into product_third_party(channel_id,product_code,provider_product_id,group_count,create_user,create_time,update_user)
+		values(#{channelId},#{productCode},#{providerProductId},#{groupCount},#{createUser},now(),#{updateUser})
+	</insert>
+	
+	<update id="updateThirdPartyProduct" parameterType="ThirdPartyProductEntity">
+		UPDATE product_third_party
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="channelId != null">channel_id=#{channelId},</if>
+			<if test="productCode != null">product_code=#{productCode},</if>
+			<if test="providerProductId != null">provider_product_id=#{providerProductId},</if>
+			<if test="groupCount != null">group_count=#{groupCount},</if>
+			<if test="updateUser != null">update_user=#{updateUser},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<insert id="batchSaveThirdPartyProduct" parameterType="list">
+		INSERT INTO product_third_party(channel_id,product_code,provider_product_id,group_count,create_user,create_time,update_user) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.channelId},#{item.productCode},#{item.providerProductId},#{item.groupCount}, #{item.createUser}, now(),#{item.updateUser})
+     	</foreach>
+	</insert>
+	
+	<update id="updateThirdPartyProductStatus" parameterType="map">
+		UPDATE product_third_party SET is_available=#{isAvailable} WHERE id IN
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateThirdPartyProductStock" parameterType="map">
+		UPDATE 
+			product_third_party 
+		SET  
+			total_stock=total_stock+#{stock},
+			available_stock=available_stock+#{stock}
+		WHERE id=#{id}
+		<if test="subtract != null and subtract == 1">AND <![CDATA[total_stock+#{stock}>0 AND available_stock+#{stock}>0]]></if>
+	</update>
+	
+	<update id="updateThirdPartyProductSales" parameterType="map">
+		UPDATE 
+			product_third_party 
+		SET  
+			total_sales=#{sales}
+		WHERE id=#{id}
+	</update>
+</mapper>  

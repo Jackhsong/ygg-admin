@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderManualMapper">
+<!-- 手动订单 相关mapper -->
+     
+<!-- 插入订单信息 -->
+     <insert id="saveOrderManual" parameterType="OrderManualEntity" useGeneratedKeys="true" keyProperty="id">
+     	INSERT INTO order_manual (`number`,`total_price`,`type`,`full_name`,`id_card`,`mobile_number`,`province`,`city`,`district`,`detail_address`,`seller_id`,`remark`,`desc`,`send_type`,`financial_affairs_card_id`,`transfer_time`) 
+     	VALUES (#{number},#{totalPrice},#{type}, #{fullName}, #{idCard}, #{mobileNumber}, #{province}, #{city}, #{district}, #{detailAddress}, #{sellerId}, #{remark},#{desc},#{sendType},#{transferAccount},#{transferTime})
+     </insert>
+     
+<!-- 插入订单商品信息 -->
+     <insert id="saveOrderManualProduct" parameterType="map">
+     	INSERT INTO order_manual_product (`order_manual_id`,`product_id`,`product_count`,`sales_price`) 
+     	VALUES (#{orderManualId}, #{productId}, #{productCount}, #{salesPrice})
+     </insert>
+     
+<!-- 查询所有手动订单信息 -->
+	<select id="findAllOrderManual" parameterType="map" resultType="OrderManualEntity">
+		SELECT 
+			id,
+			number,
+			total_price AS totalPrice,
+			full_name AS fullName,
+			id_card AS idCard,
+			mobile_number AS mobileNumber,
+			province,
+			city,
+			district,
+			detail_address AS detailAddress,
+			seller_id AS sellerId,
+			create_time AS createTime,
+			send_time AS sendTime,
+			remark,
+			`desc`,
+			`status`,
+			logistics_channel AS logisticsChannel,
+			logistics_number AS logisticsNumber,
+			send_type as sendType,
+			is_settlement as isSettlement,
+			is_need_settlement AS isNeedSettlement
+		FROM 
+			order_manual
+		WHERE
+			1=1
+			<if test="startTimeBegin != null"><![CDATA[and create_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and create_time<#{startTimeEnd} ]]></if>
+			<if test="settlementStartTimeBegin != null"><![CDATA[AND settlement_time>=#{settlementStartTimeBegin} ]]></if>
+			<if test="settlementEndTimeEnd != null"><![CDATA[AND settlement_time<#{settlementEndTimeEnd} ]]></if>
+			<if test="fullName != null"> AND full_name LIKE #{fullName} </if>
+			<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber} </if>
+			<if test="number != null"> AND number=#{number} </if>
+			<if test="sellerId != null"> AND seller_id=#{sellerId} </if>
+			<if test="sellerIdList != null">
+				AND seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="status != null"> AND status=#{status} </if>
+			<if test="isSettlement != null"> AND is_settlement=#{isSettlement} </if>
+			<if test="id != null"> AND id=#{id} </if>
+			<if test="orderNumber != null"> AND number=#{orderNumber} </if>
+			<if test="sendType != null">AND send_type=#{sendType}</if>
+		Order by create_time desc ,id desc
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- 查询手动订单和商品 -->
+	<select id="findAllOrderManualAndProduct" parameterType="map" resultType="map">
+		SELECT 
+			om.id as orderId,
+			omp.product_id as productId,
+			om.number as orderNumber,
+			total_price AS totalPrice,
+			omp.product_count as productCount,
+			omp.sales_price as salesPrice,
+			full_name AS fullName,
+			id_card AS idCard,
+			mobile_number AS mobileNumber,
+			province,
+			city,
+			district,
+			detail_address AS detailAddress,
+			seller_id AS sellerId,
+			create_time AS createTime,
+			send_time AS sendTime,
+			remark,
+			`desc`,
+			`status`,
+			logistics_channel AS logisticsChannel,
+			logistics_number AS logisticsNumber,
+			om.send_type as sendType
+		FROM 
+			order_manual om,
+			order_manual_product omp
+		WHERE om.id = omp.order_manual_id
+			<if test="startTimeBegin != null"><![CDATA[and create_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and create_time<=#{startTimeEnd} ]]></if>
+			<if test="fullName != null"> AND full_name LIKE #{fullName} </if>
+			<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber} </if>
+			<if test="number != null"> AND number=#{number} </if>
+			<if test="status != null"> AND status=#{status} </if>
+			<if test="sendType != null">AND send_type=#{sendType}</if>
+	</select>
+
+<!-- 更新手动订单信息 -->
+	<update id="updateOrderManual" parameterType="map">
+     	UPDATE `order_manual` 
+     	<set>
+          <if test="status != null"> status=#{status}, </if>
+          <if test="logisticsChannel != null"> logistics_channel=#{logisticsChannel}, </if>
+          <if test="logisticsNumber != null"> logistics_number=#{logisticsNumber}, </if>
+          <if test="sendTime != null"> send_time=#{sendTime},</if>
+          <if test="isSettlement != null"> is_settlement=#{isSettlement},</if>
+     	  <if test="settlementDate != null"> settlement_time=#{settlementDate},</if>
+          <if test="isNeedSettlement != null"> is_need_settlement=#{isNeedSettlement}</if>
+     	</set>
+     	where id=#{id}
+     </update>
+	
+	<!-- count  手动订单信息 -->
+	<select id="countOrderManual" parameterType="map" resultType="int">
+		SELECT 
+			count(id)
+		FROM 
+			order_manual
+		WHERE
+			1=1
+			<if test="startTimeBegin != null"><![CDATA[and create_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and create_time<=#{startTimeEnd} ]]></if>
+			<if test="settlementStartTimeBegin != null"><![CDATA[AND settlement_time>=#{settlementStartTimeBegin} ]]></if>
+			<if test="settlementEndTimeEnd != null"><![CDATA[AND settlement_time<#{settlementEndTimeEnd} ]]></if>
+			<if test="fullName != null"> AND full_name LIKE #{fullName} </if>
+			<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber} </if>
+			<if test="number != null"> AND number=#{number} </if>
+			<if test="sellerId != null"> AND seller_id=#{sellerId} </if>
+			<if test="sellerIdList != null">
+				AND seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="isSettlement != null"> AND is_settlement=#{isSettlement} </if>
+			<if test="orderNumber != null"> AND number=#{orderNumber} </if>
+			<if test="status != null"> AND status=#{status} </if>
+			<if test="sendType != null">AND send_type=#{sendType}</if>
+	</select>
+	
+<!-- 根据orderManualId查询商品信息 -->
+	<select id="findAllProductInfoByOrderManualId" parameterType="int" resultType="map">
+		SELECT 
+			product_id AS productId,
+			product_count AS productCount,
+			sales_price AS salesPrice
+		FROM 
+			order_manual_product 
+		WHERE 
+			order_manual_id=#{id}
+	</select>
+	
+	<select id="findOrderManualIdByNumber" parameterType="long" resultType="int">
+		select id from `order_manual` where number=#{number}
+	</select>
+	
+	<select id="findOrderManualSettlementByOrderManualId" parameterType="int" resultType="map">
+		SELECT 
+			order_manual_id AS orderManualId, 
+			freight_money AS freightMoney,
+			postage_is_settlement AS postageIsSettlement
+		FROM 
+			order_manual_settlement 
+		WHERE order_manual_id=#{orderManualId}
+	</select>
+	
+	<insert id="insertOrderManualSettlement" parameterType="map">
+		INSERT INTO order_manual_settlement (`order_manual_id`,`freight_money`,`postage_is_settlement`,`postage_comfirm_date`) 
+     	VALUES (#{orderMmanualId},#{freightMoney},#{postageIsSettlement},#{postageComfirmDate})
+	</insert>
+	
+	<delete id="deleteOrderManualSettlement" parameterType="int">
+		DELETE FROM order_manual_settlement WHERE order_manual_id=#{orderManualId}
+	</delete>
+	
+	<update id="updateOrderProductCost" parameterType="map">
+		UPDATE 
+			order_manual_product 
+		SET 
+			cost=#{cost} 
+		WHERE 
+			order_manual_id=#{orderManualId} 
+			AND product_id=#{productId}
+	</update>
+	
+	<insert id="addOverseasManualProduct" parameterType="map" >
+    	INSERT INTO overseas_manual_product (`product_id`,`product_count`,`remark`,`create_time`) 
+    	VALUES (#{productId},#{productCount},#{remark},now())
+    </insert>
+    
+    <select id="findOverseasManualProduct" parameterType="map" resultType="map" >
+    	SELECT 
+    		id,
+    		product_id as productId,
+    		product_count as productCount,
+    		remark 
+    	FROM 
+    		overseas_manual_product
+    	WHERE 
+    		1=1
+    		<if test="productId != null">AND productId=#{productId}</if> 
+    		<if test="idList != null">
+      			AND product_id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+    	ORDER BY id DESC 
+    	<if test="start != null">LIMIT #{start},#{max}</if>
+    </select>
+    
+    <select id="countOverseasManualProduct" parameterType="map" resultType="int" >
+    	SELECT 
+    		count(id)
+    	FROM 
+    		overseas_manual_product
+    	WHERE 
+    		1=1
+    		<if test="product_id != null">AND productId=#{product_id}</if> 
+    		<if test="idList != null">
+      			AND product_id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+    </select>
+     
+</mapper>

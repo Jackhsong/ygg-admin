@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SearchMapper">
+
+     <select id="findAllSearchHotKeyword" parameterType="map" resultType="map">
+		SELECT
+			id,
+			keyword,
+			sequence
+		FROM
+			search_hot_keyword
+		ORDER BY sequence DESC ,id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+
+	<select id="countAllSearchHotKeyword" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			search_hot_keyword
+	</select>
+
+	<delete id="deleteSearchHotKeyword" parameterType="int">
+		DELETE FROM search_hot_keyword WHERE id=#{id}
+	</delete>
+	
+	<update id="updateSearchHotKeyword" parameterType="map">
+		UPDATE search_hot_keyword SET sequence=#{sequence} WHERE id=#{id}
+	</update>
+
+	<insert id="saveSearchHotKeyword" parameterType="map">
+		INSERT INTO search_hot_keyword (`keyword`, `sequence`)
+		VALUES (#{keyword}, #{sequence})
+	</insert>
+
+	<select id="findAllSearchRecord" parameterType="map" resultType="map">
+		SELECT
+			shk.id,
+			shk.account_id AS accountId,
+			shk.keyword,
+			shk.result_num AS resultNum,
+			shk.create_time AS  createTime,
+			a.name AS accountName
+		FROM
+			search_account_record shk
+			LEFT JOIN account a ON shk.account_id=a.id
+		WHERE
+			1=1
+			<if test="startTimeBegin != null"><![CDATA[AND shk.create_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND shk.create_time < #{startTimeEnd}]]></if>
+			<if test="keyword != null"><![CDATA[AND shk.keyword LIKE #{keyword}]]></if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countAllSearchRecord" parameterType="map" resultType="int">
+		SELECT
+			count(shk.id)
+		FROM
+			search_account_record shk
+			LEFT JOIN account a ON shk.account_id=a.id
+		WHERE
+			1=1
+			<if test="startTimeBegin != null"><![CDATA[AND shk.create_time >= #{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND shk.create_time < #{startTimeEnd}]]></if>
+			<if test="keyword != null"><![CDATA[AND shk.keyword LIKE #{keyword}]]></if>
+	</select>
+
+</mapper>  

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomCenterMapper"> 
+	<resultMap type="CustomCenterEntity" id="CustomCenterMap">
+		<id column="id" property="id"/>
+		<result column="display_type" property="displayType"/>
+		<result column="one_image" property="oneImage"/>
+		<result column="one_type" property="oneType"/>
+		<result column="one_display_id" property="oneDisplayId"/>
+		<result column="one_remark" property="oneRemark"/>
+		<result column="one_title" property="oneTitle"/>
+		<result column="one_title_color" property="oneTitleColor"/>
+		<result column="one_width" property="oneWidth"/>
+		<result column="one_height" property="oneHeight"/>
+		<result column="two_image" property="twoImage"/>
+		<result column="two_type" property="twoType"/>
+		<result column="two_display_id" property="twoDisplayId"/>
+		<result column="two_remark" property="twoRemark"/>
+		<result column="two_title" property="twoTitle"/>
+		<result column="two_title_color" property="twoTitleColor"/>
+		<result column="two_width" property="twoWidth"/>
+		<result column="two_height" property="twoHeight"/>
+		<result column="three_image" property="threeImage"/>
+		<result column="three_type" property="threeType"/>
+		<result column="three_display_id" property="threeDisplayId"/>
+		<result column="three_remark" property="threeRemark"/>
+		<result column="three_title" property="threeTitle"/>
+		<result column="three_title_color" property="threeTitleColor"/>
+		<result column="three_width" property="threeWidth"/>
+		<result column="three_height" property="threeHeight"/>
+		<result column="four_image" property="fourImage"/>
+		<result column="four_type" property="fourType"/>
+		<result column="four_display_id" property="fourDisplayId"/>
+		<result column="four_remark" property="fourRemark"/>
+		<result column="four_title" property="fourTitle"/>
+		<result column="four_title_color" property="fourTitleColor"/>
+		<result column="four_width" property="fourWidth"/>
+		<result column="four_height" property="fourHeight"/>
+		<result column="remark" property="remark"/>
+		<result column="is_display" property="isDisplay"/>
+	</resultMap>
+	<select id="findAllCustomCenter" parameterType="map" resultMap="CustomCenterMap">
+		SELECT
+			*
+		FROM
+			custom_center
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="remark != null">AND remark LIKE #{remark}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countCustomCenter" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(id) 
+		FROM 
+			custom_center
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="remark != null">AND remark LIKE #{remark}</if>
+			<if test="isDisplay != null">AND is_display=#{isDisplay}</if>
+		</trim>
+	</select>
+	
+	<insert id="saveCustomCenter" parameterType="CustomCenterEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO custom_center(
+		display_type,one_image,one_type,one_display_id,one_remark,one_title,one_title_color,one_width,one_height,
+		two_image,two_type,two_display_id,two_remark,two_title,two_title_color,two_width,two_height,
+		three_image,three_type,three_display_id,three_remark,three_title,three_title_color,three_width,three_height,
+		four_image,four_type,four_display_id,four_remark,four_title,four_title_color,four_width,four_height,remark,is_display
+		)VALUES(
+		#{displayType},#{oneImage},#{oneType},#{oneDisplayId},#{oneRemark},#{oneTitle},#{oneTitleColor},#{oneWidth},#{oneHeight},
+		#{twoImage},#{twoType},#{twoDisplayId},#{twoRemark},#{twoTitle},#{twoTitleColor},#{twoWidth},#{twoHeight},
+		#{threeImage},#{threeType},#{threeDisplayId},#{threeRemark},#{threeTitle},#{threeTitleColor},#{threeWidth},#{threeHeight},
+		#{fourImage},#{fourType},#{fourDisplayId},#{fourRemark},#{fourTitle},#{fourTitleColor},#{fourWidth},#{fourHeight},#{remark},#{isDisplay}
+		)	
+	</insert>
+	
+	<update id="updateCustomCenter" parameterType="CustomCenterEntity">
+		UPDATE custom_center
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="displayType != null">display_type=#{displayType},</if>
+			<if test="oneImage != null">one_image=#{oneImage},</if>
+			<if test="oneType != null">one_type=#{oneType},</if>
+			<if test="oneDisplayId != null">one_display_id=#{oneDisplayId},</if>
+			<if test="oneRemark != null">one_remark=#{oneRemark},</if>
+			<if test="oneTitle != null">one_title=#{oneTitle},</if>
+			<if test="oneTitleColor != null">one_title_color=#{oneTitleColor},</if>
+			<if test="oneWidth != null">one_width=#{oneWidth},</if>
+			<if test="oneHeight != null">one_height=#{oneHeight},</if>
+			<if test="twoImage != null">two_image=#{twoImage},</if>
+			<if test="twoType != null">two_type=#{twoType},</if>
+			<if test="twoDisplayId != null">two_display_id=#{twoDisplayId},</if>
+			<if test="twoRemark != null">two_remark=#{twoRemark},</if>
+			<if test="twoTitle != null">two_title=#{twoTitle},</if>
+			<if test="twoTitleColor != null">two_title_color=#{twoTitleColor},</if>
+			<if test="twoWidth != null">two_width=#{twoWidth},</if>
+			<if test="twoHeight != null">two_height=#{twoHeight},</if>
+			<if test="threeImage != null">three_image=#{threeImage},</if>
+			<if test="threeType != null">three_type=#{threeType},</if>
+			<if test="threeDisplayId != null">three_display_id=#{threeDisplayId},</if>
+			<if test="threeRemark != null">three_remark=#{threeRemark},</if>
+			<if test="threeTitle != null">three_title=#{threeTitle},</if>
+			<if test="threeTitleColor != null">three_title_color=#{threeTitleColor},</if>
+			<if test="threeWidth != null">three_width=#{threeWidth},</if>
+			<if test="threeHeight != null">three_height=#{threeHeight},</if>
+			<if test="fourImage != null">four_image=#{fourImage},</if>
+			<if test="fourType != null">four_type=#{fourType},</if>
+			<if test="fourDisplayId != null">four_display_id=#{fourDisplayId},</if>
+			<if test="fourRemark != null">four_remark=#{fourRemark},</if>
+			<if test="fourTitle != null">four_title=#{fourTitle},</if>
+			<if test="fourTitleColor != null">four_title_color=#{fourTitleColor},</if>
+			<if test="fourWidth != null">four_width=#{fourWidth},</if>
+			<if test="fourHeight != null">four_height=#{fourHeight},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="isDisplay != null">is_display=#{isDisplay},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<update id="updateDisplayStatus" parameterType="map">
+		update custom_center set is_display=#{isDisplay} where id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findCustomCenterById" parameterType="int" resultMap="CustomCenterMap">
+		select * from custom_center where id=#{id}
+	</select>
+</mapper>  

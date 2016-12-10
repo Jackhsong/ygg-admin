@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="BrandMapper">
+	<resultMap type="BrandEntity" id="BrandMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="image" property="image" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="activity_type" property="activityType" />
+    	<result column="activity_display_id" property="activityDisplayId" />
+    	<result column="is_show_activity" property="isShowActivity" />
+    	<result column="create_time" property="createTime" />
+    	<result column="category_first_id" property="categoryFirstId" />
+    	<result column="state_id" property="stateId" />
+    	<result column="hot_spots" property="hotSpots" />
+    	<result column="introduce" property="introduce" />
+    	<result column="name_en" property="enName" />
+    	<result column="image_ad" property="adImage" />
+    </resultMap>
+    
+<!-- 插入品牌信息 -->
+    <insert id="save" parameterType="BrandEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO brand (`name`,name_en, image_ad, `image`, `return_distribution_proportion_type`,
+		 `is_available`, `activity_type`, `activity_display_id`,
+		  `is_show_activity`, `create_time`,
+		  category_first_id,state_id,hot_spots,introduce)
+		VALUES (#{name}, #{enName}, #{adImage}, #{image},#{returnDistributionProportionType},
+		 #{isAvailable}, #{activityType},
+		  #{activityDisplayId}, 
+		  #{isShowActivity}, 
+		  #{createTime},
+		  #{categoryFirstId},#{stateId},#{hotSpots},#{introduce})
+    </insert>
+    
+<!-- 更新品牌信息 -->
+    <update id="update" parameterType="map">
+     	UPDATE `brand` 
+     	<set>
+          <if test="name != null"> name=#{name}, </if>
+          <if test="enName != null"> name_en=#{enName}, </if>
+          <if test="adImage != null"> image_ad=#{adImage}, </if>
+          <if test="image != null"> image=#{image}, </if>
+          <if test="activityType != null"> activity_type=#{activityType}, </if>
+          <if test="activityDisplayId != null"> activity_display_id=#{activityDisplayId}, </if>
+          <if test="isShowActivity != null"> is_show_activity=#{isShowActivity}, </if>
+          <if test="returnDistributionProportionType != null"> return_distribution_proportion_type=#{returnDistributionProportionType}, </if>
+          <if test="isAvailable != null">is_available=#{isAvailable}, </if>
+          <if test="categoryFirstId != null">category_first_id=#{categoryFirstId}, </if>
+          <if test="stateId != null">state_id=#{stateId}, </if>
+          <if test="hotSpots != null">hot_spots=#{hotSpots}, </if>
+          <if test="introduce != null">introduce=#{introduce} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+     
+<!-- 查询品牌信息 -->
+     <select id="findAllBrandByPara" parameterType="map"  resultMap="BrandMap">
+     	SELECT b.* FROM `brand` b
+     	WHERE 1=1 
+     	<if test="id != null"> and b.id=#{id} </if>
+     	<if test="name != null"> and b.name like #{name} </if>
+     	<if test="enName != null"> and b.name_en like #{enName} </if>
+     	<if test="isAvailable != null">and b.is_available=#{isAvailable} </if>
+     	<if test="stateId != null and stateId != -1">and b.state_id=#{stateId} </if>
+     	<if test="categoryFirstId != null and categoryFirstId != -1">and b.category_first_id in (#{categoryFirstId}) </if>
+		<if test="categoryFirstIdList != null">
+			AND b.id in (
+				select distinct brand_id from relation_category_and_brand
+				where category_first_id in (
+					<foreach collection="categoryFirstIdList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			) )
+		</if>
+     	ORDER BY name , id DESC
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+<!-- 统计品牌数量 -->
+     <select id="countBrandByPara" parameterType="map" resultType="int">
+    	SELECT COUNT(1) FROM brand b WHERE 1=1
+    	<if test="id != null"> and b.id=#{id} </if>
+     	<if test="name != null"> and b.name like #{name} </if>
+     	<if test="enName != null"> and b.name_en like #{enName} </if>
+     	<if test="isAvailable != null">and b.is_available=#{isAvailable} </if>
+     	<if test="stateId != null and stateId != -1">and b.state_id=#{stateId} </if>
+		<if test="categoryFirstId != null and categoryFirstId != -1">and b.category_first_id in (#{categoryFirstId}) </if>
+		 <if test="categoryFirstIdList != null">
+			 AND b.id in (
+			 select distinct brand_id from relation_category_and_brand
+			 where category_first_id in (
+			 <foreach collection="categoryFirstIdList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			 ) )
+		 </if>
+    </select>
+    
+    <select id="countBrandByName" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM brand WHERE 1=1 
+    	<if test="name != null"> and name=#{name} </if>
+    </select>
+    <!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM brand WHERE id=#{id}
+	</delete>
+
+	<!-- 品牌分类 -->
+	<insert id="saveRelationBrandCategory" parameterType="map">
+		INSERT INTO relation_category_and_brand (`brand_id`, `category_first_id`)
+		VALUES(#{brandId}, #{categoryFirstId})
+	</insert>
+
+	<delete id="deleteRelationBrandCategory" parameterType="map" >
+		DELETE FROM relation_category_and_brand WHERE brand_id = #{brandId}
+	</delete>
+
+	<select id="findRelationBrandCategory" parameterType="map" resultType="map">
+		SELECT
+			brand_id AS brandId,
+			category_first_id AS categoryFirstId
+		FROM relation_category_and_brand WHERE brand_id = #{brandId}
+	</select>
+
+	<select id="findRelationBrandCategoryIdsByBrandId" parameterType="int" resultType="int">
+		SELECT
+		category_first_id AS categoryFirstId
+		FROM relation_category_and_brand WHERE brand_id = #{brandId}
+	</select>
+
+	<select id="findMallCountryBrandIdList"  resultType="int">
+		select brand_id from mall_country_brand where is_display=1 UNION select brand_id from mall_hot_brand where is_display=1
+	</select>
+
+</mapper>

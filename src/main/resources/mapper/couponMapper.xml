@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CouponMapper">
+
+	<!-- 查询coupon_detail -->
+    <select id="queryCouponDetailInfo"  parameterType="map" resultType="map">
+      	SELECT id, type, scope_type, scope_id, threshold, reduce,is_random_reduce,lowest_reduce,maximal_reduce, is_available, `desc` FROM coupon_detail
+      	<trim prefix="WHERE" prefixOverrides="AND">
+      		<if test="type != null">type=#{type}</if>
+      		<if test="scope != null">AND scope_type=#{scope}</if>
+      		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+      		<if test="id != null">AND id=#{id}</if>
+      	</trim>
+      	ORDER BY id desc
+      	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+    </select>
+    
+    <select id="countCouponDetailInfo" parameterType="map" resultType="int">
+    	SELECT count(id) FROM coupon_detail 
+    	<trim prefix="WHERE" prefixOverrides="AND|OR ">
+      		<if test="type != null">type=#{type}</if>
+      		<if test="scope != null">AND scope_type=#{scope}</if>
+      		<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+      	</trim>
+    </select>
+
+	<insert id="addCouponDetail" parameterType="map">
+		INSERT INTO coupon_detail 
+		(`type`,`scope_type`,`scope_id`,`threshold`,`reduce`,`desc`,`is_random_reduce`,`lowest_reduce`,`maximal_reduce`)
+		VALUES
+		(#{type},#{scopeType},#{scopeId},#{threshold},#{reduce},#{desc},#{isRandomReduce},#{lowestReduce},#{maximalReduce})
+	</insert>
+	
+	<update id="updateCouponDetail" parameterType="map">
+		UPDATE coupon_detail set 
+		`type`=#{type},`scope_type`=#{scopeType},`scope_id`=#{scopeId},`threshold`=#{threshold},
+		`reduce`=#{reduce},`desc`=#{desc},`is_random_reduce`=#{isRandomReduce},`lowest_reduce`=#{lowestReduce},`maximal_reduce`=#{maximalReduce}
+		where id=#{id}
+	</update>
+	
+	<select id="countCouponDetailFromCoupon" parameterType="int" resultType="int">
+		SELECT COUNT(coupon_detail_id) from coupon where coupon_detail_id=#{id}
+	</select>
+	
+	<select id="countCouponDetailFromCouponCode" parameterType="int" resultType="int">
+		SELECT COUNT(coupon_detail_id)from coupon_code where coupon_detail_id=#{id}
+	</select>
+	
+	<update id="updateCouponDetailStatus" parameterType="map">
+		update coupon_detail set is_available=#{isAvailable} where id=#{id}
+	</update>
+	
+	<select id="queryCouponInfo" parameterType="map" resultType="map">
+		SELECT
+			c.id,
+			c.total,
+			c.start_time AS startTime,
+			c.end_time AS endTime,
+			c.create_time AS createTime,
+			c.remark,
+			cd.type AS couponType,
+			cd.scope_type AS scopeType,
+			cd.scope_id AS scopeId,
+			cd.threshold,
+			cd.reduce,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce
+		FROM
+			coupon c,
+			coupon_detail cd
+		WHERE
+			c.coupon_detail_id = cd.id
+			<if test="couponId != null">and c.id=#{couponId}</if>
+			<if test="couponDetailType != null">and cd.type=#{couponDetailType}</if>
+			<if test="couponDetailId != null">and cd.id=#{couponDetailId}</if>
+			<if test="startTimeBegin != null"><![CDATA[and c.start_time>=#{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and c.start_time<=#{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[and c.end_time>=#{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[and c.end_time<=#{endTimeEnd}]]></if>
+			<if test="couponRemark != null">and c.remark like #{couponRemark}</if>
+		ORDER BY
+			c.create_time DESC
+		<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+	</select>
+	
+	<select id="countCouponInfo" parameterType="map" resultType="int">
+		SELECT count(c.id)
+		FROM
+			coupon c,
+			coupon_detail cd
+		WHERE
+			c.coupon_detail_id = cd.id
+			<if test="couponId != null">and c.id=#{couponId}</if>
+			<if test="couponDetailType != null">and cd.type=#{couponDetailType}</if>
+			<if test="couponDetailId != null">and cd.id=#{couponDetailId}</if>
+			<if test="startTimeBegin != null"><![CDATA[and c.start_time>=#{startTimeBegin}]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and c.start_time<=#{startTimeEnd}]]></if>
+			<if test="endTimeBegin != null"><![CDATA[and c.end_time>=#{endTimeBegin}]]></if>
+			<if test="endTimeEnd != null"><![CDATA[and c.end_time<=#{endTimeEnd}]]></if>
+			<if test="couponRemark != null">and c.remark like #{couponRemark}</if>
+	</select>
+	<insert id="insertCoupon" parameterType="CouponEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO coupon
+			(coupon_detail_id,total,type,start_time,end_time,remark,create_time)
+		VALUES
+			(#{couponDetailId},#{total},#{type},#{startTime},#{endTime},#{remark},#{createTime})
+	</insert>
+	
+	<insert id="addCouponAccout" parameterType="map">
+		INSERT INTO coupon_account
+			(`account_id`,`source_type`,`coupon_id`,`coupon_detail_id`,`start_time`,`end_time`,`remark`,`create_time`)
+		VALUES
+			(#{accountId},#{sourceType},#{couponId},#{couponDetailId},#{startTime},#{endTime},#{remark},#{createTime})
+	</insert>
+	
+	<insert id="insertRegisterMobileCoupon" parameterType="map">
+		INSERT INTO register_mobile_coupon(mobile_number,coupon_id) VALUES(#{phoneNumber},#{couponId})
+	</insert>
+	
+	<select id="queryCouponAccountInfo" parameterType="map" resultType="map">
+		SELECT
+			ca.id as id,
+			a.id AS accountId,
+			a.`name`,
+			a.nickname,
+			a.mobile_number AS phoneNumber,
+			ca.start_time AS startTime,
+			ca.end_time AS endTime,
+			ca.remark,
+			ca.is_used AS isUsed
+		FROM
+			account a,
+			coupon_account ca
+		WHERE
+			a.id = ca.account_id
+		AND ca.coupon_id = #{couponId}
+		<if test="accountId != null">and a.id=#{accountId}</if>
+		<if test="username != null">and a.`name` like #{username}</if>
+		<if test="phoneNumber != null">and a.mobile_number=#{phoneNumber}</if>
+		<if test="startTimeBegin != null"><![CDATA[and ca.start_time>=#{startTimeBegin}]]></if>
+		<if test="startTimeEnd != null"><![CDATA[and ca.start_time<=#{startTimeEnd}]]></if>
+		<if test="endTimeBegin != null"><![CDATA[and ca.end_time>=#{endTimeBegin}]]></if>
+		<if test="endTimeEnd != null"><![CDATA[and ca.end_time<=#{endTimeEnd}]]></if>
+		<if test="isUsed != null">and ca.is_used=#{isUsed}</if>
+		ORDER BY ca.id 
+      	<if test="start != null">
+	     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+	</select>
+	
+	<select id="countCouponAccountInfo" parameterType="map" resultType="int">
+		SELECT count(*)
+		FROM
+			account a,
+			coupon_account ca
+		WHERE
+			a.id = ca.account_id
+		AND ca.coupon_id = #{couponId}
+		<if test="accountId != null">and a.id=#{accountId}</if>
+		<if test="username != null">and a.`name` like #{username}</if>
+		<if test="phoneNumber != null">and a.mobile_number=#{phoneNumber}</if>
+		<if test="startTimeBegin != null"><![CDATA[and ca.start_time>=#{startTimeBegin}]]></if>
+		<if test="startTimeEnd != null"><![CDATA[and ca.start_time<=#{startTimeEnd}]]></if>
+		<if test="endTimeBegin != null"><![CDATA[and ca.end_time>=#{endTimeBegin}]]></if>
+		<if test="endTimeEnd != null"><![CDATA[and ca.end_time<=#{endTimeEnd}]]></if>
+		<if test="isUsed != null">and ca.is_used=#{isUsed}</if>
+	</select>
+	
+	<select id="queryCouponOrderDetailInfo" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			o.number AS orderNumber,
+			o.pay_time AS payTime,
+			o.total_price+o.adjust_price as totalPrice,
+			o.real_price AS realPrice,
+			o.coupon_price AS couponPrice,
+			o.account_point AS accountPoint,
+			o.adjust_price as adjustPrice,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id = s.id
+			AND o.status in (2,3,4,5)
+			<![CDATA[AND o.coupon_price > 0]]>
+			AND o.account_coupon_id = #{couponAccountId}
+			ORDER by o.id
+			<if test="start != null">
+	     		LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     		</if>
+	</select>
+	
+	<select id="countCouponOrderDetailInfo" parameterType="map" resultType="int">
+		SELECT count(*)
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id = s.id
+		AND o.account_coupon_id = #{couponAccountId}
+	</select>
+
+	<select id="getUsedCouponOrderInfoByCouponId" parameterType="map" resultType="map">
+		SELECT
+		o.number,
+		o.pay_time AS payTime,
+		o.real_price AS realPrice,
+		o.coupon_price AS couponPrice,
+		o.account_point AS accountPoint,
+		o.adjust_price as adjustPrice,
+		s.real_seller_name AS sellerName
+		FROM
+		`order` o,
+		coupon_account ca,
+		seller s
+		WHERE
+		o.account_coupon_id = ca.id
+		AND o.seller_id = s.id
+		AND o.status IN (2,3,4)
+		AND ca.coupon_id = #{couponId}
+		ORDER BY o.pay_time
+		<if test="start != null">
+			LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+		</if>
+	</select>
+
+
+	
+	<select id="queryCouponAccount" parameterType="map" resultType="map">
+		SELECT
+			ca.coupon_detail_id AS couponDetailId,
+			cd.reduce,
+			cd.scope_type AS scopeType,
+			cd.threshold,
+			cd.type AS couponType,
+			cd.scope_id AS scopeId,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce,
+			ca.start_time AS startTime,
+			ca.end_time AS endTime,
+			ca.remark,
+			a.id AS accountId,
+			a.`name` AS accountName,
+			a.type AS accountType
+		FROM
+			coupon_account ca,
+			account a,
+			coupon_detail cd
+		WHERE
+			ca.account_id = a.id
+		AND ca.coupon_detail_id = cd.id
+		AND ca.source_type = 1
+		AND ca.id = #{couponAccountId}
+	</select>
+	
+	<select id="findCouponDetailById" parameterType="int" resultType="CouponDetailEntity">
+		SELECT
+			cd.id,
+			cd.reduce,
+			cd.scope_id AS scopeId,
+			cd.scope_type AS scopeType,
+			cd.threshold,
+			cd.type,
+			cd.create_time AS createTime,
+			cd.is_random_reduce AS isRandomReduce,
+			cd.lowest_reduce AS lowestReduce,
+			cd.maximal_reduce AS maximalReduce,
+			cd.`desc`
+		FROM
+			coupon_detail cd
+		WHERE
+			id = #{id}
+	</select>
+	
+	<select id="findCouponById" parameterType="int" resultType="CouponEntity">
+		SELECT
+			id,
+			coupon_detail_id AS couponDetailId,
+			total,
+			type,
+			start_time AS startTime,
+			end_time AS endTime,
+			remark,
+			create_time AS createTime,
+			update_time AS updateTime
+		FROM
+			coupon
+		WHERE id=#{couponId}		
+	</select>
+	
+	<select id="findCouponTotalMoney" parameterType="int" resultType="float">
+		SELECT
+			SUM(t3.real_price)
+		FROM
+			coupon t1,
+			coupon_account t2,
+			`order` t3
+		WHERE
+			t1.id = #{couponId}
+		AND t1.id = t2.coupon_id
+		AND t2.id = t3.account_coupon_id
+		AND t3.`status` IN (2, 3, 4)		
+	</select>
+	
+	<select id="findCouponUsedInfo" parameterType="int" resultType="int">
+		SELECT 
+			COUNT(ca.id) AS amount
+		FROM
+			coupon c,coupon_account ca
+		WHERE
+			ca.coupon_id = c.id
+		AND ca.is_used = 1
+		AND c.id=#{couponId}
+	</select>
+	
+     <insert id="batchAddCouponAccout" parameterType="list">
+     	INSERT INTO coupon_account
+     		(`account_id`,`source_type`,`coupon_id`,`coupon_detail_id`,`start_time`,`end_time`,`remark`,`create_time`)
+     	VALUES
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.accountId},#{item.sourceType},#{item.couponId},#{item.couponDetailId},#{item.startTime},#{item.endTime},#{item.remark},now())
+     	</foreach>
+     </insert>
+     
+	<insert id="batchInsertRegisterMobileCoupon" parameterType="map">
+		INSERT INTO register_mobile_coupon(mobile_number,coupon_id) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.phoneNumber},#{item.couponId})
+     	</foreach>
+	</insert>
+	
+	<update id="updateCouponTotalNum" parameterType="CouponEntity">
+		UPDATE coupon SET total=#{total} WHERE id=#{id} AND type=2
+	</update>
+	
+	<select id="findRandomCouponIdByPara" parameterType="map" resultType="int">
+		SELECT
+			ca.coupon_id
+		FROM
+			coupon_account ca,
+			coupon_detail cd
+		WHERE
+			ca.coupon_detail_id = cd.id
+		AND cd.is_random_reduce = 1
+		<if test="reduceMin != null"><![CDATA[AND ca.reduce_price>=#{reduceMin}]]></if>
+		<if test="reduceMax != null"><![CDATA[AND ca.reduce_price<=#{reduceMax}]]></if>	
+	</select>
+	
+	<select id="findReduceCouponIdByPara" parameterType="map" resultType="int">
+		SELECT
+			ca.coupon_id
+		FROM
+			coupon_account ca,
+			coupon_detail cd
+		WHERE
+			ca.coupon_detail_id = cd.id
+		AND cd.is_random_reduce = 0
+		<if test="reduceMin != null"><![CDATA[AND cd.reduce>=#{reduceMin}]]></if>
+		<if test="reduceMax != null"><![CDATA[AND cd.reduce<=#{reduceMax}]]></if>			
+	</select>
+
+	<select id="findReducePriceByCouponAccountId" parameterType="int" resultType="map">
+		SELECT reduce_price AS reducePrice, coupon_detail_id AS couponDetailId FROM coupon_account WHERE id=#{id}
+	</select>
+
+</mapper>

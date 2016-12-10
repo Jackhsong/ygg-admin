@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="GegeImageMapper">
+    
+    <select id="findImageInfoproduct" parameterType="map" resultType="map">
+     	SELECT * FROM `gege_image_product` 
+     	WHERE is_available=1
+     	<if test="name != null"> and category_name like #{name} </if>
+     	ORDER BY create_time DESC 
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <select id="findImageInfosale" parameterType="map" resultType="map">
+     	SELECT * FROM `gege_image_activities` 
+     	WHERE is_available=1
+     	<if test="name != null"> and category_name like #{name} </if>
+     	ORDER BY create_time DESC 
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <select id="countImageInfoproduct" parameterType="map" resultType="int">
+     	SELECT COUNT(*) FROM `gege_image_product` 
+     	WHERE 1=1
+     	<if test="name != null"> and category_name like #{name} </if>
+     </select>
+     
+     <select id="countImageInfosale" parameterType="map" resultType="int">
+     	SELECT COUNT(*) FROM `gege_image_activities` 
+     	WHERE 1=1
+     	<if test="name != null"> and category_name like #{name} </if>
+     </select>
+    
+    <insert id="saveproduct" parameterType="GegeImageEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO gege_image_product (`category_name`, `image`, `create_time`) 
+		VALUES (#{categoryName},#{image},#{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    
+    <insert id="savesale" parameterType="GegeImageEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO gege_image_activities (`category_name`, `image`, `create_time`) 
+		VALUES (#{categoryName},#{image},#{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    
+    <update id="updateproduct" parameterType="GegeImageEntity">
+		UPDATE gege_image_product 
+		SET
+		<if test="categoryName != null">`category_name`=#{categoryName},</if>
+		<if test="image != null">`image`=#{image},</if>
+		<if test="isAvailable != null">`is_available`=#{isAvailable} </if>
+		WHERE `id`=#{id};
+    </update>
+    
+    <update id="updatesale" parameterType="GegeImageEntity">
+		UPDATE gege_image_activities 
+		SET
+		<if test="categoryName != null">`category_name`=#{categoryName},</if>
+		<if test="image != null">`image`=#{image},</if>
+		<if test="isAvailable != null">`is_available`=#{isAvailable} </if>
+		WHERE `id`=#{id};
+    </update>
+    
+    <select id="findGegeImageByIdproduct" parameterType="int" resultType="GegeImageEntity">
+    	SELECT 
+	    	id as id,
+	      	category_name as categoryName,
+	      	image as image,
+	      	is_available as isAvailable 
+      	FROM gege_image_product where is_available=1 and id=#{id}
+    </select>
+    
+    <select id="findGegeImageByIdsale" parameterType="int" resultType="GegeImageEntity">
+    	SELECT 
+	    	id as id,
+	      	category_name as categoryName,
+	      	image as image,
+	      	is_available as isAvailable 
+      	FROM gege_image_activities where is_available=1 and id=#{id}
+    </select>
+    
+    <select id="checkInUseproduct" parameterType="int" resultType="int">
+    	SELECT COUNT(id) from product where gege_image_id=#{id}
+    </select>
+    
+    <select id="checkInUsesale" parameterType="int" resultType="int">
+    	SELECT COUNT(id) from activities_common where gege_image_id=#{id}
+    </select>
+    
+    <update id="batchDeleteproduct" parameterType="map">
+     	UPDATE gege_image_product
+		SET is_available=#{isAvailable}
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+     </update>
+     
+     <update id="batchDeletesale" parameterType="map">
+     	UPDATE gege_image_activities
+		SET is_available=#{isAvailable}
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+     </update>
+     
+     <select id="checkIsExistproduct" parameterType="GegeImageEntity" resultType="int">
+    	SELECT COUNT(id) from gege_image_product where is_available=1
+    	<if test="categoryName != null">and category_name=#{categoryName}</if>
+    	<if test="id != -1">and id!=#{id}</if>
+    </select>
+    
+    <select id="checkIsExistsale" parameterType="GegeImageEntity" resultType="int">
+    	SELECT COUNT(id) from gege_image_activities where is_available=1
+    	<if test="categoryName != null">and category_name=#{categoryName}</if>
+    	<if test="id != -1">and id!=#{id}</if>
+    </select>
+    
+    <select id="findAllGegeImageproduct" resultType="GegeImageEntity">
+    	SELECT 
+	    	id as id,
+	      	category_name as categoryName,
+	      	image as image,
+	      	is_available as isAvailable 
+      	FROM gege_image_product where is_available=1
+    </select>
+    
+    <select id="findAllGegeImagesale" resultType="GegeImageEntity">
+    	SELECT 
+	    	id as id,
+	      	category_name as categoryName,
+	      	image as image,
+	      	is_available as isAvailable 
+      	FROM gege_image_activities where is_available=1
+    </select>
+</mapper>  

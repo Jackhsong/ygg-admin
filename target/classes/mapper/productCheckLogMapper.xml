@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductCheckLogMapper">
+
+	<resultMap type="ProductCheckSnapshotEntity" id="ProductCheckSnapshotEntityMap">
+		<id column="id" property="id"/>
+		<result column="seller_product_id" property="sellerProductId" />
+		<result column="seller_id" property="sellerId" />
+		<result column="category_first_id" property="categoryFirstId" />
+		<result column="category_second_id" property="categorySecondId" />
+		<result column="category_third_id" property="categoryThirdId" />
+		<result column="name" property="name" />
+		<result column="selling_point" property="sellingPoint" />
+		<result column="flag_name" property="flagName" />
+		<result column="brand_name" property="brandName" />
+		<result column="net_volume" property="netVolume" />
+		<result column="place_of_origin" property="placeOfOrigin" />
+		<result column="manufacturer_date" property="manufacturerDate" />
+		<result column="storage_method" property="storageMethod" />
+		<result column="durability_period" property="durabilityPeriod" />
+		<result column="people_for" property="peopleFor" />
+		<result column="food_method" property="foodMethod" />
+		<result column="use_method" property="useMethod" />
+		<result column="tip" property="tip" />
+		<result column="code" property="code" />
+		<result column="barcode" property="barcode" />
+		<result column="submit" property="submit" />
+		<result column="proposal_market_price" property="proposalMarketPrice" />
+		<result column="proposal_price" property="proposalPrice" />
+		<result column="product_check_deliver_area_template_snapshot_id" property="productCheckDeliverAreaTemplateSnapshotId" />
+		<result column="product_check_freight_template_snapshot_id" property="productCheckFreightTemplateSnapshotId" />
+		<result column="despatch_type" property="despatchType" />
+		<result column="despatch_address" property="despatchAddress" />
+		<result column="kuaidi" property="kuaidi" />
+		<result column="send_time_remark" property="sendTimeRemark" />
+		<result column="send_weekend_remark" property="sendWeekendRemark" />
+		<result column="image1" property="image1" />
+		<result column="image2" property="image2" />
+		<result column="image3" property="image3" />
+		<result column="image4" property="image4" />
+		<result column="image5" property="image5" />
+		<result column="check_content" property="checkContent" />
+		<result column="status" property="status" />
+		<result column="detail_image" property="detailImage" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+	<!-- 查询审核列表 -->
+	<select id="findCheckLogList" parameterType="map" resultType="map">
+		select * from (
+			select '' as productCheckSnapshotId,a.update_time as submitTime,'' as checkTime, a.status,a.id as sellerProductId,b.category_first_id,b.category_second_id,b.category_third_id,
+					a.name,c.seller_name as sellerName,f.audit_user_id as checker,a.check_content as checkContent,'' as waitingStatus
+			from seller_product a,relation_category_and_seller_product b,seller c,seller_expand_1 f
+				where a.id=b.seller_product_id and a.seller_id = c.id and a.status = 2 and a.seller_id = f.seller_id
+			<if test="submitStartTime!=null and submitStartTime!=''"> <![CDATA[ and a.update_time > #{submitStartTime} ]]></if>
+			<if test="submitEndTime!=null and submitEndTime!=''"> <![CDATA[ and a.update_time < #{submitEndTime} ]]></if>
+			<if test="checkStartTime!=null and checkStartTime!=''"> <![CDATA[ and 1<>1 ]]></if>
+			<if test="checkEndTime!=null and checkEndTime!=''"> <![CDATA[ and 1<>1 ]]></if>
+			<if test="status!=null and status!=0"> and status=#{status} </if>
+			<if test="waitingStatus!=null and waitingStatus!=0"><![CDATA[ and 1<>1 ]]></if>
+			<if test="checker!=null and checker!=0"> and f.audit_user_id=#{checker} </if>
+			<if test="sellerProductId!=null and sellerProductId!=0"> and a.id=#{sellerProductId} </if>
+			<if test="categoryFirstId!=null and categoryFirstId!=''"> and b.category_first_id=#{categoryFirstId} </if>
+			<if test="categorySecondId!=null and categorySecondId!=''"> and b.category_second_id=#{categorySecondId} </if>
+			<if test="name!=null and name!=''"> and name like concat(concat('%',#{name}),'%') </if>
+			<if test="sellerName!=null and sellerName!=''"> and c.seller_name like concat(concat('%',#{sellerName}),'%') </if>
+			group by a.id
+		union all
+			select * from (
+				select a.product_check_snapshot_id as productCheckSnapshotId,a.submit_time as submitTime,a.check_time as checkTime,a.status,a.seller_product_id as sellerProductId,
+						a.category_first_id,a.category_second_id,a.category_third_id,a.name,a.seller_name as sellerName,a.checker,a.check_content as checkContent,a.waiting_status as waitingStatus
+				from product_check_log a where 1 = 1
+				<if test="submitStartTime!=null and submitStartTime!=''"> <![CDATA[ and a.submit_time > #{submitStartTime} ]]></if>
+				<if test="submitEndTime!=null and submitEndTime!=''"> <![CDATA[ and a.submit_time < #{submitEndTime} ]]></if>
+				<if test="checkStartTime!=null and checkStartTime!=''"> <![CDATA[ and a.check_time > #{checkStartTime} ]]></if>
+				<if test="checkEndTime!=null and checkEndTime!=''"> <![CDATA[ and a.check_time < #{checkEndTime} ]]></if>
+				<if test="status!=null and status!=0"> and a.status=#{status} </if>
+				<if test="waitingStatus!=null and waitingStatus!=0"> and a.waiting_status=#{waitingStatus} </if>
+				<if test="checker!=null and checker!=0"> and a.checker=#{checker} </if>
+				<if test="sellerProductId!=null and sellerProductId!=0"> and a.seller_product_id=#{sellerProductId} </if>
+				<if test="categoryFirstId!=null and categoryFirstId!=''"> and a.category_first_id=#{categoryFirstId} </if>
+				<if test="categorySecondId!=null and categorySecondId!=''"> and a.category_second_id=#{categorySecondId} </if>
+				<if test="name!=null and name!=''"> and a.name like concat(concat('%',#{name}),'%') </if>
+				<if test="sellerName!=null and sellerName!=''"> and a.seller_name like concat(concat('%',#{sellerName}),'%') </if>
+				order by a.submit_time desc
+			) temp group by sellerProductId
+		) t order by status asc,submitTime desc limit #{start},#{size}
+	</select>
+	
+	<select id="countCheckLogList" parameterType="map" resultType="int">
+		select sum(count) from (
+			select count(1) as count
+				from seller_product a,relation_category_and_seller_product b,seller c,seller_expand_1 f
+			where a.id=b.seller_product_id and a.seller_id = c.id and a.status = 2 and a.seller_id = f.seller_id
+			<if test="submitStartTime!=null and submitStartTime!=''"> <![CDATA[ and a.update_time > #{submitStartTime} ]]></if>
+			<if test="submitEndTime!=null and submitEndTime!=''"> <![CDATA[ and a.update_time < #{submitEndTime} ]]></if>
+			<if test="checkStartTime!=null and checkStartTime!=''"> <![CDATA[ and 1<>1 ]]></if>
+			<if test="checkEndTime!=null and checkEndTime!=''"> <![CDATA[ and 1<>1 ]]></if>
+			<if test="status!=null and status!=0"> and status=#{status} </if>
+			<if test="waitingStatus!=null and waitingStatus!=0"><![CDATA[ and 1<>1 ]]></if>
+			<if test="checker!=null and checker!=0"> and f.audit_user_id=#{checker} </if>
+			<if test="sellerProductId!=null and sellerProductId!=0"> and a.id=#{sellerProductId} </if>
+			<if test="categoryFirstId!=null and categoryFirstId!=''"> and b.category_first_id=#{categoryFirstId} </if>
+			<if test="categorySecondId!=null and categorySecondId!=''"> and b.category_second_id=#{categorySecondId} </if>
+			<if test="name!=null and name!=''"> and name like concat(concat('%',#{name}),'%') </if>
+			<if test="sellerName!=null and sellerName!=''"> and c.seller_name like concat(concat('%',#{sellerName}),'%') </if>
+		union all
+			select count(count) from (
+				select count(1) as count
+			from product_check_log a where 1 = 1
+			<if test="submitStartTime!=null and submitStartTime!=''"> <![CDATA[ and a.submit_time > #{submitStartTime} ]]></if>
+			<if test="submitEndTime!=null and submitEndTime!=''"> <![CDATA[ and a.submit_time < #{submitEndTime} ]]></if>
+			<if test="checkStartTime!=null and checkStartTime!=''"> <![CDATA[ and a.check_time > #{checkStartTime} ]]></if>
+			<if test="checkEndTime!=null and checkEndTime!=''"> <![CDATA[ and a.check_time < #{checkEndTime} ]]></if>
+			<if test="status!=null and status!=0"> and a.status=#{status} </if>
+			<if test="waitingStatus!=null and waitingStatus!=0"> and a.waiting_status=#{waitingStatus} </if>
+			<if test="checker!=null and checker!=0"> and a.checker=#{checker} </if>
+			<if test="sellerProductId!=null and sellerProductId!=0"> and a.seller_product_id=#{sellerProductId} </if>
+			<if test="categoryFirstId!=null and categoryFirstId!=''"> and a.category_first_id=#{categoryFirstId} </if>
+			<if test="categorySecondId!=null and categorySecondId!=''"> and a.category_second_id=#{categorySecondId} </if>
+			<if test="name!=null and name!=''"> and a.name like concat(concat('%',#{name}),'%') </if>
+			<if test="sellerName!=null and sellerName!=''"> and a.seller_name like concat(concat('%',#{sellerName}),'%') </if>
+			group by a.seller_product_id
+			) temp 
+		) t
+	</select>
+
+	<!-- 保存审核列表 -->
+	<insert id="saveChackLog" parameterType="ProductCheckLogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into product_check_log
+		(seller_product_id,product_check_snapshot_id,checker,name,seller_name,category_first_id,category_second_id,category_third_id,
+		status,check_content,submit_time,check_time,create_time)
+		values
+		(#{sellerProductId},#{productCheckSnapshotId},#{checker},#{name},#{sellerName},#{categoryFirstId},#{categorySecondId},#{categoryThirdId},
+		#{status},#{checkContent},#{submitTime},now(),now())
+	</insert>
+
+	<!-- 保存审核快照 -->
+	<insert id="saveCheckSnapshot" parameterType="ProductCheckSnapshotEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		product_check_snapshot(seller_product_id,seller_id,category_first_id,category_second_id,category_third_id,name,selling_point,flag_name,brand_name,
+		net_volume,place_of_origin,manufacturer_date,storage_method,durability_period,people_for,food_method,use_method,tip,code,barcode,submit,
+		proposal_market_price,proposal_price,despatch_type,seller_name,freight_type,
+		despatch_address,kuaidi,send_time_remark,send_weekend_remark,image1,image2,image3,image4,image5,check_content,status,detail_image,create_time)
+		values
+		(#{sellerProductId},#{sellerId},#{categoryFirstId},#{categorySecondId},#{categoryThirdId},#{name},#{sellingPoint},#{flagName},#{brandName},
+		#{netVolume},#{placeOfOrigin},#{manufacturerDate},#{storageMethod},#{durabilityPeriod},#{peopleFor},#{foodMethod},#{useMethod},#{tip},#{code},#{barcode},#{submit},
+		#{proposalMarketPrice},#{proposalPrice},#{despatchType},#{sellerName},#{freightType},
+		#{despatchAddress},#{kuaidi},#{sendTimeRemark},#{sendWeekendRemark},#{image1},#{image2},#{image3},#{image4},#{image5},#{checkContent},#{status},#{detailImage},now())
+	</insert>
+
+	<!-- 保存配送地区快照 -->
+	<insert id="saveProductCheckDeliverAreaTemplateSnapshot" parameterType="map" useGeneratedKeys="true">
+		insert into product_check_deliver_area_template_snapshot (product_check_snapshot_id,name,area_name,liwai_area,type,area_desc,create_time)
+		values (#{productCheckSnapshotId},#{name},#{areaName},#{liwaiArea},#{type},#{areaDesc},now())
+	</insert>
+	
+	<!-- 保存运费模板快照 -->
+	<insert id="saveProductCheckFreightTemplateSnapshot" parameterType="map" useGeneratedKeys="true">
+		insert into 
+		product_check_freight_template_snapshot (product_check_snapshot_id,name,area,create_time)
+		values (#{productCheckSnapshotId},#{name},#{area},now())
+	</insert>
+
+	<!-- 查询配送模板 -->
+	<select id="findDeliverAreaTemplate" parameterType="int" resultType="map">
+		select area_name as areaName,area_desc as areaDesc,liwai_area as liwaiArea,name,type from product_check_deliver_area_template_snapshot where product_check_snapshot_id = #{id}
+	</select>
+	
+	<!-- 查询运费模板 -->
+	<select id="findFreightTemplate" parameterType="int" resultType="map">
+		select * from product_check_freight_template_snapshot where product_check_snapshot_id = #{id}
+	</select>
+
+	<!-- 查询审核信息 -->
+	<select id="findCheckInfo" parameterType="int" resultType="map">
+		select a.id as seller_product_id,a.seller_id,e.category_first_id,e.category_second_id,e.category_third_id,a.update_time as submitTime,
+			a.name,a.selling_point,f.name as flag_name,g.name as brand_name,a.net_volume,a.place_of_origin,a.manufacturer_date,a.storage_method,
+			a.durability_period,a.people_for,a.food_method,a.use_method,a.tip,a.code,a.barcode,a.submit_type,a.wholesale_price,a.deduction,a.proposal_market_price,
+			a.proposal_price,a.seller_deliver_area_template_id,d.name as areaTemplateName,
+			b.seller_type as despatch_type,b.send_address as despatch_address,b.kuaidi,b.send_time_type,b.send_time_remark,b.freight_type,b.freight_money,b.freight_other,
+			b.is_send_weekend,a.image1,a.image2,a.image3,a.image4,a.image5,h.audit_user_id as checker,b.seller_name
+			from seller_product a,seller b,
+			seller_deliver_area_template d,relation_category_and_seller_product e,
+			sale_flag f,brand g,seller_expand_1 h
+			where 
+			a.use_seller_send_address = b.id
+			and a.seller_deliver_area_template_id = d.id
+			and a.id = e.seller_product_id
+			and a.sale_flag_id = f.id
+			and a.brand_id = g.id
+			and a.seller_id = h.seller_id
+			and a.id = #{id}
+			limit 1
+	</select>
+	<!-- 读取明细图片 -->
+	<select id="findCheckDetailImg" resultType="map" parameterType="int">
+		select content,height,width from seller_product_mobile_detail where seller_product_id=#{id} order by `order` desc
+	</select>
+	<!-- 查询快照 -->
+	<select id="findSnapshotInfo" parameterType="int" resultType="map">
+	select a.*,c.id as product_check_deliver_area_template_snapshot_id,c.name as areaTemplateName 
+	From product_check_snapshot a, product_check_deliver_area_template_snapshot c 
+	where a.id = #{id} and a.id=c.product_check_snapshot_id
+	</select>
+	
+	<update id="updateWaitingStatus" parameterType="map">
+		update product_check_log set waiting_status = #{waitingStatus} where seller_product_id = #{sellerProductId}
+	</update>
+	
+	<select id="findWaitingStatusBySellerProductId" parameterType="int" resultType="int">
+		select max(waiting_status) from product_check_log where seller_product_id = #{seller_product_id} limit 1
+	</select>
+	
+	<select id="findWaitingStatusByProductBaseId" parameterType="int" resultType="map">
+		select a.seller_product_id as sellerProductId, max(waiting_status) as waitingStatus from product_check_log a,product b,product_base c 
+			where b.product_base_id = c.id and c.id = #{productBaseId} and b.type = 1 and a.seller_product_id = c.seller_product_id limit 1
+	</select>
+	
+	<!-- 商家商品对应的商品类目，存在一对多的情况 -->
+	<select id="findCategoryInfoBySellerProductId" parameterType="int" resultType="map">
+		SELECT a.name as categoryFirstName,e.category_first_id as categroyFirstId,b.name as categorySecondName,e.category_second_id as categorySecondId,
+				c.name as categoryThirdName,e.category_third_id as categoryThirdId
+			FROM category_first a,category_second b,category_third c,relation_category_and_seller_product e
+		WHERE a.id = e.category_first_id
+			AND b.id = e.category_second_id
+			AND c.id = e.category_third_id
+			AND e.seller_product_id =#{sellerProductId}
+	</select>
+</mapper>

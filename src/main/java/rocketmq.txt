@@ -1,0 +1,33 @@
+rocketmq 集群的方式有三种
+
+推荐用双主结构
+
+启动方式:在window中
+1. 在/bin/下先启动nameserver : mqnamesrv.exe  对应linux中的 mqnamesrv  默认的端口是9876 
+
+2.启动第一个 broker 
+/bin/mqbroker.exe -n "localhost:9876" -c ../conf/2m-noslave/broker-a.properties
+这个broker要连上broker ,-c 表示使用的配置文件  ,  broker也有自已的端口号    默认的端口是 listenPort=10911
+如果在同一个机器上启动两个broker,要改端口,在 ../conf/2m-noslave/broker-a.properties 或 broker-b.properties 后面加一个listenPort=10912
+
+再启动一个 
+/bin/mqbroker.exe -n "localhost:9876" -c ../conf/2m-noslave/broker-b.properties
+
+对应的linux中用 
+./bin/mqbroker  -n "localhost:9876" -c ../conf/2m-noslave/broker-b.properties
+
+=============以上是2主master启动成功,如有失败,一般是端口被占用,请查看 ==========================================
+
+
+
+rocketmq 还可以以 1-master 1-slave的方式启动, 先启动nameserver ,再启动 master broker ,最后  slave broker 
+启动方式如上, 只是把启动参数中的配置文件改成  ../conf/2m-2s-async/broker-a.properties 或 ../conf/2m-2s-async/broker-a.properties
+如果11911端口被占用, 加上listenPort=10912 个修改端口
+
+
+
+
+
+
+
+

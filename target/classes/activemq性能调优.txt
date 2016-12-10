@@ -1,0 +1,22 @@
+activemq的持久化是通过硬盘kahadb 原生的持久化很慢，
+调如下参数：
+在conf / activemq.xml 
+中
+这一段，加上，　indexWriteBatchSize="10000" journalMaxFileLength="64mb" enableIndexWriteAsync="true" enableJournalDiskSyncs="false"/> 
+默认的日志是32m 调大一倍，　
+
+<persistenceAdapter>
+            <kahaDB directory="${activemq.data}/kahadb"  indexWriteBatchSize="10000" journalMaxFileLength="64mb" enableIndexWriteAsync="true" enableJournalDiskSyncs="false"/> 
+        </persistenceAdapter>
+
+修改配置文件/conf/activemq.xml
+ <persistenceAdapter>
+<kahaDB directory="${activemq.data}/kahadb" indexCacheSize="100000" indexWriteBatchSize="1000" enableJournalDiskSyncs="false"  journalMaxFileLength="128mb" concurrentStoreAndDispatchQueues="true" concurrentStoreAndDispatchTopics="true"/>
+</persistenceAdapter>
+
+
+
+２.调节jvm的参数在 启动脚本中调节 
+
+ set ACTIVEMQ_OPTS=-server  -Xms2g -Xmx2g -Xmn800m -Xss512k  -XX:PermSize=256m -XX:MaxPermSize=256m -verbose:gc -Xloggc:../logs/ygggc.log  -XX:+HeapDumpOnOutOfMemoryError  -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+PrintGCDetails -XX:+PrintGCTimeStamps  -noclassgc
+      

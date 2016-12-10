@@ -1,0 +1,75 @@
+### 发布时打包名称 ###
+build.warname=yggManager
+
+### 数据源  ###
+jdbc.url=jdbc:mysql://rdsifzni2ifzni2.mysql.rds.aliyuncs.com:3306/ygg_sale_platform?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.urlread=jdbc:mysql://rdsmmv2yjjyuue2.mysql.rds.aliyuncs.com:3306/ygg_sale_platform?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.admin.url=jdbc:mysql://rds4by768papsadm63hvy.mysql.rds.aliyuncs.com:3306/ygg_admin?useUnicode=true&amp;characterEncoding=UTF8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true&amp;allowMultiQueries=true
+jdbc.username=ygg_app
+jdbc.password=yangege
+jdbc.admin.username=ygg_admin
+jdbc.admin.password=gegejia0_0
+
+### 缓存  ###
+cache.type=memcache
+cache.host=b79d5f866e1b4f2b.m.cnhzaliqshpub001.ocs.aliyuncs.com
+cache.port=11211
+
+### 系统配置  ###
+config.env.type=prod
+config.timer.switch=1
+config.email.switch=1
+config.admin.accountId=66236
+log.path=/home/server/tomcat-admin
+config.order.downloadDir=/home/server/adminFile/adminExportFile/orderDownload
+config.image.uploadDir=/home/server/adminFile/adminUploadFile/images
+config.update.statusURL=http://m.gegejia.com/ygg/order/modifynopayorderstatus?orderIds=
+config.domain.name=http://121.40.73.86:3335/yggManager/
+config.kd100.callBack=http://121.40.73.86:3335/yggManager/order/kd100Callback
+config.kd100.refund.callBack=http://121.40.73.86:3335/yggManager/outCall/kd100Callback
+config.check.url=http://seller.gegejia.com/yggSellerManager/
+config.sync.url=http://seller.gegejia.com/syncSellerProduct/
+### 搜索 elasticsearch ###
+config.search.elasticsearch.host=121.40.160.90
+config.search.elasticsearch.port=50020
+config.search.elasticsearch.cluster.name=yangege
+
+config.search.elasticsearch.crm.host=114.215.198.55
+config.search.elasticsearch.crm.port=9300
+config.search.elasticsearch.cluster.crm.name=crm
+
+### 笨鸟订单相关 ###
+config.birdex.order.cancel.url=http://121.40.73.86:8099/overseas/order/cancel
+config.birdex.order.modify.address.url=http://121.40.73.86:8099/overseas/order/modifyAddressApply
+config.birdex.order.modify.idcard.url=http://222.40.73.86:8099/overseas/order/updateIdCardInfo
+config.birdex.stock.refresh.url=http://111.221.73.86:8099/overseas/stock/getAllInventory
+### 左岸城堡
+提现打款 ###
+qqbs.weixin.appid=44241
+qqbs.weixin.appsecret=3213124
+qqbs.weixin.mchid=421414
+qqbs.weixin.key=42151512512521561
+qqbs.weixin.cash.url=https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers
+qqbs.weixin.cash.cert=/mnt/server/p12/apiclient_cert.p12
+qqbs.weixin.token.url=http://wx.globalscanner.com/ygg-hqbs/wechatToken
+qqbs.weixin.create.qrcode.url=https://api.weixin.qq.com/cgi-bin/qrcode/create
+qqbs.weixin.show.qrcode.url=https://mp.weixin.qq.com/cgi-bin/showqrcode
+
+### 左岸城堡
+退款相关 ###
+weixin.refund.cert.path=/mnt/server/p12/apiclient_cert_refund_
+### 左岸城堡游戏 ###
+gegetuan_game_url=http://tuan.gegejia.com/yggGroupPurchase/game/web/
+### 左岸城堡web地址 ###
+gegetuan_web_url=http://tuan.gegejia.com/yggGroupPurchase/
+
+
+### 燕网提现打款 ###
+yw.weixin.appid=wx842142168c1508a0
+yw.weixin.mchid=1316324501
+yw.weixin.key=8934e7424151251594cf7b0519d
+yw.weixin.cash.url=https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers
+yw.weixin.cash.cert=/mnt/server/p12/apiclient_cert_1316385501.p12
+
+### 燕网退款相关 ###
+weixin.refund.cert.path=/mnt/server/p12/apiclient_cert_refund_

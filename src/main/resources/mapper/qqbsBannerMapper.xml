@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="QqbsBannerWindowMapper">  
+    
+    <resultMap type="BannerWindowEntity" id="BannerWindowMap">
+    	<id column="id" property="id" />
+    	<result column="type" property="type" />
+    	<result column="display_id" property="displayId" />
+    	<result column="desc" property="desc" />
+    	<result column="image" property="image" />
+    	<result column="start_time" property="startTime" />
+    	<result column="end_time" property="endTime" />
+    	<result column="is_display" property="isDisplay" />
+    	<result column="order" property="order" />
+		<result column="sale_time_type" property="saleTimeType" />
+    	<result column="create_time" property="createTime" />
+    	<result column="update_time" property="updateTime" />
+    </resultMap>
+    
+<!-- 插入banner位特卖 -->
+    <insert id="save" parameterType="BannerWindowEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qqbs_banner_window (`type`, `display_id`, `desc`, `image`, `start_time`, `end_time`, `is_display`, `order`, `create_time`, `sale_time_type`,`url`)
+		VALUES (#{type}, #{displayId}, #{desc}, #{image}, #{startTime,jdbcType=TIMESTAMP}, 
+		#{endTime,jdbcType=TIMESTAMP}, #{isDisplay}, #{order}, #{createTime,jdbcType=TIMESTAMP},#{saleTimeType},#{url});
+    </insert>
+    
+<!-- 更新banner位特卖 -->
+    <update id="update" parameterType="map" >
+    	UPDATE `qqbs_banner_window` 
+     	<set>
+          <if test="type != null"> `type`=#{type} </if>
+          <if test="displayId != null"> display_id=#{displayId}, </if>
+          <if test="desc != null">`desc`=#{desc}, </if>
+		  <if test="saleTimeType != null">`sale_time_type`=#{saleTimeType}, </if>
+          <if test="image != null"> image=#{image}, </if>
+          <if test="startTime != null"> `start_time`=#{startTime,jdbcType=TIMESTAMP}, </if>
+          <if test="endTime != null">`end_time`=#{endTime,jdbcType=TIMESTAMP}, </if>
+          <if test="isDisplay != null"> `is_display`=#{isDisplay}, </if>
+          <if test="order != null"> `order`=#{order}, </if>
+          <if test="url != null"> `url`=#{url} </if>
+     	</set>
+     	where id=#{id}
+    </update>
+    
+    <update id="updateObject" parameterType="BannerWindowEntity" >
+		UPDATE qqbs_banner_window 
+		SET `type`=#{type},`display_id`=#{displayId},`desc`=#{desc},`image`=#{image},`start_time`=#{startTime,jdbcType=TIMESTAMP}, 
+			`end_time`=#{endTime,jdbcType=TIMESTAMP},`is_display`=#{isDisplay},`order`=#{order} ,`sale_time_type`=#{saleTimeType},`url`=#{url}
+		WHERE `id`=#{id};
+    </update>
+    
+<!-- 查询banner位特卖信息 -->
+    <select id="findBannerWindow" parameterType="map"  resultMap="BannerWindowMap">
+      SELECT * FROM qqbs_banner_window 
+      WHERE 1=1 
+      	<if test="isDisplay != null">AND is_display=#{isDisplay} </if>
+      	<if test="id != null"> and id=#{id} </if>
+      	<!-- 即将开始 -->
+      	<if test="status == 1">
+      		<![CDATA[AND start_time > #{now}]]>
+      	</if>
+      	<!-- 进行中 -->
+      	<if test="status == 2">
+      		<![CDATA[AND start_time < #{now} AND #{now} < end_time]]>
+      	</if>
+      	<!-- 已结束 -->
+      	<if test="status == 3">
+      		<![CDATA[AND end_time < #{now}]]>
+      	</if>
+      	<!-- 即将开始 and 进行中 -->
+      	<if test="status == 12">
+      		<![CDATA[AND end_time > #{now}]]>
+      	</if>
+      	<!-- 即将开始 and 已结束 -->
+      	<if test="status == 13">
+      		<![CDATA[AND (start_time > #{now} or end_time < #{now})]]>
+      	</if>
+      	<!-- 进行中 and 已结束 -->
+      	<if test="status == 23">
+      		<![CDATA[AND start_time < #{now}]]>
+      	</if>
+      	<if test="bannerDesc != null">and `desc` like #{bannerDesc}</if>
+      	ORDER BY `order` DESC , id DESC
+      	<if test="start != null">
+      		LIMIT #{start},#{max}
+      	</if>
+    </select>
+    
+<!-- 统计banner位特卖数量 -->
+    <select id="countBannerWindow" parameterType="map"  resultType="int">
+      SELECT count(id) FROM qqbs_banner_window 
+      WHERE 1=1 
+      	<if test="isDisplay != null">AND is_display=#{isDisplay} </if>
+      	<if test="id != null"> and id=#{id} </if>
+      	<!-- 即将开始 -->
+      	<if test="status == 1">
+      		<![CDATA[AND start_time > #{now}]]>
+      	</if>
+      	<!-- 进行中 -->
+      	<if test="status == 2">
+      		<![CDATA[AND start_time < #{now} AND #{now} < end_time]]>
+      	</if>
+      	<!-- 已结束 -->
+      	<if test="status == 3">
+      		<![CDATA[AND end_time < #{now}]]>
+      	</if>
+      	<!-- 即将开始 and 进行中 -->
+      	<if test="status == 12">
+      		<![CDATA[AND end_time > #{now}]]>
+      	</if>
+      	<!-- 即将开始 and 已结束 -->
+      	<if test="status == 13">
+      		<![CDATA[AND (start_time > #{now} or end_time < #{now})]]>
+      	</if>
+      	<!-- 进行中 and 已结束 -->
+      	<if test="status == 23">
+      		<![CDATA[AND start_time < #{now}]]>
+      	</if>
+      	<if test="bannerDesc != null">and `desc` like #{bannerDesc}</if>
+    </select>
+    
+    <update id="updateDisplayCode" parameterType="map">
+    	UPDATE qqbs_banner_window 
+		SET `is_display`=#{isDisplay} 
+		WHERE `id`=#{id};
+    </update>
+    
+    <select id="findBannerWindowById" parameterType="int"  resultMap="BannerWindowMap">
+      SELECT id,type,display_id,`desc`,image,start_time,end_time,is_display,`order`,sale_time_type,url FROM qqbs_banner_window WHERE id=#{id}
+    </select>
+    
+    <update id="updateOrder" parameterType="map" >
+		UPDATE qqbs_banner_window 
+		SET `order`=#{order} 
+		WHERE `id`=#{id};
+    </update>
+
+</mapper>  

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="GroupBuyMapper">  
+
+	<select id="findAllGroupProductCodeByPara" parameterType="map" resultType="GroupProductCodeEntity">
+		SELECT 
+			id,
+			product_id as productId,
+			code,
+			is_succeed as isSucceed,
+			is_available as isAvailable,
+			create_time as createTime
+		FROM 
+			group_product_code
+		WHERE
+			1=1
+			<if test="isSucceed != null">AND is_succeed=#{isSucceed}</if>
+			<if test="productId != null">AND product_id=#{productId}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+			<if test="code != null">AND code=#{code}</if>
+			<if test="idList != null">
+      			AND product_id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if> 
+      		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- 查询商品团购次数 -->
+	<select id="findAllGourpProductNums" parameterType="map" resultType="map">
+		SELECT 
+			gpc.product_id AS productId,
+			COUNT(gpc.id) AS total
+		FROM 
+			product p ,group_product_code gpc 
+		WHERE 
+			gpc.product_id=p.id 
+			/*AND p.activities_status=2 */
+			<if test="productId != null">AND p.id=#{productId}</if> 
+			<if test="productName != null">AND p.name like #{productName}</if> 
+			<if test="isSucceed != null">AND gpc.is_succeed=#{isSucceed}</if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+		GROUP BY gpc.product_id 
+		ORDER BY COUNT(gpc.id) DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count 商品团购次数 -->
+	<select id="countAllGourpProductNums" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(DISTINCT gpc.product_id)
+		FROM 
+			product p ,group_product_code gpc 
+		WHERE 
+			gpc.product_id=p.id 
+			/*AND p.activities_status=2 */
+			<if test="productId != null">AND p.id=#{productId}</if> 
+			<if test="productName != null">AND p.name like #{productName}</if> 
+			<if test="isSucceed != null">AND gpc.is_succeed=#{isSucceed}</if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+	</select>
+	
+	<!-- 统计团购人数 -->
+	<select id="findGroupTotalPeople" parameterType="map" resultType="map">
+		SELECT 
+			gai.product_id AS productId,
+			COUNT(gai.id) AS total 
+		FROM 
+			group_account_info gai,product p,group_product_code gpc
+		WHERE 
+			gai.product_id=p.id 
+			/*AND p.activities_status=2 */
+			AND gai.group_product_code_id=gpc.id
+			<if test="isSucceed != null">AND gpc.is_succeed=#{isSucceed}</if>
+			<if test="isGenerateOrder != null">AND gai.is_generate_order=#{isGenerateOrder}</if>
+			<if test="isBuy != null">AND gai.is_buy=#{isBuy}</if>
+			<if test="idList != null">
+      			AND p.id in 
+      			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">  
+          			#{item}
+        		</foreach>
+      		</if>
+		GROUP BY gai.product_id 
+		ORDER BY COUNT(gai.id) DESC
+	</select>
+	
+</mapper>  

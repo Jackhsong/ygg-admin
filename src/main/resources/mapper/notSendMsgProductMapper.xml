@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="NotSendMsgProductMapper">
+	<select id="queryAllProductId" resultType="map">
+		SELECT id, product_id as productId  from not_sendsms_product
+	</select>
+	
+	<insert id="add" parameterType="map">
+		insert into not_sendsms_product(product_id) values(#{productId})
+	</insert>
+	
+	<delete id="delete" parameterType="map">
+		delete from not_sendsms_product where 1=1
+		<if test="productId != null">
+			AND product_id=#{productId}
+		</if>
+		<if test="ids != null">
+			AND product_id in 
+ 			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+       			#{item}
+       		</foreach>
+		</if>
+	</delete>
+	
+	<select id="checkIsExist" parameterType="string" resultType="int">
+		select count(id) from not_sendsms_product where product_id=#{productId}
+	</select>
+	
+	<select id="findProductById" parameterType="list" resultType="int">
+		select id from not_sendsms_product where product_id in
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+       			#{item}
+       		</foreach>
+	</select>
+</mapper>

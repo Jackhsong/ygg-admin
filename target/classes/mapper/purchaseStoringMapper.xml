@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PurchaseStoringMapper">  
+    <select id="findPurchaseStoringByParam" resultType="map" parameterType="map">
+    	select id,provider_product_id as providerProductId,gege_wating_storing as gegeWatingStoring,
+    		storage_real_storing as storageRealStoring,storage_usable_storing as storageUsableStoring,
+    		gege_usable_storing as gegeUsableStoring,unallocation_storing as unallocationStoring,channel_remain_storing as channelRemainStoring
+    	from purchase_storing where 1=1
+    	<if test="providerProductId!=null"> and provider_product_id=#{providerProductId}</if>
+    	<if test="id!=null"> and id=#{id}</if>
+    	<if test="start!=null"> limit #{start},#{size}</if>
+    </select>
+    <select id="findPurchaseStoringByIds" resultType="map">
+    	select id,provider_product_id as providerProductId,gege_wating_storing as gegeWatingStoring,
+    		storage_real_storing as storageRealStoring,storage_usable_storing as storageUsableStoring,
+    		gege_usable_storing as gegeUsableStoring,unallocation_storing as unallocationStoring,channel_remain_storing as channelRemainStoring
+    	from purchase_storing where 1=1 and provider_product_id in
+    	<foreach collection="list" open="(" separator="," close=")" item="item">
+    		#{item}
+    	</foreach>
+    </select>
+    <!-- 更新库存信息 -->
+    <update id="updatePurchaseStoringByParam" parameterType="map">
+    	update purchase_storing
+    	<set>
+    		<!-- 等待入库数 -->
+    		<if test="gegeWatingStoring!=null">gege_wating_storing=#{gegeWatingStoring}+gege_wating_storing,</if>
+    		<!-- 入库后 -->
+    		<if test="storingCount!=null">gege_wating_storing=gege_wating_storing-#{storingCount},unallocation_storing=#{storingCount}+unallocation_storing,</if>
+    		<!-- 入库并完结，完结。采购数和实际入库数之间的 -->
+    		<if test="isFinished!=null and offsetCount!=null">gege_wating_storing=gege_wating_storing+#{offsetCount},</if>
+    		<!-- 分配库存 -->
+    		<if test="allocationNumber!=null and providerProductId!=null">unallocation_storing=unallocation_storing-#{allocationNumber},</if>
+    		<!-- 渠道使用 -->
+    		<if test="usedNumber!=null and providerProductId!=null">channel_remain_storing=channel_remain_storing-#{usedNumber},</if>
+    	</set>
+    	where 1=1
+    	<if test="id!=null"> and id=#{id}</if>
+    	<if test="providerProductId!=null"> and providerProductId={providerProductId}</if>
+    </update>
+    <!-- 已付款未推送商品信息 -->
+    <select id="findUnpushOrder" resultType="map">
+    	select op.product_id as productId,op.product_count + op.adjust_count AS productCount 
+    		from `order` o, order_product op 
+    	where o.status = 2 and o.is_freeze!=1 and o.id=op.order_id
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) 
+			and EXISTS (select 1 from birdex_order_confirm where order_id = o.id and is_push=1)
+    </select>
+    <!-- 商品信息与采购商品之间的关联关系 -->
+    <select id="findProviderProduct" resultType="map">
+    	select a.id,b.provider_product_id as providerProductId,b.group_count as groupCount 
+			from product a,product_base b 
+		where a.product_base_id = b.id and a.id in 
+		<foreach collection="list" open="(" separator="," close=")" item="item">
+			#{item}
+		</foreach>
+    </select>
+
+</mapper>  

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OperationMapper">
+	<resultMap type="OperationEntity" id="OperationMap">
+    	<id column="id" property="id" />
+    	<result column="date_created" property="dateCreated" />
+    	<result column="order_id" property="orderId" />
+    	<result column="auto_memo" property="autoMemo" />
+    	<result column="mark" property="mark" />
+    </resultMap>
+    
+<!-- 插入后台操作信息 -->
+    <insert id="save" parameterType="OperationEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_operation (`mark`,`order_id`,`auto_memo`, `date_created`) 
+		VALUES (#{mark},#{orderId},#{autoMemo}, #{dateCreated,jdbcType=TIMESTAMP})
+    </insert>
+    
+     
+<!-- 查询后台操作信息 -->
+     <select id="findAllOperationByPara" parameterType="map"  resultMap="OperationMap">
+     	SELECT * FROM `order_operation` 
+     	ORDER BY date_created DESC  
+     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     </select>
+     
+<!-- 统计后台操作数量 -->
+     <select id="countOperationByPara" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM order_operation 
+    </select>
+    
+</mapper>

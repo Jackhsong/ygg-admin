@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomActivitiesMapper">
+	<select id="findCustomActivitiesInfo" parameterType="map"  resultType="map">
+		SELECT
+			id,
+			type AS typeCode,
+			type_id AS typeId,
+			url,
+			remark,
+			version,
+			is_hide_share_button AS isHideShareButton,
+			share_title AS shareTitle,
+			share_content_tencent AS shareContentTencent,
+			share_content_sina AS shareContentSina,
+		    share_peng_you_quan_title AS sharePengYouQuanTitle,
+			share_url AS shareURL,
+			share_image AS shareImage,
+			is_available AS isAvailableCode,
+			head_type AS headType,
+			share_type AS shareType
+		FROM
+			activities_custom
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable} </if>
+		<if test="remark != null">AND remark LIKE #{remark} </if>
+		<if test="typeList != null">AND type in<foreach collection="typeList" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>		
+	</select>
+	
+	<select id="countCustomActivitiesInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			activities_custom
+		WHERE 1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="isAvailable != null">AND is_available = #{isAvailable} </if>
+		<if test="typeList != null">AND type in<foreach collection="typeList" index="index" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+	</select>
+	
+	<update id="updateCustomActivitiesStatus" parameterType="map">
+		UPDATE activities_custom SET is_available = #{isAvailable} WHERE id in
+		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<insert id="add" parameterType="map">
+		INSERT INTO activities_custom (
+			type,
+			type_id,
+			url,
+			remark,
+			version,
+			share_title,
+			share_content_tencent,
+			share_content_sina,
+			share_url,
+			share_image,
+			is_available,
+			head_type,
+			share_type,
+			is_hide_share_button,
+			share_peng_you_quan_title
+		)
+		VALUES(
+			#{type},
+			#{typeId},
+			#{url},
+			#{remark},
+			#{version},
+			#{shareTitle},
+			#{shareContentTencent},
+			#{shareContentSina},
+			#{shareUrl},
+			#{shareImage},
+			#{isAvailable},
+			#{headType},
+			#{shareType},
+			#{isHideShareButton},
+			#{sharePengYouQuanTitle}
+		)		
+	</insert>
+	
+	<update id="update" parameterType="map">
+		update activities_custom
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="type != null">type=#{type},</if>
+			<if test="typeId != null">type_id=#{typeId},</if>
+			<if test="url != null">url=#{url},</if>
+			<if test="shareUrl != null">share_url=#{shareUrl},</if>
+			<if test="remark != null">remark=#{remark},</if>
+			<if test="version != null">version=#{version},</if>
+			<if test="shareTitle != null">share_title=#{shareTitle},</if>
+			<if test="shareContentTencent != null">share_content_tencent=#{shareContentTencent},</if>
+			<if test="shareContentSina != null">share_content_sina=#{shareContentSina},</if>
+			<if test="shareImage != null">share_image=#{shareImage},</if>
+			<if test="isAvailable != null">is_available=#{isAvailable},</if>
+			<if test="headType != null">share_type=#{headType},</if>
+			<if test="shareType != null">share_type=#{shareType},</if>
+			<if test="isHideShareButton != null">is_hide_share_button=#{isHideShareButton},</if>
+			<if test="sharePengYouQuanTitle != null">share_peng_you_quan_title=#{sharePengYouQuanTitle}</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<select id="findCustomActivitiesId" parameterType="int" resultType="CustomActivityEntity">
+		SELECT
+			id,
+			type,
+			version,
+			type_id AS typeId,
+			url,
+			remark,
+			share_title AS shareTitle,
+			share_content_tencent AS shareContentTencent,
+			share_content_sina AS shareContentSina,
+			share_url AS shareUrl,
+			share_image AS shareImage,
+			share_type AS shareType,
+			head_type AS headType,
+			is_available AS isAvailable,
+			is_hide_share_button as isHideShareButton,
+			share_peng_you_quan_title as sharePengYouQuanTitle
+		FROM
+			activities_custom
+		WHERE id=#{id}		
+	</select>
+</mapper>

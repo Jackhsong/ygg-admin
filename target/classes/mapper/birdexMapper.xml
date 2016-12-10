@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="BirdexMapper">  
+    <select id="findAllBirdexProduct" parameterType="map" resultType="map">
+		SELECT
+			bpp.id,
+			bpp.price/100 AS price,
+			pt.id AS productId,
+			pt.`name` AS productName,
+			pt.`code` AS productCode
+		FROM
+			product pt,
+			birdex_product_price bpp
+		WHERE
+			pt.id = bpp.product_id
+		<if test="productId != null">AND pt.id=#{productId}</if>
+		<if test="productCode != null">AND pt.`code`=#{productCode}</if>
+		<if test="productName != null">AND pt.`name` like #{productName}</if>
+		ORDER BY bpp.id DESC    	
+    </select>
+    
+    <select id="countBirdexProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(bpp.id)
+		FROM
+			product pt,
+			birdex_product_price bpp
+		WHERE
+			pt.id = bpp.product_id
+		<if test="productId != null">AND pt.id=#{productId}</if>
+		<if test="productCode != null">AND pt.`code`=#{productCode}</if>
+		<if test="productName != null">AND pt.`name` like #{productName}</if>    
+    </select>
+    
+    <insert id="saveBirdexProduct" parameterType="map">
+    	INSERT INTO birdex_product_price(product_id,price) VALUES(#{productId},#{price})
+    </insert>
+    
+    <update id="updateBirdexProduct" parameterType="map">
+    	UPDATE birdex_product_price SET product_id=#{productId},price=#{price} WHERE id=#{id}
+    </update>
+    
+    <delete id="deleteBirdexProduct" parameterType="int">
+    	DELETE FROM birdex_product_price where id=#{id}
+    </delete>
+    
+    <select id="countBirdexStock" parameterType="map" resultType="int">
+		SELECT
+			COUNT(bps.id)
+		FROM
+			birdex_product_stock bps
+		LEFT OUTER JOIN provider_product pp ON bps.provider_product_id = pp.id
+    </select>
+   
+   	<select id="findAllBirdexStock" parameterType="map" resultType="map">
+		SELECT
+			bps.id,
+			bps.`code`,
+			bps.warehouse,
+			bps.available_stock AS availableStock,
+			bps.actual_stock AS actualStock,
+			pp.id AS providerProductId,
+			pp.`name` AS providerProductName
+		FROM
+			birdex_product_stock bps
+		LEFT OUTER JOIN provider_product pp ON bps.provider_product_id = pp.id
+		ORDER BY bps.id DESC 
+		<if test="start != null">LIMIT #{start},#{max}</if>	   	
+   	</select> 
+   	
+   	<select id="findBirdexCancelOrder" parameterType="map" resultType="map">
+		SELECT 
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			o.is_freeze AS isFreeze,
+			ora.id as addressId,
+			ora.full_name as fullName,
+			ora.mobile_number as mobileNumber,
+			ora.id_card as idCard,
+			ora.detail_address as detailAddress,
+			ora.province,
+			ora.city,
+			ora.district
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			birdex_order_confirm boc
+		WHERE 
+			o.seller_id=s.id 
+			and o.receive_address_id=ora.id 
+			and boc.order_id=o.id
+			and boc.is_push=0
+			and s.id in (select id from seller where is_birdex=1)
+			<if test="number != null">and o.number=#{number}</if>
+		ORDER BY boc.create_time desc,o.id
+		<if test="start != null">LIMIT #{start},#{max}</if>   		
+   	</select>
+   	
+   	<select id="countBirdexCancelOrder" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(o.id)
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			birdex_order_confirm boc
+		WHERE 
+			o.seller_id=s.id 
+			and o.receive_address_id=ora.id 
+			and boc.order_id=o.id
+			and boc.is_push=0
+			and s.id in (select id from seller where is_birdex=1)
+			<if test="number != null">and o.number=#{number}</if>   	
+   	</select>
+   	
+   	<update id="updateBirdexOrderConfirmPushStatus" parameterType="int">
+   		update birdex_order_confirm set is_push=1 where order_id=#{orderId}
+   	</update>
+</mapper>   

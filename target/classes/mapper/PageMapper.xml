@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="PageMapper">
+
+	<!-- 页面信息操作  begin -->
+	<insert id="insertPage" parameterType="map">
+		INSERT INTO page(`name`, remark, is_available) VALUES (#{name}, #{remark}, #{isAvailable})
+	</insert>
+
+	<update id="updatePageById" parameterType="map">
+		UPDATE page
+		<set>
+			<if test="name != null"> `name`=#{name}, </if>
+			<if test="remark != null"> remark=#{remark},</if>
+			<if test="isAvailable != null"> is_available=#{isAvailable}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findAllPageByPara" parameterType="map" resultType="map">
+		SELECT
+			`id`,`name`,`remark`,is_available AS isAvailable
+		FROM
+			page
+		WHERE
+			1=1
+			<if test="name != null">AND `name` like #{name}</if>
+			<if test="id != null">AND id=#{id}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		ORDER BY id DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+
+	<select id="countAllPageByPara" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			page
+		WHERE
+			1=1
+			<if test="name != null">AND `name` like #{name}</if>
+			<if test="id != null">AND id=#{id}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+	<!--	<if test="start != null"> LIMIT #{start},#{max} </if> -->
+	</select>
+	<!-- 页面信息操作  end -->
+
+
+	<!-- 页面模块操作  begin -->
+	<insert id="insertPageModel" parameterType="map">
+		INSERT INTO page_model(`page_id`, `type`, `name`, remark, is_display)
+		VALUES (#{pageId}, #{type}, #{name}, #{remark}, #{isDisplay})
+	</insert>
+
+	<update id="updatePageModelById" parameterType="map">
+		UPDATE page_model
+		<set>
+			<if test="name != null"> `name`=#{name}, </if>
+			<if test="remark != null"> remark=#{remark},</if>
+			<if test="sequence != null"> sequence=#{sequence},</if>
+			<if test="isDisplay != null"> is_display=#{isDisplay},</if>
+			<if test="isAvailable != null"> is_available=#{isAvailable}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findAllPageModelByPara" parameterType="map" resultType="PageModelEntity">
+		SELECT
+			`id`,
+			`page_id` AS pageId,
+			`type`,
+			`name`,
+			`remark`,
+			`is_display` AS isDisplay,
+			`sequence`,
+			`create_time` AS createTime
+		FROM
+			page_model
+		WHERE
+			is_available=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="pageId != null">AND page_id=#{pageId}</if>
+		ORDER BY `sequence` DESC
+	</select>
+	<!-- 页面模块操作  end -->
+
+	<!-- 自定义模块内容 begin -->
+	<select id="findAllPageModelCustomLayoutByModelId" parameterType="map" resultType="PageModelCustomLayoutEntity">
+		SELECT
+			id,
+			page_model_id AS pageModelId,
+			sequence,
+			display_type AS displayType,
+			one_remark AS oneRemark,
+			one_display_id AS oneDisplayId,
+			one_type AS oneType,
+			one_image AS oneImage,
+			two_remark AS twoRemark,
+			two_display_id AS twoDisplayId,
+			two_type AS twoType,
+			two_image AS twoImage,
+			three_remark AS threeRemark,
+			three_display_id AS threeDisplayId,
+			three_type AS threeType,
+			three_image AS threeImage,
+			four_remark AS fourRemark,
+			four_display_id AS fourDisplayId,
+			four_type AS fourType,
+			four_image AS fourImage,
+			is_display AS isDisplay
+		FROM
+			page_model_custom_layout
+		WHERE
+			1=1
+			<if test="pageModelId != null">AND page_model_id=#{pageModelId}</if>
+			<if test="id != null">AND id=#{id}</if>
+		ORDER BY sequence DESC
+	</select>
+
+	<select id="countAllPageModelCustomLayoutByModelId" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			page_model_custom_layout
+		WHERE
+		<if test="pageModelId != null">page_model_id=#{pageModelId}</if>
+		<if test="id != null">AND id=#{id}</if>
+	</select>
+
+	<!-- 自定义模块内容 begin -->
+	<select id="findPageModelCustomLayoutMaxSequence" parameterType="int" resultType="int">
+		SELECT
+			max(sequence)
+		FROM
+			page_model_custom_layout
+		WHERE
+			page_model_id=#{pageModelId}
+	</select>
+
+	<insert id="insertPageModelCustomLayout" parameterType="PageModelCustomLayoutEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO page_model_custom_layout (
+			page_model_id,
+			sequence,
+			display_type,
+			one_image,
+			one_type,
+			one_display_id,
+			one_remark,
+			one_width,
+			one_height,
+			two_image,
+			two_type,
+			two_display_id,
+			two_remark,
+			two_width,
+			two_height,
+			three_image,
+			three_type,
+			three_display_id,
+			three_remark,
+			three_width,
+			three_height,
+			four_image,
+			four_type,
+			four_display_id,
+			four_remark,
+			four_width,
+			four_height,
+			is_display
+		) VALUES(
+			#{pageModelId},
+			#{sequence},
+			#{displayType},
+			#{oneImage},
+			#{oneType},
+			#{oneDisplayId},
+			#{oneRemark},
+			#{oneWidth},
+			#{oneHeight},
+			#{twoImage},
+			#{twoType},
+			#{twoDisplayId},
+			#{twoRemark},
+			#{twoWidth},
+			#{twoHeight},
+			#{threeImage},
+			#{threeType},
+			#{threeDisplayId},
+			#{threeRemark},
+			#{threeWidth},
+			#{threeHeight},
+			#{fourImage},
+			#{fourType},
+			#{fourDisplayId},
+			#{fourRemark},
+			#{fourWidth},
+			#{fourHeight},
+			#{isDisplay}
+		)
+	</insert>
+
+	<update id="updatePageModelCustomLayout" parameterType="PageModelCustomLayoutEntity">
+		update page_model_custom_layout set
+			page_model_id=#{pageModelId},
+			display_type=#{displayType},
+			one_image=#{oneImage},
+			one_type=#{oneType},
+			one_display_id=#{oneDisplayId},
+			one_remark=#{oneRemark},
+			one_width=#{oneWidth},
+			one_height=#{oneHeight},
+			two_image=#{twoImage},
+			two_type=#{twoType},
+			two_display_id=#{twoDisplayId},
+			two_remark=#{twoRemark},
+			two_width=#{twoWidth},
+			two_height=#{twoHeight},
+			three_image=#{threeImage},
+			three_type=#{threeType},
+			three_display_id=#{threeDisplayId},
+			three_remark=#{threeRemark},
+			three_width=#{threeWidth},
+			three_height=#{threeHeight},
+			four_image=#{fourImage},
+			four_type=#{fourType},
+			four_display_id=#{fourDisplayId},
+			four_remark=#{fourRemark},
+			four_width=#{fourWidth},
+			four_height=#{fourHeight},
+			is_display=#{isDisplay}
+		where id=#{id}
+	</update>
+
+	<update id="updatePageModelCustomLayoutSimpleData" parameterType="map">
+		UPDATE page_model_custom_layout
+		<set>
+			<if test="isDisplay != null"> `is_display`=#{isDisplay}, </if>
+			<if test="sequence != null"> sequence=#{sequence}</if>
+		</set>
+		where id=#{id}
+	</update>
+	<!-- 自定义模块内容 end -->
+
+	<!-- 模块关联滚动商品 begin -->
+	<insert id="insertBatchPageModelRelationRollProduct" parameterType="list">
+		INSERT INTO page_model_relation_roll_product(`page_model_id`, sequence, product_id) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.pageModelId}, #{item.sequence}, #{item.productId})
+		</foreach>
+	</insert>
+
+	<update id="updatePageModelRelationRollProduct" parameterType="map">
+		UPDATE page_model_relation_roll_product
+		<set>
+			<if test="sequence != null"> `sequence`=#{sequence}, </if>
+			<if test="isDisplay != null"> is_display=#{isDisplay}</if>
+		</set>
+		WHERE id IN
+			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</update>
+	
+	<delete id="deletePageModelRelationRollProduct" parameterType="list">
+		DELETE FROM page_model_relation_roll_product WHERE id IN
+			<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</delete>
+
+	<select id="findAllPageModelRelationRollProduct" parameterType="map" resultType="map">
+		SELECT
+			pmrrp.id AS id,
+			p.id AS productId,
+			p.name,
+			p.type,
+			p.sales_price AS salesPrice,
+			pmrrp.sequence,
+			pmrrp.is_display AS isDisplay,
+			p.start_time AS startTime,
+			p.end_time AS endTime
+		FROM
+			page_model_relation_roll_product pmrrp,product p
+		WHERE
+			pmrrp.product_id=p.id
+			AND pmrrp.page_model_id=#{pageModelId}
+			<if test="productName != null"> AND p.name like #{productName} </if>
+			<if test="productType != null"> AND p.type = #{productType} </if>
+			<if test="productId != null"> AND p.id = #{productId} </if>
+			<if test="isDisplay != null"> AND pmrrp.is_display=#{isDisplay} </if>
+		ORDER BY sequence DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+
+	<select id="countAllPageModelRelationRollProduct" parameterType="map" resultType="int">
+		SELECT
+			count(p.id)
+		FROM
+			page_model_relation_roll_product pmrrp,product p
+		WHERE
+			pmrrp.product_id=p.id
+			AND pmrrp.page_model_id=#{pageModelId}
+			<if test="productName != null"> AND p.name like #{productName} </if>
+			<if test="productType != null"> AND p.type = #{productType} </if>
+			<if test="productId != null"> AND p.id = #{productId} </if>
+			<if test="isDisplay != null"> AND pmrrp.is_display=#{isDisplay} </if>
+	</select>
+
+	<select id="findMaxSequencePageModelRelationRollProduct" parameterType="int" resultType="int">
+		SELECT
+			max(sequence)
+		FROM
+			page_model_relation_roll_product
+		WHERE
+			page_model_id=#{pageModelId}
+	</select>
+
+	<!-- 模块关联滚动商品 end -->
+
+	<!-- 模块关联两栏商品 begin -->
+	<insert id="insertBatchPageModelRelationColumnProduct" parameterType="list">
+		INSERT INTO page_model_relation_column_product(`page_model_id`, sequence, product_id) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.pageModelId}, #{item.sequence}, #{item.productId})
+		</foreach>
+	</insert>
+
+	<update id="updatePageModelRelationColumnProduct" parameterType="map">
+		UPDATE page_model_relation_column_product
+		<set>
+			<if test="sequence != null"> `sequence`=#{sequence}, </if>
+			<if test="isDisplay != null"> is_display=#{isDisplay}</if>
+		</set>
+		WHERE id IN
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<delete id="deletePageModelRelationColumnProduct" parameterType="list">
+		DELETE FROM page_model_relation_column_product WHERE id IN
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<select id="findAllPageModelRelationColumnProduct" parameterType="map" resultType="map">
+		SELECT
+			pmrrp.id AS id,
+			p.id AS productId,
+			p.name,
+			p.type,
+			p.sales_price AS salesPrice,
+			pmrrp.sequence,
+			pmrrp.is_display AS isDisplay,
+			p.start_time AS startTime,
+			p.end_time AS endTime
+		FROM
+			page_model_relation_column_product pmrrp,product p
+		WHERE
+			pmrrp.product_id=p.id
+			AND pmrrp.page_model_id=#{pageModelId}
+			<if test="productName != null"> AND p.name like #{productName} </if>
+			<if test="productType != null"> AND p.type = #{productType} </if>
+			<if test="productId != null"> AND p.id = #{productId} </if>
+			<if test="isDisplay != null"> AND pmrrp.is_display=#{isDisplay} </if>
+		ORDER BY sequence DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+
+	<select id="countAllPageModelRelationColumnProduct" parameterType="map" resultType="int">
+		SELECT
+			count(p.id)
+		FROM
+			page_model_relation_column_product pmrrp,product p
+		WHERE
+			pmrrp.product_id=p.id
+			AND pmrrp.page_model_id=#{pageModelId}
+			<if test="productName != null"> AND p.name like #{productName} </if>
+			<if test="productType != null"> AND p.type = #{productType} </if>
+			<if test="productId != null"> AND p.id = #{productId} </if>
+			<if test="isDisplay != null"> AND pmrrp.is_display=#{isDisplay} </if>
+	</select>
+
+	<select id="findMaxSequencePageModelRelationColumnProduct" parameterType="int" resultType="int">
+		SELECT
+			max(sequence)
+		FROM
+			page_model_relation_column_product
+		WHERE
+			page_model_id=#{pageModelId}
+	</select>
+
+	<!-- 模块关联两栏商品 end -->
+
+	<!-- 模块关联banner begin -->
+	<insert id="insertPageModelBanner" parameterType="PageModelBannerEntity">
+		INSERT INTO page_model_banner(`page_model_id`, `type`, display_id, `desc`, image, start_time, end_time, is_display) VALUES
+			(#{pageModelId}, #{type}, #{displayId}, #{desc}, #{image}, #{startTime}, #{endTime}, #{isDisplay})
+	</insert>
+
+	<update id="updatePageModelBanner" parameterType="PageModelBannerEntity">
+		update
+			page_model_banner
+		set
+			page_model_id=#{pageModelId},
+			`type`=#{type},
+			display_id=#{displayId},
+			`desc`=#{desc},
+			image=#{image},
+			start_time=#{startTime},
+			end_time=#{endTime},
+			is_display=#{isDisplay}
+		where
+			id=#{id}
+	</update>
+
+	<update id="updateSimplePageModelBanner" parameterType="map">
+		UPDATE page_model_banner
+		<set>
+			<if test="isDisplay != null"> `is_display`=#{isDisplay}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findAllPageModelBanner" parameterType="map" resultType="PageModelBannerEntity">
+		SELECT
+			id,
+			page_model_id AS pageModelId,
+			`type`,
+			display_id AS displayId,
+			`desc`,
+			image,
+			start_time AS startTime,
+			end_time AS endTime,
+			is_display AS isDisplay
+		FROM
+			page_model_banner
+		WHERE
+			1=1
+			<if test="pageModelId != null">AND page_model_id=#{pageModelId}</if>
+			<if test="id != null">AND id = #{id}</if>
+			<if test="isDisplay != null">AND is_display = #{isDisplay}</if>
+			<if test="desc != null">AND `desc` like #{desc}</if>
+			<!-- 即将开始 -->
+			<if test="bannerStatus == 1">
+				<![CDATA[AND start_time > #{nowTime}]]>
+			</if>
+			<!-- 进行中 -->
+			<if test="bannerStatus == 2">
+				<![CDATA[AND start_time < #{nowTime} AND #{nowTime} < end_time]]>
+			</if>
+			<!-- 已结束 -->
+			<if test="bannerStatus == 3">
+				<![CDATA[AND end_time < #{nowTime}]]>
+			</if>
+		ORDER BY is_display DESC, id DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+
+	<select id="countAllPageModelBanner" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			page_model_banner
+		WHERE
+			1=1
+			<if test="pageModelId != null">AND page_model_id=#{pageModelId}</if>
+			<if test="id != null">AND id = #{id}</if>
+			<if test="isDisplay != null">AND is_display = #{isDisplay}</if>
+			<if test="desc != null">AND `desc` like #{desc}</if>
+			<!-- 即将开始 -->
+			<if test="bannerStatus == 1">
+				<![CDATA[AND start_time > #{nowTime}]]>
+			</if>
+			<!-- 进行中 -->
+			<if test="bannerStatus == 2">
+				<![CDATA[AND start_time < #{nowTime} AND #{nowTime} < end_time]]>
+			</if>
+			<!-- 已结束 -->
+			<if test="bannerStatus == 3">
+				<![CDATA[AND end_time < #{nowTime}]]>
+			</if>
+	</select>
+
+	<!-- 模块关联banner end -->
+	
+	<select id="findPageBypid" parameterType="int" resultType="PageEntity">
+		SELECT
+			`id`,`name`,`remark`,is_available AS isAvailable
+		FROM
+			page
+		WHERE
+			id=#{id}
+	</select>
+	
+	<select id="findPageModelBypid" parameterType="int" resultType="PageModelEntity">
+		 select 
+		 	id,
+		 	page_id as pageId,
+		 	type,
+		 	`name`,
+		 	remark,
+		 	is_display as isDisplay,
+		 	is_available as isAvailable,
+		 	sequence
+		 from 
+		 	page_model
+		 where
+		 	page_id=#{pid}
+		 order by sequence desc
+	</select>
+	
+	<select id="findPageModelCustomLayoutByModelId" parameterType="int" resultType="PageModelCustomLayoutEntity">
+		SELECT
+			id,
+			page_model_id AS pageModelId,
+			sequence,
+			display_type AS displayType,
+			one_remark AS oneRemark,
+			one_display_id AS oneDisplayId,
+			one_type AS oneType,
+			one_image AS oneImage,
+			two_remark AS twoRemark,
+			two_display_id AS twoDisplayId,
+			two_type AS twoType,
+			two_image AS twoImage,
+			three_remark AS threeRemark,
+			three_display_id AS threeDisplayId,
+			three_type AS threeType,
+			three_image AS threeImage,
+			four_remark AS fourRemark,
+			four_display_id AS fourDisplayId,
+			four_type AS fourType,
+			four_image AS fourImage,
+			is_display AS isDisplay
+		FROM
+			page_model_custom_layout
+		WHERE
+			page_model_id=#{pageModelId}
+		ORDER BY sequence DESC
+	</select>	
+
+</mapper>  

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="UserMapper">  
+    
+<!-- 插入管理员信息 -->
+    <insert id="createUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+       INSERT INTO user(username,realname,mobile_number,password,locked) 
+       VALUES(#{username},#{realname},#{mobileNumber},#{password},#{locked})
+     </insert>
+     
+<!-- 查询管理员信息 -->
+	<select id="findUserByPara" parameterType="map" resultType="User">
+		SELECT id,username,realname,`password`,locked, mobile_number AS mobileNumber,sms_code AS smsCode FROM `user`
+		WHERE
+			1=1
+		<if test="username != null"> AND username=#{username}</if>
+		<if test="realname != null"> AND realname=#{realname}</if>
+		<if test="locked != null"> AND locked=#{locked}</if>
+		<if test="id != null"> AND id=#{id}</if>
+		<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber}</if>
+		<if test="smsCode != null"> AND sms_code=#{smsCode}</if>
+		<if test="start != null"> LIMIT #{start},#{max}</if>
+	</select>
+	
+<!-- count管理员信息 -->
+	<select id="countUserByPara" parameterType="map" resultType="int">
+		SELECT count(u.id) FROM `user` u 
+		WHERE
+			1=1
+		<if test="username != null"> AND username=#{username}</if>
+		<if test="realname != null"> AND realname=#{realname}</if>
+		<if test="locked != null"> AND locked=#{locked}</if>
+		<if test="id != null"> AND id=#{id}</if>
+		<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber}</if>
+		<if test="smsCode != null"> AND sms_code=#{smsCode}</if>
+	</select>
+     
+<!-- 更新管理员 -->
+    <update id="updateUser" parameterType="map">
+     	UPDATE user
+     	<set>
+          <if test="password != null"> password=#{password}, </if>
+          <if test="username != null"> username=#{username}, </if>
+          <if test="realname != null"> realname=#{realname}, </if>
+          <if test="locked != null"> locked=#{locked}, </if>
+          <if test="mobileNumber != null"> mobile_number=#{mobileNumber},</if>
+		<if test="smsCode != null"> sms_code=#{smsCode}</if>
+     	</set>
+     	where id=#{id}
+    </update>
+
+<!-- 插入角色信息 -->
+	<insert id="insertRole" parameterType="Role" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO role(role,description) 
+		VALUES(#{role},#{description})
+	</insert>
+	
+<!-- 根据userId删除角色 -->
+	<delete id="deleteAllRoleByUserId" parameterType="int">
+		DELETE FROM user_role WHERE user_id=#{id}
+	</delete>
+	
+<!-- 更新角色信息 -->
+	<update id="updateRole" parameterType="Role">
+		UPDATE role
+     	<set>
+          <if test="role != null"> role=#{role}, </if>
+          <if test="description != null"> description=#{description} </if>
+     	</set>
+     	where id=#{id}
+	</update>
+	
+<!-- 删除角色信息 -->
+	<delete id="deleteRole" parameterType="int">
+		DELETE FROM role WHERE id=#{id}
+	</delete>
+
+<!-- 插入权限信息 -->
+	<insert id="insertPermission" parameterType="map">
+		INSERT INTO permission(permission,description) 
+		VALUES(#{permission},#{description})
+	</insert>
+	
+<!-- 删除权限信息 -->
+	<delete id="deletePermission" parameterType="int">
+		DELETE FROM permission WHERE id=#{id}
+	</delete>
+	
+<!-- 插入用户角色关系 -->
+	<insert id="insertUserRole" parameterType="map">
+		INSERT INTO user_role(user_id,role_id) 
+		VALUES(#{userId},#{roleId})
+	</insert>
+	
+<!-- 根据userId查询用户角色Id -->
+	<select id="findAllRoleIdByUserId" parameterType="int" resultType="int">
+		SELECT role_id FROM user_role WHERE user_id=#{id}
+	</select>
+
+<!-- 删除用户角色关系 -->
+	<delete id="deleteUserRole" parameterType="int">
+		DELETE FROM user_role WHERE id=#{id}
+	</delete>
+	
+<!-- 插入角色权限关系 -->
+	<insert id="insertRolePermission" parameterType="map">
+		INSERT INTO role_permission(role_id,permission_id) 
+		VALUES(#{roleId},#{permissionId})
+	</insert>
+	
+<!-- 根据roleId查询对应permissionId -->
+	<select id="findAllPermissionIdByRole" parameterType="int" resultType="int">
+		SELECT DISTINCT permission_id FROM role_permission WHERE role_id=#{id}
+	</select>
+	
+<!-- 根据roleId删除角色权限关系 -->
+	<delete id="deleteAllPermissionByRole" parameterType="int">
+		DELETE FROM role_permission WHERE role_id=#{id}
+	</delete>
+
+<!-- 删除角色权限关系 -->
+	<delete id="deleteRolePermission" parameterType="int">
+		DELETE FROM role_permission WHERE id=#{id}
+	</delete>
+	
+<!-- 根据username 查询用户拥有的角色 -->
+	<select id="findRolesByUsername" parameterType="string" resultType="string">
+		SELECT 
+			r.role
+		FROM 
+			`user` u,user_role ur,role r
+		WHERE 
+			ur.user_id=u.id
+			AND ur.role_id=r.id
+			AND u.username=#{username}
+	</select>
+	
+<!-- 查询所有可用角色 -->
+	<select id="findRolesForShow" parameterType="map" resultType="map">
+		SELECT 
+			role,description,id
+		FROM 
+			`role`
+		WHERE 
+			is_available=1
+			<if test="role != null"> AND role=#{role} </if>
+			<if test="id != null"> AND id=#{id} </if>
+	</select>
+
+<!-- count 所有可用角色 -->
+	<select id="countRolesForShow" resultType="int">
+		SELECT 
+			count(id)
+		FROM 
+			`role`
+		WHERE 
+			is_available=1
+	</select>
+
+<!-- 根据username 查询用户拥有的权限 -->
+	<select id="findPermissionByUsername" parameterType="string" resultType="string">
+		SELECT 
+			p.permission
+		FROM 
+			permission p,
+			role_permission rp,
+			role r
+		WHERE 
+			rp.permission_id=p.id
+			AND rp.role_id=r.id
+			AND r.id in 
+				(SELECT r.id FROM `user` u,user_role ur,role r WHERE  ur.user_id=u.id AND ur.role_id=r.id AND u.username=#{username})
+	</select>
+	
+<!-- 查找系统所有权限 -->
+	<select id="findPermissionForAdd" resultType="map">
+		SELECT 
+			id,
+			permission,
+			description
+		FROM 
+			permission
+		WHERE 
+			is_available=1
+	</select>
+	
+<!-- 根据role查找权限ID -->
+	<select id="findPermissionByRoleId" parameterType="int" resultType="int">
+		SELECT 
+			DISTINCT p.id
+		FROM 
+			permission p,
+			role_permission rp,
+			role r
+		WHERE 
+			r.id=#{id}
+			AND rp.role_id=r.id
+			AND rp.permission_id=p.id
+	</select>
+	
+	<update id="batchUpdateLockStatus" parameterType="map">
+		UPDATE user SET locked=#{locked} where id in
+		<foreach index="index" item="item" collection="idList" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findUserByIds" resultType="map">
+		select realname,id from user where id in
+		<foreach index="index" item="item" collection="list" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findUserByRole" parameterType="string" resultType="User">
+		SELECT
+			u.id,
+			u.username,
+			u.realname,
+			u.`password`,
+			u.locked, 
+			u.mobile_number AS mobileNumber,
+			u.sms_code AS smsCode
+		FROM
+			realm_role rr,
+			relation_user_role rur,
+			`user` u
+		WHERE
+			rr.id = rur.realm_role_id
+		AND rur.user_id = u.id
+		AND rr.role = #{role}		
+	</select>
+	
+	<select id="findAllUserCode" resultType="map">
+		select id,realname from user where locked = 0
+	</select>
+</mapper>  

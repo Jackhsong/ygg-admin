@@ -1,0 +1,3253 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderMapper">
+
+	<resultMap type="OrderEntity" id="OrderMap">
+          <id column="id" property="id" />
+          <result column="type" property="type" />
+          <result column="number" property="number" />
+          <result column="same_batch_number" property="sameBatchNumber" />
+          <result column="seller_id" property="sellerId" />
+          <result column="account_id" property="accountId" />
+          <result column="receive_address_id" property="receiveAddressId" />
+          <result column="total_price" property="totalPrice" />
+          <result column="freight_money" property="freightMoney" />
+          <result column="pay_channel" property="payChannel" />
+          <result column="remark" property="remark" />
+          <result column="remark2" property="remark2" />
+          <result column="status" property="status" />
+          <result column="create_time" property="createTime" />
+          <result column="pay_time" property="payTime" />
+          <result column="send_time" property="sendTime" />
+          <result column="receive_time" property="receiveTime" />
+          <result column="is_delete" property="isDelete" />
+          <result column="update_time" property="updateTime" />
+          <result column="operation_status" property="operationStatus" />
+          <result column="order_seller_id" property="orderSellerId" />
+          <result column="account_coupon_id" property="accountCouponId" />
+          <result column="coupon_price" property="couponPrice" />
+          <result column="real_price" property="realPrice" />
+          <result column="adjust_price" property="adjustPrice" />
+          <result column="account_point" property="accountPoint" />
+          <result column="is_settlement" property="isSettlement" />
+          <result column="is_freeze" property="isFreeze" />
+		  <result column="is_need_settlement" property="isNeedSettlement" />
+          <result column="app_version" property="appVersion" />
+          <result column="app_channel" property="appChannel" />
+          <result column="activities_price" property="activitiesPrice" />
+		  <result column="is_member_order" property="isMemberOrder" />
+		  <result column="activities_optional_part_price" property="activitiesOptionalPartPrice" />
+		  <result column="is_timeout" property="isTimeOut" />
+     </resultMap>
+     
+     <resultMap type="com.ygg.admin.view.ClientBuyView" id="ClientBuyViewMap">
+     	<result column="number" property="orderNumber" />
+     	<result column="account_id" property="accountId" />
+     	<result column="total_price" property="totalPrice" />
+     	<result column="real_price" property="realPrice" />
+     	<result column="app_channel" property="appChannel" />
+     	<result column="app_version" property="appVersion" />
+     </resultMap>
+     
+     <select id="findOrder" parameterType="map" resultMap="OrderMap">
+     	SELECT * FROM `order` 
+     	WHERE 1=1 
+     	<if test="id != null"> and id=#{id} </if>
+     	<if test="number != null"> and number=#{number} </if>
+     	ORDER BY id DESC 
+     	LIMIT #{start},#{max}
+     </select>
+     
+	 <!-- 查询订单状态 -->
+     <select id="findOrderStatusByOrderId" parameterType="int" resultType="int">
+     	SELECT status FROM order where id=#{id}
+     </select>
+     
+     <select id="countOrder" parameterType="map" resultType="int">
+     	SELECT COUNT(id) FROM `order` 
+     	WHERE 1=1 
+     	<if test="id != null"> and id=#{id}</if>
+     	<if test="number != null"> and number=#{number}</if>
+     </select>
+     
+     <update id="updateOrder" parameterType="map">
+     	UPDATE `order` 
+     	<set>
+          <if test="status != null"> status=#{status}, </if>
+          <if test="isFreeze != null"> is_freeze=#{isFreeze}, </if>
+          <if test="totalPrice != null"> total_price=#{totalPrice}, </if>
+          <if test="realPrice != null"> real_price=#{realPrice}, </if>
+          <if test="adjustPrice != null"> adjust_price=#{adjustPrice}, </if>
+          <if test="freightMoney != null">freight_money=#{freightMoney}, </if>
+          <if test="remark != null">remark=#{remark}, </if>
+          <if test="remark2 != null">remark2=concat(remark2,#{remark2}), </if>
+          <if test="sendTime != null">send_time=#{sendTime,jdbcType=TIMESTAMP},</if>
+          <if test="isDelete != null">is_delete=#{isDelete},</if>
+          <if test="isAvailableCoupon != null">is_available_coupon=#{isAvailableCoupon},</if>
+          <if test="expireTime != null">expire_time=#{expireTime},</if>
+          <if test="checkStatus != null">check_status=#{checkStatus},</if>
+          <if test="isTimeout != null">is_timeout=#{isTimeout},</if>
+          <if test="payTime != null">pay_time=#{payTime},</if>
+          <if test="isGroup != null">is_group=#{isGroup}</if>
+     	</set>
+     	where id=#{id}
+     </update>
+     
+     <update id="updateOrderAddress" parameterType="ReceiveAddressEntity">
+     	UPDATE `order_receive_address` 
+     	<set>
+          <if test="fullName != null"> full_name=#{fullName}, </if>
+          <if test="mobileNumber != null"> mobile_number=#{mobileNumber}, </if>
+          <if test="detailAddress != null">detail_address=#{detailAddress}, </if>
+          <if test="province != null">province=#{province}, </if>
+          <if test="city != null">city=#{city},</if>
+          <if test="idCard != null">id_card=#{idCard},</if>
+          <if test="district != null">district=#{district}</if>
+     	</set>
+     	where id=#{id}
+     </update>
+     
+     <update id="updateOrderOperationStatus" parameterType="map">
+     	UPDATE `order` 
+     	set operation_status=#{operationStatus}
+     	where id in 
+     	<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+     </update>
+     
+<!-- 插入订单物流信息 -->
+     <insert id="saveOrderLogistics" parameterType="map">
+     	INSERT INTO order_logistics (`order_id`, `channel`, `number`, `money`, `create_time`, `is_subscribed`) 
+     	VALUES (#{orderId}, #{channel}, #{number}, #{money}, #{createTime,jdbcType=TIMESTAMP}, #{isSubscribed})
+     </insert>
+     
+     <!-- 根据订单ID查询物流信息 -->
+     <select id="findOrderLogisticsByOrderId" parameterType="int" resultType="map">
+     	SELECT 
+     		id,
+     		order_id as orderId,
+     		channel,
+     		number,
+     		money,
+     		status,
+     		create_time as createTime,
+     		is_subscribed as isSubscribed,
+     		subscribe_count as subscribeCount,
+     		is_fake as isFake,
+     		track_info as trackInfo 
+     	FROM 
+     		order_logistics 
+     	WHERE 
+     		order_id=#{id}
+     </select>
+     
+     <!-- 根据channel，number查询物流信息 -->
+     <select id="findOrderLogisticsBychannelAndNumber" parameterType="map" resultType="OrderLogistics">
+     	SELECT 
+     		id as id,
+     		order_id as orderId,
+     		channel,
+     		number,
+     		money,
+     		status,
+     		create_time as createTime,
+     		is_subscribed as isSubscribed,
+     		subscribe_count as subscribeCount,
+     		is_fake as isFake,
+     		track_info as trackInfo,
+     		service_type as serviceType
+     	FROM 
+     		order_logistics 
+     	WHERE 
+     		channel=#{channel} and number=#{number} 
+     		<if test="orderId != null"> and order_id!=#{orderId} </if>
+     	LIMIT 0,1
+     </select>
+     
+     <!-- 查询物流信息 -->
+     <select id="findOrderLogistics" parameterType="map" resultType="OrderLogistics">
+     	SELECT 
+     		id,
+     		order_id as orderId,
+     		channel,
+     		number,
+     		money,
+     		status,
+     		create_time as createTime,
+     		is_subscribed as isSubscribed,
+     		subscribe_count as subscribeCount,
+     		is_fake as isFake,
+     		track_info as trackInfo 
+     	FROM 
+     		order_logistics 
+     	WHERE 
+     		1=1 
+     		<if test="orderId != null"> and order_id=#{orderId} </if>
+     		<if test="isSubscribed != null"> and is_subscribed=#{isSubscribed} </if>
+     		<if test="isFake != null"> and is_fake=#{isFake} </if>
+     		<if test="trackInfo != null"> and track_info=#{trackInfo} </if>
+     		<if test="subscribeCount != null"><![CDATA[and subscribe_count>#{subscribeCount} ]]></if>
+     		<if test="start != null"> LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER} </if>
+     </select>
+     
+     <!-- 更新物流信息 -->
+     <update id="updateOrderLogisticsByOrderId" parameterType="map">
+     	UPDATE `order_logistics`
+     	<trim prefix="SET" suffixOverrides=",">
+     		<if test="channel != null"> channel=#{channel}, </if>
+          	<if test="number != null"> number=#{number}, </if>
+          	<if test="money != null">money=#{money}, </if>
+          	<if test="status != null"> status=#{status}, </if>
+          	<if test="isSubscribed != null"> is_subscribed=#{isSubscribed}, </if>
+          	<if test="subscribeCount != null">subscribe_count=#{subscribeCount}, </if>
+          	<if test="isFake != null">is_fake=#{isFake}, </if>
+          	<if test="trackInfo != null">track_info=#{trackInfo}, </if>     	
+          	<if test="serviceType != null">service_type=#{serviceType}, </if>
+			<if test="outId != null">out_id=#{outId},</if>
+     	</trim>
+     	where order_id=#{orderId}
+     </update>
+     
+     <!-- 插入订单物流详细信息 -->
+     <insert id="saveLogisticsDetail" parameterType="map">
+     	INSERT INTO logistics_detail (`logistics_channel`, `logistics_number`, `operate_time`, `content`, `create_time`) 
+     	VALUES (#{logisticsChannel}, #{logisticsNumber}, #{operateTime}, #{content}, #{createTime,jdbcType=TIMESTAMP})
+     </insert>
+     
+     <!-- 统计订单物流详细信息数量 -->
+     <select id="countLogisticsDetail" parameterType="map" resultType="int">
+     	SELECT COUNT(id) FROM logistics_detail WHERE logistics_channel=#{logisticsChannel} and logistics_number=#{logisticsNumber}
+     </select>
+     
+     <!-- 返回相同物流信息数量 -->
+     <select id="existsLogisticsDetail" parameterType="map" resultType="int">
+     	SELECT 
+     		COUNT(id) 
+     	FROM 
+     		logistics_detail 
+     	WHERE 
+     		logistics_channel=#{logisticsChannel} 
+     		AND logistics_number=#{logisticsNumber} 
+     		AND operate_time=#{operateTime} 
+     		AND content=#{content}
+     </select>
+     
+     <!-- 查询物流信息 -->
+     <select id="findAllLogisticsDetail" parameterType="map" resultType="map">
+     	SELECT 
+     		operate_time as operateTime,
+     		content as content 
+     	FROM 
+     		logistics_detail 
+     	WHERE 
+     		logistics_channel=#{logisticsChannel} 
+     		AND logistics_number=#{logisticsNumber} 
+     	ORDER BY operate_time DESC
+     	<if test="start != null">
+     		LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     	</if>
+     </select>
+     
+     <!-- 删除订单物流详细信息 -->
+     <delete id="deleteLogisticsDetail" parameterType="map">
+     	DELETE FROM logistics_detail WHERE logistics_channel=#{logisticsChannel} and logistics_number=#{logisticsNumber}
+     </delete>
+     
+     <!-- 查询所有订单商品信息 -->
+     <select id="findAllOrderProductInfo" parameterType="int" resultType="map">
+		SELECT 
+			p.id as pid,
+			p.code as pCode,
+			p.name as pName,
+			p.short_name pShortName,
+			p.type as type,
+			s.real_seller_name as sellerName,
+			s.seller_type as sellerType,
+			s.send_address as sendAddress,
+			b.`name` as bName,
+			op.id as orderProductId,
+			op.sales_price as price,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count as count,
+			op.adjust_count as adjustCount,
+			s.is_need_idcard_number as isNeedIdcardNumber,
+			s.is_need_idcard_image as isNeedIdcardImage
+		FROM 
+			order_product op LEFT JOIN product p ON op.product_id=p.id 
+				LEFT JOIN seller s ON p.seller_id=s.id 
+					LEFT JOIN brand b ON p.brand_id=b.id 
+		WHERE 
+			op.order_id=#{id}
+     </select>
+     
+     <!-- 根据id查询订单商品信息 -->
+     <select id="findOrderProductById" parameterType="int" resultType="map">
+		SELECT 
+			id as id,
+			product_count as productCount,
+			order_id as orderId,
+			product_id as productId,
+			sales_price as salesPrice,
+			group_price AS groupPrice,
+			is_group AS isGroup,
+			adjust_count as adjustCount
+		FROM 
+			order_product
+		WHERE 
+			id=#{id}
+     </select>
+     
+     <!-- 根据orderId查询订单商品信息 -->
+     <select id="findOrderProductByOrderId" parameterType="int" resultType="map">
+		SELECT 
+			id as id,
+			product_count as productCount,
+			order_id as orderId,
+			product_id as productId,
+			sales_price as salesPrice,
+			group_price AS groupPrice,
+			is_group AS isGroup,
+			adjust_count as adjustCount
+		FROM 
+			order_product
+		WHERE 
+			order_id=#{orderId}
+     </select>
+     
+     <!-- 更新订单商品信息 updateOrderProduct -->
+     <update id="updateOrderProduct" parameterType="map">
+     	UPDATE `order_product` 
+     	set adjust_count=#{adjustCount}
+     	where id=#{id}
+     </update>
+
+	<select id="findAllOrderInfoForList" parameterType="map" resultType="map">
+		SELECT
+			id AS id,
+			type,
+			create_time AS createTime,
+			pay_time AS payTime,
+			send_time AS sendTime,
+			expire_time AS expireTime,
+			is_timeout AS isTimeout,
+			`number` AS number,
+			`status` AS status,
+			total_price+adjust_price AS totalPrice,
+			adjust_price AS adjustPrice,
+			real_price AS realPrice,
+			app_channel AS appChannel,
+			app_version AS appVersion,
+			remark AS remark,
+			pay_channel AS payChannel,
+			source_channel_id AS sourceChannelId,
+			is_settlement AS isSettlement,
+			account_id AS accountId,
+			receive_address_id AS receiveAddressId,
+			seller_id AS sellerId,
+			is_freeze AS isFreeze,
+			check_status AS checkStatus
+		FROM
+			`order` o
+		WHERE
+			1=1
+			<if test="orderNumber != null"> and number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and status=#{orderStatus} </if>
+			<if test="checkStatus != null"> and check_status=#{checkStatus} </if>
+			<if test="orderSourceId != null"> and source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and app_channel=#{channelType} </if>
+			<if test="noChannelType != null"> and app_channel!=#{noChannelType} </if>
+			<if test="operationStatus != null"> and operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND remark2='']]></if>
+			<if test="accountId != null"> and account_id = #{accountId} </if>
+			<if test="sellerId != null"> and seller_id=#{sellerId} </if>
+			<if test="isSettlement != null">AND is_settlement=#{isSettlement}</if>
+			<if test="payTimeBegin != null"><![CDATA[and pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and send_time<=#{sendTimeEnd} ]]></if>
+			<if test="sellerIdList != null">
+				and seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="isTimeout != null">AND is_timeout=#{isTimeout}</if>
+			<if test="lockedOrder != null and lockedOrder == 1">
+				and EXISTS (select 1 from order_check where order_id = o.id)
+			</if>
+			<if test="orderType != null">AND type=#{orderType}</if>
+			<if test="expireTimeBegin != null"><![CDATA[AND expire_time>=#{expireTimeBegin}]]></if>
+			<if test="expireTimeEnd != null"><![CDATA[AND expire_time<=#{expireTimeEnd}]]></if>
+		ORDER BY id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+
+	<select id="countAllOrderInfoForList" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			`order` o
+		WHERE
+			1=1
+			<if test="orderNumber != null"> and number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and status=#{orderStatus} </if>
+			<if test="checkStatus != null"> and check_status=#{checkStatus} </if>
+			<if test="orderSourceId != null"> and source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and app_channel=#{channelType} </if>
+			<if test="noChannelType != null"> and app_channel!=#{noChannelType} </if>
+			<if test="operationStatus != null"> and operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND remark2='']]></if>
+			<if test="accountId != null"> and account_id = #{accountId} </if>
+			<if test="sellerId != null"> and seller_id=#{sellerId} </if>
+			<if test="isSettlement != null">AND is_settlement=#{isSettlement}</if>
+			<if test="payTimeBegin != null"><![CDATA[and pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and send_time<=#{sendTimeEnd} ]]></if>			
+			<if test="sellerIdList != null">
+				and seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="isTimeout != null">AND is_timeout=#{isTimeout}</if>
+			<if test="lockedOrder != null and lockedOrder == 1">
+				and EXISTS (select 1 from order_check where order_id = o.id)
+			</if>
+			<if test="orderType != null">AND type=#{orderType}</if>
+			<if test="expireTimeBegin != null"><![CDATA[AND expire_time>=#{expireTimeBegin}]]></if>
+			<if test="expireTimeEnd != null"><![CDATA[AND expire_time<=#{expireTimeEnd}]]></if>
+	</select>
+
+	<select id="findAllOrderInfoForList2" parameterType="map" resultType="map">
+		SELECT
+			o.id AS id,
+			o.type,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.expire_time AS expireTime,
+			o.is_timeout AS isTimeout,
+			o.send_time AS sendTime,
+			o.`number` AS number,
+			o.`status` AS status,
+			o.total_price+adjust_price AS totalPrice,
+			o.adjust_price AS adjustPrice,
+			o.real_price AS realPrice,
+			o.app_channel AS appChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId,
+			o.receive_address_id AS receiveAddressId,
+			o.seller_id AS sellerId,
+			o.is_freeze AS isFreeze,
+			o.check_status AS checkStatus
+		FROM
+			`order` o
+		WHERE
+			1 = 1
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="checkStatus != null"> and o.check_status=#{checkStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="noChannelType != null"> and app_channel!=#{noChannelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productIdList != null">
+				<!--and op.product_id in-->
+				<!--<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">-->
+					<!--#{item}-->
+				<!--</foreach>-->
+				and o.id in  (
+					select order_id from order_product op
+					where op.product_id in
+					<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				)
+			</if>
+			<if test="isTimeout != null">AND o.is_timeout=#{isTimeout}</if>
+			<if test="lockedOrder != null and lockedOrder == 1">
+				and EXISTS (select 1 from order_check where order_id = o.id)
+			</if>
+			<if test="orderType != null">AND o.type=#{orderType}</if>
+			<if test="expireTimeBegin != null"><![CDATA[AND expire_time>=#{expireTimeBegin}]]></if>
+			<if test="expireTimeEnd != null"><![CDATA[AND expire_time<=#{expireTimeEnd}]]></if>
+		GROUP BY o.id
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+
+	<select id="countAllOrderInfoForList2" parameterType="map" resultType="int">
+		SELECT
+			count(distinct o.id)
+		FROM
+			`order` o
+		WHERE
+		    1 = 1
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="checkStatus != null"> and o.check_status=#{checkStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="noChannelType != null"> and app_channel!=#{noChannelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="payTimeBegin != null"><![CDATA[and o.pay_time>=#{payTimeBegin} ]]></if>
+			<if test="payTimeEnd != null"><![CDATA[and o.pay_time<=#{payTimeEnd} ]]></if>
+			<if test="sendTimeBegin != null"><![CDATA[and o.send_time>=#{sendTimeBegin} ]]></if>
+			<if test="sendTimeEnd != null"><![CDATA[and o.send_time<=#{sendTimeEnd} ]]></if>
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productIdList != null">
+				and o.id in  (
+					select order_id from order_product op
+					where op.product_id in
+						<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+				)
+			</if>
+			<if test="isTimeout != null">AND o.is_timeout=#{isTimeout}</if>
+			<if test="lockedOrder != null and lockedOrder == 1">
+				and EXISTS (select 1 from order_check where order_id = o.id)
+			</if>
+			<if test="orderType != null">AND o.type=#{orderType}</if>
+			<if test="expireTimeBegin != null"><![CDATA[AND expire_time>=#{expireTimeBegin}]]></if>
+			<if test="expireTimeEnd != null"><![CDATA[AND expire_time<=#{expireTimeEnd}]]></if>
+	</select>
+
+	<select id="findAllOrderIdList" parameterType="map" resultType="int">
+		SELECT
+			id
+		FROM
+			`order`
+		WHERE
+			1=1
+			<if test="orderNumber != null"> and number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND remark2='']]></if>
+			<if test="accountId != null"> and account_id = #{accountId} </if>
+			<if test="sellerId != null"> and seller_id=#{sellerId} </if>
+			<if test="isSettlement != null">AND is_settlement=#{isSettlement}</if>
+			<if test="sellerIdList != null">
+				and seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		ORDER BY id DESC
+	</select>
+
+	<select id="findAllOrderIdList2" parameterType="map" resultType="int">
+		SELECT
+			o.id
+		FROM
+			`order` o,order_product op
+		WHERE
+			op.order_id=o.id
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+			<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+			<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+			<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+			<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+			<if test="accountId != null"> and o.account_id = #{accountId} </if>
+			<if test="sellerId != null"> and o.seller_id=#{sellerId} </if>
+			<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+			<if test="sellerIdList != null">
+				and o.seller_id in
+				<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="accountIdList != null">
+				and o.account_id in
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="receiveAddressIdList != null">
+				and o.receive_address_id in
+				<foreach item="item" index="index" collection="receiveAddressIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="orderIdList != null">
+				and o.id in
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="productIdList != null">
+				and op.product_id in
+				<foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			GROUP BY o.id
+			ORDER BY o.id DESC
+	</select>
+     
+     <!-- 查询订单详情for订单列表 -->
+     <select id="findAllOrderInfoForManage" parameterType="map" resultType="OrderInfoForManage">
+		SELECT 
+			o.id AS oId,
+			o.create_time AS oCreateTime,
+			o.pay_time AS oPayTime,
+			o.send_time AS oSendTime,
+			o.number AS oNumber,
+			o.`status` AS oStatus,
+			o.total_price+o.adjust_price AS oTotalPrice,
+			o.adjust_price AS oAdjustPrice,
+			o.real_price AS oRealPrice,
+			o.app_channel AS oAppChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			s.real_seller_name AS sSellerName,
+			s.send_address AS sSendAddress,
+			o.operation_status AS operaStatus,
+			olog.channel AS ologChannel,
+			olog.money AS ologMoney,
+			olog.number AS ologNumber,
+			osc.name AS orderSource,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE 1=1 
+		<if test="orderId != null"> and o.id=#{orderId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+		<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+		<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+		<if test="productId != null"> and op.product_id=#{productId} </if>
+		<if test="productName != null"> and p.name like #{productName} </if>
+		<if test="productRemark != null"> and p.remark like #{productRemark} </if>
+		<if test="sellerType != null"> and s.seller_type=#{sellerType} </if>
+		<if test="sellerId != null"> and s.id=#{sellerId} </if>
+		<if test="accountName != null"> and a.name like #{accountName} </if>
+		<if test="accountId != null"> and a.id = #{accountId} </if>
+		<if test="fullName != null"> and ra.full_name like #{fullName} </if>
+		<if test="mobileNumber != null"> and ra.mobile_number=#{mobileNumber} </if>
+		<if test="logisticsNumber != null"> and olog.number=#{logisticsNumber} </if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+		<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+		GROUP BY o.id 
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+     </select>
+     
+     <!-- 统计订单数量forManage -->
+     <select id="countAllOrderInfoForManage" parameterType="map" resultType="int">
+		SELECT 
+			count(distinct o.id)
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id 
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE 1=1 
+		<if test="orderId != null"> and o.id=#{orderId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+		<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+		<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+		<if test="productId != null"> and op.product_id=#{productId} </if>
+		<if test="productName != null"> and p.name like #{productName} </if>
+		<if test="code != null"> and p.code = #{code} </if>
+		<if test="productRemark != null"> and p.remark like #{productRemark} </if>
+		<if test="sellerType != null"> and s.seller_type=#{sellerType} </if>
+		<if test="sellerId != null"> and s.id=#{sellerId} </if>
+		<if test="accountName != null"> and a.name like #{accountName} </if>
+		<if test="accountId != null"> and a.id = #{accountId} </if>
+		<if test="fullName != null"> and ra.full_name like #{fullName} </if>
+		<if test="mobileNumber != null"> and ra.mobile_number=#{mobileNumber} </if>
+		<if test="logisticsNumber != null"> and olog.number=#{logisticsNumber} </if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+		<if test="isSettlement != null">AND o.is_settlement=#{isSettlement}</if>
+		<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+		<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+     </select>
+
+     
+     <!-- 查询订单详情for商家 -->
+     <select id="findAllOrderInfoForSeller" parameterType="map" resultType="OrderDetailInfoForSeller">
+		SELECT 
+			o.id AS oId,
+			o.number AS oNumber,
+			o.`status` AS oStatus,
+			o.total_price+o.adjust_price AS oTotalPrice,
+			o.real_price AS oRealPrice,
+			o.coupon_price AS oCouponPrice,
+			o.adjust_price AS oAdjustPrice,
+			o.account_point AS oAccountPoint,
+			o.create_time AS oCreateTime,
+			o.send_time AS oSendTime,
+			o.pay_time AS oPayTime,
+		 	o.pay_channel AS payChannel,
+			o.remark AS sellerMarks,
+			o.freight_money AS oFreightMoney,
+			o.remark2 AS kefuRemark,
+			o.is_freeze AS isFreeze,
+		 	o.type AS orderType,
+		 	o.app_channel AS appChannel,
+			a.name AS aName,
+			op.product_count + op.adjust_count AS productCount,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			p.seller_product_name AS productName,
+			p.code AS productCode,
+		 	s.id AS sId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			ra.id_card AS raIdCard,
+			ra.province AS raProvince,
+			ra.city AS raCity,
+			ra.district AS raDistrict,
+			ra.detail_address AS raDetailAddress,
+			olog.channel AS ologChannel,
+			olog.money AS ologMoney,
+			olog.number AS ologNumber,
+			o.is_settlement as isSettlement
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id 
+		WHERE 1=1 
+		and (op.product_count + op.adjust_count) > 0
+		and o.check_status=2
+		<if test="isFreeze != null"> and o.is_freeze=#{isFreeze} </if>
+		<if test="orderId != null"> and o.id=#{orderId} </if>
+		<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+		<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+		<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+		<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+		<if test="orderSourceId != null"> and o.source_channel_id=#{orderSourceId} </if>
+		<if test="channelType != null"> and o.app_channel=#{channelType} </if>
+		<if test="operationStatus != null"> and o.operation_status=#{operationStatus} </if>
+		<if test="productId != null"> and op.product_id=#{productId} </if>
+		<if test="productName != null"> and p.name like #{productName} </if>
+		<if test="code != null"> and p.code = #{code} </if>
+		<if test="productRemark != null">and EXISTS (SELECT 1 FROM order_product iop,product ip WHERE iop.product_id=ip.id AND iop.order_id=o.id AND ip.remark like '分销%')</if>
+		<if test="sellerType != null"> and s.seller_type=#{sellerType} </if>
+		<if test="sellerId != null"> and s.id=#{sellerId} </if>
+		<if test="accountId != null"> and a.id = #{accountId} </if>
+		<if test="accountName != null"> and a.name like #{accountName} </if>
+		<if test="fullName != null"> and ra.full_name like #{fullName} </if>
+		<if test="mobileNumber != null"> and ra.mobile_number=#{mobileNumber} </if>
+		<if test="logisticsNumber != null"> and olog.number=#{logisticsNumber} </if>
+		<if test="isSettlement != null"> and o.is_settlement=#{isSettlement}</if>
+		<if test="remark2Type == 1"><![CDATA[AND o.remark2<>'']]></if>
+		<if test="remark2Type == 0"><![CDATA[AND o.remark2='']]></if>
+	    <if test="sellerIdList != null">
+		  and o.seller_id in
+		  <foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			 #{item}
+		  </foreach>
+	    </if>
+		<if test="idList != null">
+			and o.id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY o.id DESC
+     </select>
+
+
+	  <!-- 查询结算订单详情for商家 -->
+     <select id="findSellerUnSettleOrders" parameterType="map" resultType="OrderDetailInfoForSeller">
+		SELECT 
+			o.create_time as oCreateTime,
+			o.pay_time as oPayTime,
+			o.send_time as oSendTime,
+			o.number as oNumber,
+			o.status as oStatus,
+			p.code as productCode,
+			p.short_name as productName,
+			op.product_count as productCount,
+		 	ol.channel AS ologChannel,
+		 	ol.number AS ologNumber,
+			s.id AS sId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse,
+			ra.province AS raProvince,
+			o.type as orderType,
+			o.app_channel as appChannel,
+			op.sales_price as salesPrice
+			FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id
+		 	LEFT JOIN order_logistics ol ON ol.order_id = o.id
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+		WHERE 
+			o.is_settlement = 0 
+			AND o.send_time != '0000-00-00 00:00:00'
+		<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+		<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+		  and o.seller_id in
+		  <foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			 #{item}
+		  </foreach>
+		ORDER BY o.id DESC
+     </select>
+
+<!-- 统计 时间段 内未发货订单 信息 根据商家分组 -->
+     <select id="findAllUnSendGoodsInfo" parameterType="map" resultType="map">
+     	SELECT 
+     		s.id as id,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse,
+			s.responsibility_person AS responsibilityPerson,
+			COUNT(o.id) as countIds,
+			SUM(o.real_price) sumTotal 
+		FROM 
+			seller s,`order` o 
+		WHERE 
+			o.seller_id=s.id 
+			AND o.`status`=2 
+			<if test="payTimeBegin != null"> <![CDATA[AND o.pay_time >= #{payTimeBegin}]]> </if>
+			<if test="payTimeEnd != null"> <![CDATA[AND o.pay_time < #{payTimeEnd}]]> </if>
+		GROUP BY s.id
+     </select>
+     
+<!-- 超24小时未发货明细 -->
+	<select id="findAllUnSendGoodsDetail" parameterType="map" resultType="map">
+    SELECT 
+		o.id AS id,
+		o.pay_time AS payTime,
+		o.number,
+		o.create_time AS createTime,
+		o.app_channel AS appChannel,
+		o.`status` AS `status`,
+		o.total_price AS totalPrice,
+		ora.full_name AS fullName,
+		ora.mobile_number AS mobileNumber,
+		s.real_seller_name AS sellerName,
+		s.send_address AS sendAddress,
+		s.warehouse AS warehouse
+	FROM 
+		seller s,`order` o,order_receive_address ora
+	WHERE 
+		o.seller_id=s.id
+		AND o.`status`=2 
+		AND o.receive_address_id=ora.id 
+		<if test="sellerType != null"> AND s.seller_type=#{sellerType} </if>
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="payTimeBegin != null"> <![CDATA[AND o.pay_time > #{payTimeBegin}]]> </if>
+		<if test="payTimeEnd != null"> <![CDATA[AND o.pay_time < #{payTimeEnd}]]> </if>
+		ORDER BY o.pay_time DESC ,o.id DESC
+		<if test="start != null">
+			LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}			
+		</if>
+     </select>
+
+<!-- count 超24小时未发货明细 -->  
+     <select id="countAllUnSendGoodsDetail" parameterType="map" resultType="int">
+    SELECT 
+		count(o.id)
+	FROM 
+		seller s,`order` o,order_receive_address ora
+	WHERE 
+		o.seller_id=s.id
+		AND o.`status`=2 
+		AND o.receive_address_id=ora.id 
+		<if test="sellerType != null"> AND s.seller_type=#{sellerType} </if>
+		<if test="sellerId != null"> AND s.id=#{sellerId} </if>
+		<if test="payTimeEnd != null"> <![CDATA[AND o.pay_time < #{payTimeEnd}]]> </if>
+     </select>
+     
+<!-- 插入订单发货记录 -->
+	<insert id="insertOrderSendRecord" parameterType="map">
+		INSERT INTO order_send_record (`order_id`, `account_id`,`receive_address_id`, `channel`, `number`, `status`) 
+     	VALUES (#{orderId},#{accountId},#{receiveAddressId}, #{channel}, #{number}, #{status})
+	</insert>
+
+<!-- 根据para查询订单发货记录 -->
+	<select id="findAllOrderSendRecord" parameterType="map" resultType="map">
+	    SELECT 
+	    	osr.id,
+			osr.order_id AS orderId,
+			osr.account_id AS accountId,
+			osr.channel,
+			osr.number,
+			osr.receive_address_id AS receiveAddressId
+		FROM 
+			order_send_record osr
+		WHERE 
+			1=1
+		<if test="status != null"> AND status=#{status} </if>
+		<if test="orderId != null"> AND order_id=#{orderId} </if>
+		ORDER BY create_time 
+		<if test="start != null">
+			LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}			
+		</if>
+     </select>
+
+<!-- 更新订单发货记录 -->
+     <update id="updateOrderSendRecord" parameterType="map">
+     	UPDATE `order_send_record` 
+     	<set>
+          <if test="status != null"> status=#{status} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+     
+<!-- 根据id查找订单地址信息 -->
+	<select id="findReceiveInfoById" parameterType="int" resultType="map">
+		SELECT full_name AS fullName, mobile_number AS mobileNumber,detail_address as detailAddress,id_card as idCard,province as province,city as city,district as district FROM order_receive_address WHERE id=#{id}
+	</select>
+	
+<!-- 根据收货地址信息查询订单ids查询 -->
+    <select id="findOrderIdsByPara" parameterType="map" resultType="int">
+    	SELECT o.id
+		FROM 
+			order_receive_address ora,
+			`order` o
+		WHERE
+			o.receive_address_id=ora.id
+			<if test="fullName != null"> AND ora.full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> AND ora.mobile_number=#{mobileNumber} </if>
+    </select>
+    
+<!-- 月度数据统计 根据para 查询 所有已下单记录 -->
+	<select id="findOrderSalesRecord" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.pay_time AS payTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice
+		FROM 
+			`order` o
+		WHERE
+			o.`status` in(2,3,4,5)
+			and o.type=1
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+
+	<select id="findOrderProductCount" parameterType="map" resultType="map">
+		SELECT 
+			o.id as orderId,
+			op.product_count as productCount
+		FROM 
+			`order` o,order_product op
+		WHERE
+			o.id=op.order_id
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+<!-- 查询 -->
+	<select id="checkOrderIsOverseasOrder" parameterType="int"  resultType="int">
+		SELECT 
+			o.id
+		FROM 
+			`order`o,seller s
+		WHERE 
+			o.seller_id=s.id
+			AND o.id=#{id}
+			AND s.id in (select id from seller where is_available=1 and seller_type!=1)
+	</select>
+	
+<!-- 查询 订单渠道 list -->
+	<select id="findAllOrderChannel" parameterType="map" resultType="map">
+	SELECT 
+		sc.id,
+		sc.`name`,
+		sc.responsibility_person AS responsibilityPerson,
+		sc.mark
+	FROM 
+		order_source_channel sc 
+	WHERE 
+		1=1
+		<if test="name != null"> AND sc.`name` = #{name} </if>
+		<if test="mark != null"> AND sc.`mark` = #{mark} </if>
+		<if test="responsibilityPerson != null"> AND sc.`responsibility_person` = #{responsibilityPerson} </if>
+	ORDER BY id DESC 
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+<!-- count 订单渠道  -->
+	<select id="countOrderChannel"  parameterType="map" resultType="int">
+	SELECT 
+		count(sc.id)
+	FROM 
+		order_source_channel sc 
+	WHERE 
+		1=1
+		<if test="name != null"> AND sc.`name` LIKE #{name} </if>
+		<if test="mark != null"> AND sc.`mark` LIKE #{mark} </if>
+		<if test="responsibilityPerson != null"> AND sc.`responsibility_person` LIKE #{responsibilityPerson} </if>
+	</select>
+
+<!-- 插入订单渠道信息 -->
+	<insert id="saveOrderChannel" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+     	INSERT INTO order_source_channel (`name`, `responsibility_person`) 
+     	VALUES (#{name}, #{responsibilityPerson})
+     </insert>
+
+<!-- 更新订单渠道信息 -->
+     <update id="updateOrderChannel" parameterType="map">
+     	UPDATE `order_source_channel` 
+     	<set>
+          <if test="name != null"> name=#{name}, </if>
+          <if test="mark != null"> mark=#{mark}, </if>
+          <if test="responsibilityPerson != null"> responsibility_person=#{responsibilityPerson} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+
+<!-- 删除订单渠道信息 -->
+	<delete id="deleteOrderChannel" parameterType="int">
+		DELETE FROM order_source_channel WHERE id=#{id}
+	</delete>
+	
+<!-- 根据渠道Id统计订单 -->
+	<select id="countOrderBySourceChannelId" parameterType="int" resultType="int">
+		SELECT COUNT(id) FROM `order` WHERE source_channel_id=#{id}
+	</select>
+	
+<!-- 根据订单Id查询商品Id -->
+	<select id="findProductIdListByOrderId" parameterType="int" resultType="int">
+		select p.product_id from order_product p where p.order_id=#{id}
+	</select>
+	
+	<!-- 根据订单Id查询商品id和name -->
+	<select id="findProductInfoByOrderId" parameterType="int" resultType="map">
+		select 
+			op.id,
+			p.name,
+			p.id AS productId,
+			op.product_count AS productCount,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup
+		from 
+			order_product op,
+			product p
+		where 
+			op.product_id=p.id
+			AND op.order_id=#{id}
+	</select>
+	
+<!-- 查询今日在售相关订单商品记录信息 -->
+	<select id="findAllTodaySaleRelOrderProduct" parameterType="map" resultType="map">
+		SELECT 
+			o.id AS oId,
+			o.pay_time AS payTime,
+			op.product_id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.short_name AS name,
+			pc.stock AS stock,
+			p.type,
+			p.code,
+			b.name AS brandName
+		FROM 
+			`order` o,order_product op,product_count pc,product p,brand b
+		WHERE 
+			op.order_id = o.id
+			AND op.product_id = pc.product_id
+			AND op.product_id = p.id
+			AND o.status in (2,3,4)
+			AND p.brand_id = b.id
+			AND o.type=1
+			<if test="minTime != null">
+				<![CDATA[AND o.pay_time >= #{minTime}]]>
+			</if>
+			<if test="idList != null">
+				AND op.product_id in
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="payTimeBegin != null">
+				<![CDATA[AND o.pay_time >= #{payTimeBegin}]]>
+			</if>
+			<if test="payTimeEnd != null">
+				<![CDATA[AND o.pay_time < #{payTimeEnd}]]>
+			</if>
+	</select>
+	
+	<!-- 查询今日在售心动慈露
+相关订单商品记录信息 -->
+	<select id="findQqbsAllTodaySaleRelOrderProduct" parameterType="map" resultType="map">
+		SELECT 
+			o.id AS oId,
+			o.pay_time AS payTime,
+			op.product_id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.short_name AS name,
+			pc.stock AS stock,
+			p.type,
+			p.code,
+			b.name AS brandName
+		FROM 
+			`order` o,order_product op,product_count pc,product p,brand b
+		WHERE 
+			op.order_id = o.id
+			AND op.product_id = pc.product_id
+			AND op.product_id = p.id
+			AND o.status in (2,3,4)
+			AND p.brand_id = b.id
+			AND o.type = 4
+			
+			<!-- 	<if test="minTime != null">
+				<![CDATA[AND o.pay_time >= #{minTime}]]>
+			</if>
+			<if test="idList != null">
+				AND op.product_id in
+				<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if> 
+			-->
+			
+			<if test="payTimeBegin != null">
+				<![CDATA[AND o.pay_time >= #{payTimeBegin}]]>
+			</if>
+			<if test="payTimeEnd != null">
+				<![CDATA[AND o.pay_time < #{payTimeEnd}]]>
+			</if>
+	</select>
+	
+	
+		<!-- 查询今日在售燕网相关订单商品记录信息 -->
+	<select id="findYWAllTodaySaleRelOrderProduct" parameterType="map" resultType="map">
+		SELECT 
+			o.id AS oId,
+			o.pay_time AS payTime,
+			op.product_id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.short_name AS name,
+			pc.stock AS stock,
+			p.type,
+			p.code,
+			b.name AS brandName
+		FROM 
+			`order` o,order_product op,product_count pc,product p,brand b
+		WHERE 
+			op.order_id = o.id
+			AND op.product_id = pc.product_id
+			AND op.product_id = p.id
+			AND o.status in (2,3,4)
+			AND p.brand_id = b.id
+			AND o.type = 5
+			<if test="payTimeBegin != null">
+				<![CDATA[AND o.pay_time >= #{payTimeBegin}]]>
+			</if>
+			<if test="payTimeEnd != null">
+				<![CDATA[AND o.pay_time < #{payTimeEnd}]]>
+			</if>
+	</select>
+
+<!-- 根据productIdList查询商品库存 -->
+	<select id="findProductStockAndNameByProductIdList" parameterType="map" resultType="map">
+		SELECT 
+			p.`name`,
+			pc.stock,
+			pc.product_id AS productId
+		FROM
+			product_count pc,product p
+		WHERE
+			pc.product_id=p.id
+			AND pc.product_id in
+			<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+<!-- 根据订单ID查询订单商品总价 -->
+	<select id="sumOrderPrice" parameterType="int" resultType="string">
+		SELECT sum(sales_price*product_count) FROM order_product WHERE order_id=#{orderId}
+	</select>
+	
+<!-- ############################## 临时修正订单信息 #################################### -->
+
+	<select id="findOrderCount" resultType="int">
+		SELECT 
+			count(o.id)
+		FROM 
+			`order` o,seller s
+		WHERE
+			o.seller_id=s.id
+			AND o.order_seller_id=0
+	</select>
+	
+	<select id="findAllOrderForSetValue" parameterType="map" resultType="map">
+		SELECT 
+			o.id,
+			s.seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.seller_type AS sellerType
+		FROM 
+			`order` o,seller s
+		WHERE
+			o.seller_id=s.id
+			AND o.order_seller_id=0
+		ORDER BY id
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+
+<!-- 更新订单订单的商家字段信息 -->
+	<update id="updateOrderSellerId" parameterType="map">
+     	UPDATE 
+     		`order` 
+     	SET  
+     		order_seller_id=#{orderSellerId}
+     	where id=#{id}
+     </update>
+     
+<!-- 插入订单商家信息 -->
+    <insert id="insertOrderSellerInfo" parameterType="SellerEntity" useGeneratedKeys="true" keyProperty="id">
+    	INSERT INTO order_seller(seller_name,seller_type,send_address) VALUES(#{sellerName},#{sellerType},#{sendAddress})
+    </insert>
+    
+    <select id="findAccountSpending" resultType="map">
+    	SELECT
+			SUM(total_price) AS totalPrice,
+			account_id AS accountId
+		FROM
+			`order`
+		WHERE
+			(
+				`status` = 2
+				OR `status` = 3
+				OR `status` = 4
+			)
+		GROUP BY
+			account_id
+    </select>
+     
+<!-- ############################## 临时修正订单信息 #################################### -->
+
+	<select id="queryAllFakeOrder" parameterType="map" resultType="map">
+		SELECT
+			ol.id AS id,
+			ol.order_id AS orderId,
+			ol.is_fake AS isFakeOrder,
+			ol.subscribe_count AS orderCount,
+			ol.channel AS channelType,
+			ol.number AS channelNumber,
+			left(ol.create_time,10) AS createTime,
+			o.number AS orderNumber,
+			s.real_seller_name AS sellerName,
+			s.seller_type AS sellerType,
+			s.send_address AS sendAddress,
+			s.is_need_idcard_number as isNeedIdcardNumber,
+			s.is_need_idcard_image as isNeedIdcardImage
+		FROM
+			order_logistics ol,
+			`order` o,
+			seller s
+		WHERE
+			ol.order_id = o.id
+		AND o.seller_id = s.id
+		AND ol.status != 3
+		<![CDATA[AND ol.subscribe_count > 1]]>
+		<if test="channelType != null">AND ol.channel = #{channelType}</if>
+		<if test="channelNumber != null">AND ol.number = #{channelNumber}</if>
+		<if test="orderNumber != null">AND o.number = #{orderNumber}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="sellerType != null">AND s.seller_type = #{sellerType}</if>
+		<if test="orderCount != null">AND ol.subscribe_count = #{orderCount}</if>
+		<if test="sendDate != null">AND left(ol.create_time,10)=#{sendDate}</if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+		AND NOT EXISTS(SELECT * from logistics_detail where logistics_detail.logistics_channel=ol.channel AND logistics_detail.logistics_number=ol.number)
+		ORDER by ol.id
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+	<select id="countAllFakeOrder" parameterType="map" resultType="int">
+		SELECT count(ol.id)
+		FROM
+			order_logistics ol,
+			`order` o,
+			seller s
+		WHERE
+			ol.order_id = o.id
+		AND o.seller_id = s.id
+		AND ol.status != 3
+		<![CDATA[AND ol.subscribe_count > 1]]>
+		<if test="channelType != null">AND ol.channel = #{channelType}</if>
+		<if test="channelNumber != null">AND ol.number = #{channelNumber}</if>
+		<if test="orderNumber != null">AND o.number = #{orderNumber}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="sellerType != null">AND s.seller_type = #{sellerType}</if>
+		<if test="orderCount != null">AND ol.subscribe_count = #{orderCount}</if>
+		<if test="sendDate != null">AND left(ol.create_time,10)=#{sendDate}</if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+		AND NOT EXISTS(SELECT * from logistics_detail where logistics_detail.logistics_channel=ol.channel AND logistics_detail.logistics_number=ol.number)
+	</select>
+	
+	<update id="orderLogisticsAgain" parameterType="map">
+		update order_logistics set is_fake=0
+		<if test="id != null">where id = #{id}</if>
+		<if test="idList != null">
+			where id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+
+	<update id="updateOrderSettlement" parameterType="map">
+		update `order` set `is_settlement`=#{isSettlement},`settlement_time`=#{settlementDate} where `number`=#{orderNumber}
+	</update>
+
+	<update id="updateOrderIsNeedSettlement" parameterType="map">
+		update `order` set `is_need_settlement`=#{isNeedSettlement} where `number`=#{orderNumber}
+	</update>
+	
+	<!-- 查询解冻时间段内所有冻结订单ID -->
+	<select id="findFreezeOrderIdByPara" parameterType="map" resultType="int">
+		SELECT 
+    		order_id as orderId
+		FROM 
+			order_freeze
+		WHERE 
+			1=1
+			<if test="status != null">AND status=#{status}</if>
+			<if test="freezeTimeBegin != null"><![CDATA[AND freeze_time >= #{freezeTimeBegin}]]></if>
+			<if test="freezeTimeEnd != null"><![CDATA[AND freeze_time < #{freezeTimeEnd}]]></if>
+			<if test="unfreezeTimeBegin != null"><![CDATA[AND unfreeze_time >= #{unfreezeTimeBegin}]]></if>
+			<if test="unfreezeTimeEnd != null"><![CDATA[AND unfreeze_time < #{unfreezeTimeEnd}]]></if>
+		ORDER BY freeze_time DESC,id DESC
+	</select>
+	
+	<!-- 查询所有冻结订单 -->
+	<select id="findAllOrderFreeze" parameterType="map" resultType="map">
+		SELECT 
+    		of.id as id,
+    		of.freeze_time as freezeTime,
+    		of.unfreeze_time as unfreezeTime,
+    		of.`status` as freezeStatus,
+    		o.id as orderId,
+    		o.pay_time as payTime,
+    		o.number as number,
+    		o.`status` as orderStatus,
+    		o.total_price as totalPrice,
+    		o.real_price as realPrice,
+    		s.real_seller_name as sellerName,
+    		s.send_address as sendAddress
+		FROM 
+			order_freeze of,`order` o,seller s
+		WHERE 
+			of.order_id=o.id
+			AND o.seller_id=s.id
+			<if test="orderId != null">AND of.order_id=#{orderId}</if> 
+			<if test="status != null">AND of.status=#{status}</if>
+			<if test="freezeTimeBegin != null"><![CDATA[AND of.freeze_time >= #{freezeTimeBegin}]]></if>
+			<if test="freezeTimeEnd != null"><![CDATA[AND of.freeze_time < #{freezeTimeEnd}]]></if>
+			<if test="unfreezeTimeBegin != null"><![CDATA[AND of.unfreeze_time >= #{unfreezeTimeBegin}]]></if>
+			<if test="unfreezeTimeEnd != null"><![CDATA[AND of.unfreeze_time < #{unfreezeTimeEnd}]]></if>
+		ORDER BY freeze_time DESC,id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<!-- count所有冻结订单 -->
+	<select id="countOrderFreeze" parameterType="map" resultType="int">
+		SELECT 
+    		count(of.id)
+		FROM 
+			order_freeze of,`order` o,seller s
+		WHERE 
+			of.order_id=o.id
+			AND o.seller_id=s.id
+			<if test="orderId != null">AND of.order_id=#{orderId}</if> 
+			<if test="status != null">AND of.status=#{status}</if>
+			<if test="freezeTimeBegin != null"><![CDATA[AND of.freeze_time >= #{freezeTimeBegin}]]></if>
+			<if test="freezeTimeEnd != null"><![CDATA[AND of.freeze_time < #{freezeTimeEnd}]]></if>
+			<if test="freezeTimeBegin != null"><![CDATA[AND of.unfreeze_time >= #{freezeTimeBegin}]]></if>
+			<if test="freezeTimeEnd != null"><![CDATA[AND of.unfreeze_time < #{freezeTimeEnd}]]></if>
+	</select>
+
+	<insert id="insertOrderFreeze" parameterType="int">
+		INSERT INTO order_freeze(order_id,freeze_time)
+		values(#{orderId},now())
+	</insert>
+
+	<update id="updateOrderFreeze" parameterType="map">
+		UPDATE `order` SET is_freeze=#{isFreeze} WHERE id=#{orderId}
+	</update>
+
+	<update id="updateOrderFreezeRecord" parameterType="map">
+        UPDATE `order_freeze` 
+     	<set>
+          <if test="unfreezeTime != null"> unfreeze_time=#{unfreezeTime}, </if>
+          <if test="status != null">status=#{status} </if>
+     	</set>
+     	WHERE order_id=#{orderId}
+     </update>
+
+	<update id="updateOrderFreezeRecord1" parameterType="map">
+		UPDATE
+			`order_freeze`
+		SET
+			freeze_time=now(),
+			unfreeze_time=#{unfreezeTime},
+			status=#{status}
+		WHERE id=#{id}
+	</update>
+     
+     <select id="findOrderFreezeByOrderId" parameterType="int" resultType="map">
+        SELECT 
+        	id,
+        	order_id as orderId,
+        	freeze_time as freezeTime,
+        	unfreeze_time as unfreezeTime,
+        	status
+        FROM 
+        	order_freeze 
+        WHERE 
+        	order_id =#{orderId}
+     </select>
+	
+
+	<select id="findOrderAccountIdByPara" parameterType="map" resultType="int">
+		SELECT 
+			DISTINCT account_id as accountId
+		FROM 
+			`order`
+		WHERE 
+			`status` IN(2,3,4)
+			<if test="accountIdList != null">
+				AND account_id IN 
+				<foreach item="item" index="index" collection="accountIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="payTimeEnd != null"><![CDATA[AND pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	<select id="findOrderIdByNumber" parameterType="long" resultType="int">
+		select id from `order` where number=#{number}
+	</select>
+	
+	<select id="findOrderIsSettlementByOrderId" parameterType="int" resultType="map">
+		SELECT 
+			freight_money AS freightMoney,
+			order_manual_id AS orderManualId 
+		FROM 
+			order_manual_settlement 
+		WHERE order_manual_id=#{orderManualId}
+	</select>
+	
+	<select id="findOrderSettlementByOrderId" parameterType="int" resultType="map">
+		SELECT 
+			order_id AS orderId, 
+			freight_money AS freightMoney,
+			postage_is_settlement AS postageIsSettlement
+		FROM 
+			order_settlement 
+		WHERE order_id=#{orderId}
+	</select>
+	
+	<insert id="insertOrderSettlement" parameterType="map">
+		INSERT INTO order_settlement (`order_id`,`freight_money`,`postage_is_settlement`,`postage_comfirm_date`) 
+     	VALUES (#{orderId},#{freightMoney},#{postageIsSettlement},#{postageComfirmDate})
+	</insert>
+	
+	<delete id="deleteOrderSettlement" parameterType="int">
+		DELETE FROM order_settlement WHERE order_id=#{orderId}
+	</delete>
+	
+	<update id="updateOrderProductCost" parameterType="map" >
+		UPDATE 
+			order_product 
+		SET cost=#{cost} 
+		WHERE 
+			order_id=#{orderId} 
+			AND product_id=#{productId}
+	</update>
+	
+	<select id="findPayTidOrderAliPay" parameterType="int" resultType="string">
+    	SELECT pay_tid AS payTid FROM order_ali_pay WHERE is_pay=1 AND order_id=#{orderId} ORDER BY id DESC LIMIT 1
+    </select>
+    
+    <select id="findPayMarkTidOrderAliPay" parameterType="int" resultType="string">
+    	SELECT pay_mark AS payMark FROM order_ali_pay WHERE is_pay=1 AND order_id=#{orderId} ORDER BY id DESC LIMIT 1
+    </select>
+
+	<select id="findPayMarkTidOrderWeixinPay" parameterType="int" resultType="string">
+		SELECT pay_mark AS payMark FROM order_weixin_pay WHERE is_pay=1 AND order_id=#{orderId} ORDER BY id DESC LIMIT 1
+	</select>
+    
+    <select id="findPayTidOrderWeixinPay" parameterType="int" resultType="string">
+    	SELECT pay_tid AS payTid FROM order_weixin_pay WHERE is_pay=1 AND order_id=#{orderId} ORDER BY id DESC LIMIT 1
+    </select>
+
+	<select id="findPayTidOrderUnionPay" parameterType="int" resultType="string">
+		SELECT pay_tid AS payTid FROM order_union_pay WHERE is_pay=1 AND order_id=#{orderId} ORDER BY id DESC LIMIT 1
+	</select>
+	
+	
+	
+	<select id="find_PayMarkTidOrderAliPay" parameterType="int" resultType="map">
+    	SELECT pay_mark AS payMark,order_id as orderId  FROM order_ali_pay  
+    	
+    	<where>
+    	     order_id=#{orderId}
+    	</where>
+    	ORDER BY id DESC
+    </select>
+	
+	
+	 <select id="find_PayMarkTidOrderWeixinPay" parameterType="int" resultType="map">
+    	SELECT pay_mark AS payMark,order_id as orderId FROM order_weixin_pay  
+    	
+    	<where>
+    	     order_id=#{orderId}
+    	</where>
+    	ORDER BY id DESC
+    </select>
+    
+    <select id="find_PayTidOrderUnionPay" parameterType="int" resultType="map">
+		SELECT pay_mark AS payMark,order_id as orderId  FROM order_union_pay  
+		<where>
+    	     order_id=#{orderId}
+    	</where>
+    	ORDER BY id DESC 
+	</select>
+	
+	
+	
+	<select id="findOrderAliPay" parameterType="com.alibaba.fastjson.JSONObject" resultType="com.alibaba.fastjson.JSONObject">
+    	SELECT pay_mark AS payMark,order_id as orderId  FROM order_ali_pay  
+    	
+    	<where>
+    	 <if test="payTid != null and payTid!=''"> pay_tid=#{payTid}</if>     
+    	</where>
+    </select>
+    
+    
+    <select id="findOrderWeixinPay" parameterType="com.alibaba.fastjson.JSONObject" resultType="com.alibaba.fastjson.JSONObject">
+    	SELECT pay_mark AS payMark,order_id as orderId  FROM order_weixin_pay  
+    	
+    	<where>
+    	 <if test="payTid != null and payTid!=''"> pay_tid=#{payTid}</if>     
+    	</where>
+    </select>
+    
+    <select id="findOrderUnionPay" parameterType="com.alibaba.fastjson.JSONObject" resultType="com.alibaba.fastjson.JSONObject">
+    	SELECT pay_mark AS payMark,order_id as orderId  FROM order_union_pay  
+    	
+    	<where>
+    	 <if test="payTid != null and payTid!=''"> pay_tid=#{payTid}</if>     
+    	</where>
+    </select>
+	
+<!-- 查询所有可以导出的海外购订单信息 -->
+	<select id="findAllBirdexOrder"  resultType="map">
+		SELECT 
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			o.is_freeze AS isFreeze,
+			ora.id as addressId,
+			ora.full_name as fullName,
+			ora.mobile_number as mobileNumber,
+			ora.id_card as idCard,
+			ora.detail_address as detailAddress,
+			ora.province,
+			ora.city,
+			ora.district
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s
+		WHERE 
+			o.seller_id=s.id 
+			and o.receive_address_id=ora.id 
+			and o.status = 2
+			and o.check_status=2
+			<![CDATA[and ((o.type != 4) or (o.pay_time < '2016-01-25 20:00:00')) ]]>
+			AND NOT EXISTS (SELECT 1 FROM order_product WHERE product_id=5235 AND order_id=o.id)
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number)
+			and NOT EXISTS (select 1 from birdex_order_confirm where order_id = o.id and is_push=0)
+			and s.id in (select id from seller where is_birdex=1)
+			<if test="number != null">and o.number=#{number}</if>
+		ORDER BY o.create_time,o.id
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countAllBirdexOrder"  resultType="int">
+		SELECT 
+			count(o.id)
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			and o.receive_address_id=ora.id
+			and o.status = 2
+			and o.check_status=2
+			<![CDATA[and ((o.type != 4) or (o.pay_time < '2016-01-25 20:00:00')) ]]>
+			AND NOT EXISTS (SELECT 1 FROM order_product WHERE product_id=5235 AND order_id=o.id)
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number)
+			and NOT EXISTS (select 1 from birdex_order_confirm where order_id = o.id and is_push=0)
+			and s.id in (select id from seller where is_birdex=1)
+			<if test="number != null">and o.number=#{number}</if>
+	</select>
+	
+<!-- 查询没有设置导出价格和导出名称的笨鸟订单信息  -->
+	<select id="findAllBirdexOrderWithOutExportInfo" resultType="map">
+		SELECT 
+			p.`code` as pCode,
+			p.`name` as pName,
+			o.id as orderId,
+			s.`real_seller_name` as realSellerName,
+			s.`send_address` as sendAddress
+		FROM 
+			`order` o,
+			`seller` s,
+			`order_product` op,
+			`product` p
+		WHERE 
+			o.`seller_id`=s.id 
+			and o.`id`=op.order_id 
+			and op.`product_id`=p.id
+			and o.`status` in (2)
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) 
+			and s.id in (select id from seller where is_birdex=1)
+			and NOT EXISTS (select 1 from overseas_product_info where `code` = p.`code` and `seller_name` = s.`real_seller_name` and `status` = 1)
+		GROUP BY 
+			p.`code`,s.`real_seller_name`
+	</select>
+	
+<!-- 根据para查询笨鸟商品导出所需要的信息 -->
+    <select id="findAllBirdexProductInfo" parameterType="map" resultType="map">
+    	SELECT 
+    		id ,
+    		code ,
+    		name ,
+    		seller_id as sellerId,
+    		export_name as exportName ,
+    		export_price as exportPrice ,
+    		status ,
+    		remark 
+    	FROM 
+    		birdex_product_info
+    	WHERE 
+    		1=1 
+    	<if test="status != null"> AND status=#{status} </if>
+    	<if test="code != null"> AND code=#{code} </if>
+    	ORDER BY status ASC,update_time DESC
+    	<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+    
+    <!-- 根据para查询笨鸟商品导出所需要的信息 -->
+    <select id="countAllBirdexProductInfo" parameterType="map" resultType="int">
+    	SELECT 
+    		count(id) 
+    	FROM 
+    		birdex_product_info
+    	WHERE 
+    		1=1
+    	<if test="status != null"> AND status=#{status} </if>
+    	<if test="code != null"> AND code=#{code} </if>
+    </select>
+	
+	<!-- 更新海外购商品信息 -->
+	<update id="updateBirdexProductInfo" parameterType="map">
+     	UPDATE `birdex_product_info` 
+     	<set>
+          <if test="name != null"> name=#{name}, </if>
+          <if test="code != null"> code=#{code}, </if>
+          <if test="exportName != null">export_name=#{exportName}, </if>
+          <if test="exportPrice != null">export_price=#{exportPrice}, </if>
+          <if test="remark != null">remark=#{remark}, </if>
+          <if test="status != null">status=#{status} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+	
+	<!-- 插入笨鸟商品编码对应导单信息记录 -->
+    <insert id="insertBirdexProInfo" parameterType="map">
+    	INSERT INTO birdex_product_info (`code`, `name`,`export_name`, `export_price`, `status`,`remark`) 
+     	VALUES (#{code}, #{name}, #{exportName}, #{exportPrice}, #{status}, #{remark})
+    </insert>
+    
+    <delete id="deleteBirdexPro" parameterType="int">
+    	DELETE FROM birdex_product_info WHERE id=#{id}
+	</delete>
+	
+<!-- 插入笨鸟订单确认发货记录 -->
+    <insert id="insertBirdexOrderConfirm" parameterType="map">
+    	INSERT INTO birdex_order_confirm (`order_id`,`is_push`) 
+     	VALUES (#{orderId},#{isPush})
+    </insert>
+    
+    <update id="updateBirdexOrderPushStatus" parameterType="map">
+    	update birdex_order_confirm set `is_push`=#{isPush} where `order_id`=#{orderId}
+    </update>
+
+	<select id="findBirdexOrderConfirmByOrderId" parameterType="int" resultType="int" >
+     	SELECT id FROM birdex_order_confirm WHERE order_id=#{orderId}
+    </select>    
+    
+    <select id="findIdcardRealnameMappingByIdCard" parameterType="string" resultType="map">
+    	SELECT 
+    		old_name AS oldName,
+    		real_name AS realName,
+    		id_card AS idCard
+    	FROM 
+    		idcard_realname_mapping 
+    	WHERE 
+    		id_card=#{idCard}
+    </select>
+    
+    <select id="findOrderProductSettlementInfo"  parameterType="list" resultType="map">
+    	SELECT 
+    		op.order_id AS orderId,
+    		pb.id AS productBaseId,
+    		pb.submit_type AS submitType,
+    		pb.deduction,
+    		pb.self_purchase_price AS selfPurchasePrice,
+    		pb.wholesale_price AS wholesalePrice,
+    		pb.proposal_price  AS proposalPrice
+    	FROM 
+    		order_product op,
+    		product p, 
+    		product_base pb 
+    	WHERE 
+    		op.product_id=p.id 
+    		AND p.product_base_id=pb.id
+    		AND op.order_id IN 
+    		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+    </select>
+    
+    <select id="clientBuyAnalyze" parameterType="map" resultMap="ClientBuyViewMap">
+		 SELECT
+			app_channel,
+			app_version,
+			number,
+			account_id,
+			total_price,
+			real_price
+		FROM
+			`order`
+		WHERE `status` in(2,3,4)
+		<if test="payTimeBegin != null"><![CDATA[AND pay_time >= #{payTimeBegin}]]></if>
+		<if test="payTimeEnd != null"><![CDATA[AND pay_time < #{payTimeEnd}]]></if>
+		ORDER BY id   	
+    </select>
+    
+    <select id="userBehaviorAnalyze" parameterType="map" resultType="map">
+		SELECT
+			t1.account_id AS accountId,
+			count(t1.account_id) AS times,
+			SUM(t1.real_price) AS totalPrice
+		FROM
+			`order` t1,account t2
+		WHERE
+			t1.account_id = t2.id
+		AND	`status` IN (2, 3, 4)
+		AND t1.type=1
+		<![CDATA[AND t1.create_time >= #{oStartTime}]]>
+		<![CDATA[AND t1.create_time <= #{oEndTime}]]>
+		<!-- <![CDATA[AND t2.create_time >= #{aStartTime}]]>
+		<![CDATA[AND t2.create_time <= #{aEndTime}]]> -->
+		<if test="idList != null">
+		AND t1.account_id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		</if>
+		GROUP BY t1.account_id
+		ORDER BY times
+    </select>
+    
+    <select id="countZeroBuyUser" parameterType="map" resultType="int">
+		SELECT
+			count(id) AS amount
+		FROM
+			account
+		WHERE
+			id NOT IN (
+				SELECT
+					account_id
+				FROM
+					`order`
+				WHERE
+					`status` IN (2, 3, 4)
+				<![CDATA[AND create_time >= #{oStartTime}]]>
+				<![CDATA[AND create_time <= #{oEndTime}]]>
+			)
+			AND type in(1,2,3,4,5)
+		<![CDATA[AND create_time >= #{aStartTime}]]>
+		<![CDATA[AND create_time <= #{aEndTime}]]>  	
+    </select>
+    
+    <select id="countNextBuyUser" parameterType="map" resultType="map">
+		SELECT
+			COUNT(DISTINCT account_id) AS nextUserCount,
+			SUM(real_price) AS nextTotalAmount
+		FROM
+			`order` t1,account t
+		WHERE
+			t1.account_id NOT in (
+				SELECT
+					t2.id
+				FROM
+					account t2,
+					`order` t3
+				WHERE
+					t2.id = t3.account_id
+				AND t3.`status` IN (2, 3, 4)
+				AND t3.type=1
+				AND t2.type in(1,2,3,4,5)
+				<![CDATA[AND t3.create_time >= #{prevStartTime}]]>
+				<![CDATA[AND t3.create_time <= #{prevEndTime}]]>
+				<![CDATA[AND t2.create_time >= #{prevStartTime}]]>
+				<![CDATA[AND t2.create_time <= #{prevEndTime}]]>
+			)
+			AND t1.`status` IN (2, 3, 4)
+			AND t1.account_id = t.id
+			AND t1.type=1
+			AND t.type in(1,2,3,4,5)
+		<![CDATA[AND t1.create_time >= #{nextStartTime}]]>
+		<![CDATA[AND t1.create_time <= #{nextEndTime}]]>
+		<![CDATA[AND t.create_time >= #{prevStartTime}]]>
+		<![CDATA[AND t.create_time <= #{prevEndTime}]]>	
+    </select>
+    
+    <select id="findZeroBuyAccount" parameterType="map" resultType="int">
+		SELECT
+			id
+		FROM
+			account t1
+		WHERE
+			t1.id NOT IN (
+				SELECT
+					account_id
+				FROM
+					`order` t2
+				WHERE
+					t2.`status` IN (2, 3, 4)
+				<![CDATA[AND t2.create_time >= #{startTime}]]>
+				<![CDATA[AND t2.create_time <= #{endTime}]]>
+			)
+			<![CDATA[AND t1.create_time >= #{startTime}]]>
+			<![CDATA[AND t1.create_time <= #{endTime}]]>	
+    </select>
+    
+    
+    
+    <select id="findProductNameAndTypeByOrderId" parameterType="string" resultType="map">
+		 SELECT
+			t2.`short_name` AS productName,
+			t3.type,
+			o.type as orderType
+		FROM
+			order_product t1,
+			product t2,
+			product_base t3,
+			`order` o
+		WHERE
+			t1.product_id = t2.id
+		AND t2.product_base_id = t3.id
+		AND t1.order_id = #{orderId}
+		and t1.order_id=o.id
+		ORDER BY t1.product_id
+    </select>
+    
+    <select id="findReceiveMobileNumberByOrderId" parameterType="string" resultType="string">
+		 SELECT
+			t1.mobile_number
+		FROM
+			order_receive_address t1,
+			`order` t2
+		WHERE
+			t1.id = t2.receive_address_id
+		AND t2.id = #{orderId}   	
+    </select>
+    
+    <select id="findSaleDataByDate" parameterType="map" resultType="map">
+    	SELECT 
+    		total_price AS realPrice,
+    		pay_time AS payTime
+    	FROM 
+    		`order` 
+    	WHERE
+			status IN(2,3,4,5)
+			AND type=1
+    		<if test="payTimeBegin != null"><![CDATA[AND pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND pay_time < #{payTimeEnd}]]></if>
+    </select>
+    
+    <!-- 心动慈露
+数据魔方折线图-->
+    <select id="findQqbsSaleDataByDate" parameterType="map" resultType="map">
+    	SELECT 
+    		total_price AS realPrice,
+    		pay_time AS payTime
+    	FROM 
+    		`order` 
+    	WHERE
+			status IN(2,3,4,5)
+			AND type = 4
+    		<if test="payTimeBegin != null"><![CDATA[AND pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND pay_time < #{payTimeEnd}]]></if>
+    </select>
+    
+        <!-- 燕网数据魔方折线图-->
+    <select id="findYWSaleDataByDate" parameterType="map" resultType="map">
+    	SELECT 
+    		total_price AS realPrice,
+    		pay_time AS payTime
+    	FROM 
+    		`order` 
+    	WHERE
+			status IN(2,3,4,5)
+			AND type = 5
+    		<if test="payTimeBegin != null"><![CDATA[AND pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND pay_time < #{payTimeEnd}]]></if>
+    </select>
+
+	<!-- 根据para查询导出订单合并记录信息 -->
+	<select id="findAllHBOrderRecord" parameterType="string" resultType="string">
+		SELECT
+		son_number AS sonNumber
+		FROM
+		hb_order_record
+		WHERE
+		1=1
+		AND hb_number=#{hbNumber}
+		LIMIT 1
+	</select>
+	
+    <!-- 根据channel，number查询所有订单物流信息 -->
+     <select id="findAllOrderLogisticsBychannelAndNumber" parameterType="map" resultType="OrderLogistics">
+     	SELECT 
+     		id as id,
+     		order_id as orderId,
+     		channel,
+     		number,
+     		money,
+     		status,
+     		create_time as createTime,
+     		is_subscribed as isSubscribed,
+     		subscribe_count as subscribeCount,
+     		is_fake as isFake,
+     		track_info as trackInfo 
+     	FROM 
+     		order_logistics 
+     	WHERE 
+     		channel=#{channel} and number=#{number} 
+     </select>
+
+	<select id="findOrderSignRecordIdByOrderId" parameterType="int" resultType="int">
+		SELECT
+     		id
+     	FROM
+     		order_sign_record
+     	WHERE
+     		order_id=#{orderId}
+	</select>
+
+	<insert id="addOrderSignRecordIdByOrderId" parameterType="int">
+		INSERT INTO order_sign_record(order_id) VALUES (#{orderId})
+	</insert>
+	
+	<select id="findOrderPayRecordForSendTimeAnalyze" parameterType="map" resultType="map">
+	SELECT
+		o.id AS orderId,
+		o.pay_time AS payTime,
+		o.send_time AS sendTime,
+		s.real_seller_name AS sellerName,
+		s.id AS sellerId,
+		s.send_address AS sendAddress,
+		s.warehouse,
+		s.seller_type AS sellerType,
+		s.bonded_number_type AS bondedNumberType
+	FROM
+		`order` o,seller s
+	WHERE
+		o.seller_id = s.id
+		AND o.`status` in (2,3,4) 
+		AND <![CDATA[pay_time >= #{payTimeBegin}]]>
+		AND <![CDATA[pay_time < #{payTimeEnd}]]>
+		ORDER BY pay_time ASC		
+	</select>
+	
+	<select id="findOrderPayRecordForLogisticAnalyze" parameterType="map" resultType="map">
+		SELECT
+			o.id AS orderId,
+			o.send_time AS sendTime,
+			ol.channel,
+			ol.number,
+			s.real_seller_name AS sellerName,
+			s.id AS sellerId,
+			s.send_address AS sendAddress,
+			s.warehouse,
+			s.seller_type AS sellerType,
+			s.bonded_number_type AS bondedNumberType
+		FROM
+			`order` o,
+			order_logistics ol,
+			seller s
+		WHERE
+			o.id = ol.order_id
+		AND o.seller_id = s.id
+		AND o.status in (2,3,4)
+		AND <![CDATA[o.send_time >= #{sendTimeBegin}]]>
+		AND <![CDATA[o.send_time < #{sendTimeEnd}]]>
+	</select>
+	
+	<select id="finOrderLogisticsTimeByChannelAndNumber" parameterType="map" resultType="string">
+		SELECT
+			create_time
+		FROM
+			logistics_detail
+		WHERE
+			logistics_channel = #{channel}
+		AND logistics_number = #{number}
+		ORDER BY id LIMIT 1		
+	</select>
+	
+	
+     <select id="findAllOrderSendTimeAnalyze" parameterType="map" resultType="OrderInfoForManage">
+		SELECT 
+			o.id AS oId,
+			o.create_time AS oCreateTime,
+			o.pay_time AS oPayTime,
+			o.send_time AS oSendTime,
+			o.number AS oNumber,
+			o.`status` AS oStatus,
+			o.total_price+o.adjust_price AS oTotalPrice,
+			o.adjust_price AS oAdjustPrice,
+			o.real_price AS oRealPrice,
+			o.app_channel AS oAppChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.remark2 AS remark2,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			s.real_seller_name AS sSellerName,
+			s.send_address AS sSendAddress,
+			o.operation_status AS operaStatus,
+			olog.channel AS ologChannel,
+			olog.money AS ologMoney,
+			olog.number AS ologNumber,
+			osc.name AS orderSource,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE o.`status` in(2,3,4) 
+		AND <![CDATA[o.pay_time>=#{payTimeStart}]]>
+		<if test="source == 1">AND <![CDATA[o.pay_time<=#{payTimeEnd}]]></if>  
+		<if test="source == 2">AND <![CDATA[o.pay_time<#{payTimeEnd}]]></if>  
+		<if test="beginHour != null">AND <![CDATA[HOUR(TIMEDIFF(o.pay_time, o.send_time))>#{beginHour}]]></if> 
+		<if test="endHour != null">AND <![CDATA[HOUR(TIMEDIFF(o.pay_time, o.send_time))<=#{endHour}]]></if> 
+		<if test="sendTime != null">AND <![CDATA[o.send_time=#{sendTime}]]></if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		GROUP BY o.id 
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+     </select>
+     
+     	
+     <select id="countAllOrderSendTimeAnalyze" parameterType="map"  resultType="int">
+		SELECT 
+			count(distinct o.id)
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id 
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE o.`status` in(2,3,4) 
+		AND <![CDATA[o.pay_time>=#{payTimeStart}]]>
+		<if test="source == 1">AND <![CDATA[o.pay_time<=#{payTimeEnd}]]></if>  
+		<if test="source == 2">AND <![CDATA[o.pay_time<#{payTimeEnd}]]></if>  
+		<if test="beginHour != null">AND <![CDATA[HOUR(TIMEDIFF(o.pay_time, o.send_time))>#{beginHour}]]></if> 
+		<if test="endHour != null">AND <![CDATA[HOUR(TIMEDIFF(o.pay_time, o.send_time))<=#{endHour}]]></if> 
+		<if test="sendTime != null">AND <![CDATA[o.send_time=#{sendTime}]]></if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+     </select>
+     
+     <select id="findAllOrderLogisticAnalyzeDetail" parameterType="map" resultType="OrderInfoForManage">
+		SELECT 
+			o.id AS oId,
+			o.create_time AS oCreateTime,
+			o.pay_time AS oPayTime,
+			o.send_time AS oSendTime,
+			o.number AS oNumber,
+			o.`status` AS oStatus,
+			o.total_price+o.adjust_price AS oTotalPrice,
+			o.adjust_price AS oAdjustPrice,
+			o.real_price AS oRealPrice,
+			o.app_channel AS oAppChannel,
+			o.app_version AS appVersion,
+			o.remark AS remark,
+			o.remark2 AS remark2,
+			o.pay_channel AS payChannel,
+			o.source_channel_id AS sourceChannelId,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			s.real_seller_name AS sSellerName,
+			s.send_address AS sSendAddress,
+			o.operation_status AS operaStatus,
+			olog.channel AS ologChannel,
+			olog.money AS ologMoney,
+			olog.number AS ologNumber,
+			osc.name AS orderSource,
+			o.is_settlement AS isSettlement,
+			o.account_id AS accountId
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE o.`status` in(2,3,4) 
+		AND <![CDATA[o.send_time>=#{sendTimeBegin}]]>
+		<if test="source == 1">AND <![CDATA[o.send_time<=#{sendTimeEnd}]]></if>  
+		<if test="source == 2">AND <![CDATA[o.send_time<#{sendTimeEnd}]]></if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="idList != null"> 
+			AND o.id in
+			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY o.id 
+		ORDER BY o.id DESC
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>     
+     </select>
+     
+     <select id="countAllOrderLogisticAnalyzeDetail" parameterType="map" resultType="int">
+		SELECT 
+			count(distinct o.id)
+		FROM 
+			`order` o LEFT JOIN order_product op ON o.id=op.order_id 
+			LEFT JOIN product p ON op.product_id=p.id 
+			LEFT JOIN seller s ON o.seller_id=s.id 
+			LEFT JOIN account a ON o.account_id=a.id
+			LEFT JOIN order_receive_address ra ON o.receive_address_id=ra.id 
+			LEFT JOIN order_logistics olog ON o.id=olog.order_id 
+			LEFT JOIN order_source_channel osc ON o.source_channel_id=osc.id 
+		WHERE o.`status` in(2,3,4) 
+		AND <![CDATA[o.send_time>=#{sendTimeBegin}]]>
+		<if test="source == 1">AND <![CDATA[o.send_time<=#{sendTimeEnd}]]></if>  
+		<if test="source == 2">AND <![CDATA[o.send_time<#{sendTimeEnd}]]></if>
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="idList != null"> 
+			AND o.id in
+			<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>    
+     </select>
+
+
+	<!-- 查询订单简要信息 -->
+	<select id="findSimpleOrderInfoByPara" parameterType="map" resultType="map">
+		SELECT
+			o.id AS id,
+			o.number AS number,
+			o.status AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.freight_money AS freightMoney,
+			o.account_point AS accountPoint,
+			o.coupon_price AS couponPrice,
+			o.adjust_price AS adjustPrice,
+			o.seller_id AS sellerId,
+			o.pay_time AS payTime
+		FROM
+			`order` o
+		WHERE
+			1=1
+			<if test="sellerId != null">AND o.seller_id=#{sellerId}</if>
+			<if test="startTimeBegin != null"><![CDATA[AND o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[AND o.pay_time<#{startTimeEnd} ]]></if>
+	</select>
+
+	<!-- 查询所有订单商品信息 -->
+	<select id="findAllOrderProductInfoByPara" parameterType="map" resultType="map">
+		SELECT
+			op.id AS id,
+			op.order_id AS orderId,
+			op.product_id AS productId,
+			op.sales_price AS salesPrice,
+			op.group_price AS groupPrice,
+			op.is_group AS isGroup,
+			op.product_count AS productCount,
+			op.cost AS cost,
+			p.name AS productName
+		FROM
+			`order_product` op,product p
+		WHERE
+			op.product_id=p.id
+			<if test="orderIdList != null">
+				AND op.order_id IN
+				<foreach item="item" index="index" collection="orderIdList" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+	</select>
+
+     
+     <select id="findOldBuyAccountIds" parameterType="string" resultType="int">
+		SELECT 
+			DISTINCT account_id as accountId
+		FROM 
+			`order` 
+		WHERE 
+			<![CDATA[create_time < #{payTimeEnd}  ]]>
+			AND `status` IN(2,3,4)
+			AND type=1
+     </select>
+     
+     <select id="userFirstBehaviorAnalyze" parameterType="map" resultType="map">
+ 		SELECT
+			t1.account_id AS accountId,
+			count(t1.account_id) AS times,
+			SUM(t1.real_price) AS totalPrice
+		FROM
+			`order` t1,account t2
+		WHERE
+			t1.account_id = t2.id
+		AND	`status` IN (2, 3, 4)
+		AND t1.type=1
+		<![CDATA[AND t1.create_time >= #{oStartTime}]]>
+		<![CDATA[AND t1.create_time <= #{oEndTime}]]>
+		AND t2.type in(1,2,3,4,5)
+		<if test="idList != null">
+		AND t1.account_id NOT in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		</if>
+		GROUP BY t1.account_id
+		ORDER BY times    	
+     </select>
+     
+     <select id="countFirstZeroBuyUser" parameterType="map" resultType="int">
+		SELECT
+			count(id) AS amount
+		FROM
+			account
+		WHERE
+			id NOT IN (
+				SELECT
+					account_id
+				FROM
+					`order`
+				WHERE
+					`status` IN (2, 3, 4)
+				<![CDATA[AND create_time >= #{oStartTime}]]>
+				<![CDATA[AND create_time <= #{oEndTime}]]>
+			)    
+     </select>
+     
+     <select id="countFirstNextBuyUser" parameterType="map" resultType="map">
+		SELECT
+			COUNT(DISTINCT account_id) AS nextUserCount,
+			SUM(real_price) AS nextTotalAmount
+		FROM
+			`order` t1
+		WHERE
+			t1.account_id NOT in (
+				SELECT
+					account_id
+				FROM
+					`order`
+				WHERE
+					`status` IN (2, 3, 4)
+				<![CDATA[AND create_time >= #{prevStartTime}]]>
+				<![CDATA[AND create_time <= #{nextEndTime}]]>
+			)
+			AND t1.`status` IN (2, 3, 4)
+		     
+     </select>
+     
+     <select id="findOrderSalesRecordForMonthAnalyze" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.pay_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM 
+			`order` o
+		WHERE
+		 	status IN(2,3,4,5)
+		 	AND o.type=1
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+
+	<select id="findOrderSalesRecordForMonthAnalyze2" parameterType="map"  resultType="map">
+		SELECT
+			o.id,
+			o.create_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM
+			`order` o
+		WHERE
+			status IN(1,6)
+			AND o.type=1
+			<if test="payTimeBegin != null"><![CDATA[AND o.create_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.create_time < #{payTimeEnd}]]></if>
+	</select>
+
+
+	<select id="findOrderSalesRecordForPlatformMonthAnalyze" parameterType="map"  resultType="map">
+		SELECT
+		o.id,
+		o.pay_time AS createTime,
+		o.account_id AS accountId,
+		o.total_price AS totalPrice,
+		o.status,
+		o.type,
+		o.app_channel AS channel
+		FROM
+		`order` o
+		WHERE
+		status IN(2,3,4,5)
+		<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+		<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+
+	<select id="findOrderSalesRecordForQqbsMonthAnalyze" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.pay_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM 
+			`order` o
+		WHERE
+		 	status IN(2,3,4,5)
+		 	AND o.type = 4
+		    <if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	<select id="findOrderSalesRecordForQqbsMonthAnalyze2" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.create_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM 
+			`order` o
+		WHERE
+		 	status IN(1,6)
+		 	AND o.type  = 4
+			<if test="payTimeBegin != null"><![CDATA[AND o.create_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.create_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	<!-- 燕网-月度统计 -->
+	<select id="findOrderSalesRecordForYWMonthAnalyze" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.pay_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM 
+			`order` o
+		WHERE
+		 	status IN(2,3,4,5)
+		 	AND o.type = 5
+		    <if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	<select id="findOrderSalesRecordForYWMonthAnalyze2" parameterType="map"  resultType="map">
+		SELECT 
+			o.id,
+			o.create_time AS createTime,
+			o.account_id AS accountId,
+			o.total_price AS totalPrice,
+			o.status
+		FROM 
+			`order` o
+		WHERE
+		 	status IN(1,6)
+		 	AND o.type  = 5
+			<if test="payTimeBegin != null"><![CDATA[AND o.create_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.create_time < #{payTimeEnd}]]></if>
+	</select>
+	
+	
+
+	<select id="findAllProblemOrder" parameterType="map" resultType="map">
+		SELECT
+			ol.id AS id,
+			ol.order_id AS orderId,
+			ol.is_fake AS isFakeOrder,
+			ol.subscribe_count AS orderCount,
+			ol.channel AS channelType,
+			ol.number AS channelNumber,
+			ol.status AS logisticsStatus,
+			left(ol.create_time,10) AS createTime,
+			o.number AS orderNumber,
+			s.real_seller_name AS sellerName,
+			s.seller_type AS sellerType,
+			s.send_address AS sendAddress,
+			s.is_need_idcard_number as isNeedIdcardNumber,
+			s.is_need_idcard_image as isNeedIdcardImage
+		FROM
+			order_logistics ol,
+			`order` o,
+			seller s
+		WHERE
+			ol.order_id = o.id
+		AND o.seller_id = s.id
+		AND ol.status = 2
+		AND o.status = 3
+		<if test="channelType != null">AND ol.channel = #{channelType}</if>
+		<if test="channelNumber != null">AND ol.number = #{channelNumber}</if>
+		<if test="orderNumber != null">AND o.number = #{orderNumber}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="sellerType != null">AND s.seller_type = #{sellerType}</if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+		ORDER by ol.id
+		<if test="start != null">
+			LIMIT #{start},#{max}			
+		</if>
+	</select>
+	
+	<select id="countAllProblemOrder" parameterType="map" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			order_logistics ol,
+			`order` o,
+			seller s
+		WHERE
+			ol.order_id = o.id
+		AND o.seller_id = s.id
+		AND ol.status = 2
+		AND o.status = 3
+		<if test="channelType != null">AND ol.channel = #{channelType}</if>
+		<if test="channelNumber != null">AND ol.number = #{channelNumber}</if>
+		<if test="orderNumber != null">AND o.number = #{orderNumber}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="sellerType != null">AND s.seller_type = #{sellerType}</if>
+		<if test="isNeedIdcardNumber != null">AND s.is_need_idcard_number=#{isNeedIdcardNumber}</if>
+		<if test="isNeedIdcardImage != null">AND s.is_need_idcard_image=#{isNeedIdcardImage}</if>
+	</select>
+
+	<!-- 批量插入外部订单合并记录信息 -->
+	<insert id="batchInsertOutOrderHbRecord" parameterType="list">
+		INSERT INTO out_order_hb_record(hb_number,son_number) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.hbNumber},#{item.sonNumber})
+		</foreach>
+	</insert>
+
+	<select id="findOutOrderHbRecordByHbNumberList" parameterType="list" resultType="map">
+		SELECT
+			hb_number AS hbNumber,son_number AS sonNumber
+		FROM
+			out_order_hb_record
+		WHERE
+			hb_number IN
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="findOrderIdByCouponAccountId" parameterType="int" resultType="int">
+		SELECT id FROM `order` WHERE account_coupon_id=#{accountCouponId} AND status IN (2,3,4)
+	</select>
+
+	<select id="findOrderReceiveAddressIdListByFullNameAndPhone" parameterType="map" resultType="int">
+		SELECT
+			id
+		FROM
+			order_receive_address
+		WHERE
+			1=1
+			<if test="fullName != null"> AND full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> AND mobile_number=#{mobileNumber} </if>
+	</select>
+	
+	<select id="findOrderIdListByOrderLogisticsNumber" parameterType="string" resultType="int">
+		SELECT order_id FROM order_logistics WHERE `number`=#{number}
+	</select>
+
+	<select id="findReceiveInfoByIdList" parameterType="list" resultType="map">
+		SELECT
+			id,
+			full_name AS fullName,
+			mobile_number AS mobileNumber
+		FROM
+			order_receive_address
+		WHERE
+			id IN
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findSourceChannelInfoByIdList" parameterType="list" resultType="map">
+		SELECT id, `name` FROM order_source_channel
+		WHERE
+			id IN
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="findLogisticsInfoByIdList" parameterType="list" resultType="map">
+		SELECT order_id AS orderId, channel,number,money FROM order_logistics WHERE order_id IN
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getOrderById" parameterType="int" resultMap="OrderMap">
+     	SELECT * FROM `order` 
+     	where id=#{id}
+     </select>
+
+	<select id="findEdbOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.status,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			o.is_freeze AS isFreeze,
+-- 			ora.id as addressId,
+-- 			ora.full_name as fullName,
+-- 			ora.mobile_number as mobileNumber,
+-- 			ora.id_card as idCard,
+-- 			ora.detail_address as detailAddress,
+-- 			ora.province,
+-- 			ora.city,
+-- 			ora.district,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName
+		FROM
+			`order` o,
+-- 			order_receive_address ora,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			and o.check_status=2
+-- 			and o.receive_address_id=ora.id
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			<if test="freeze != null">and o.is_freeze=1</if>
+			<if test="unFreeze != null">and o.is_freeze!=1</if>
+		    <if test="confirmed != null"><!-- 已确认 -->
+				and EXISTS (select 1 from order_edb_confirm where order_id=o.id)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 1"><!-- 接收状态 成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id AND is_receive_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 0"><!-- 接收状态 未成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id AND is_receive_success=0)
+			</if>
+		    <if test="unconfirmed != null"><!-- 未确认 -->
+				and NOT EXISTS (select 1 from order_edb_confirm where order_id=o.id)
+			</if>
+			<![CDATA[and ((o.type != 4) or (o.pay_time < '2016-01-25 20:00:00')) ]]>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		ORDER BY o.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countEdbOrder" parameterType="map" resultType="int">
+		SELECT
+			count(o.id)
+		FROM
+			`order` o,
+-- 			order_receive_address ora,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			and o.check_status=2
+-- 			and o.receive_address_id=ora.id
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<#{startTimeEnd} ]]></if>
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			<if test="freeze != null">and o.is_freeze=1</if>
+			<if test="unFreeze != null">and o.is_freeze!=1</if>
+			<if test="confirmed != null"><!-- 已确认 -->
+				and EXISTS (select 1 from order_edb_confirm where order_id=o.id)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 1"><!-- 接收状态 成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id AND is_receive_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 0"><!-- 接收状态 未成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id AND is_receive_success=0)
+			</if>
+			<if test="unconfirmed != null"><!-- 未确认 -->
+				and NOT EXISTS (select 1 from order_edb_confirm where order_id=o.id)
+			</if>
+			<![CDATA[and ((o.type !=4) or (o.pay_time < '2016-01-25 20:00:00')) ]]>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<!-- 插入客服E店宝订单确认记录 -->
+	<insert id="addOrderEdbConfirm" parameterType="map">
+		INSERT INTO order_edb_confirm(order_id,is_push) VALUES(#{orderId},#{isPush})
+	</insert>
+
+	<update id="updateOrderEdbConfirm" parameterType="map">
+		UPDATE order_edb_confirm SET is_push=#{isPush} WHERE order_id=#{orderId}
+	</update>
+
+	<select id="findOrderEdbConfirmByOrderId" parameterType="map" resultType="map">
+		SELECT
+			order_id AS orderId,
+			is_push AS isPush
+		FROM
+			`order_edb_confirm`
+     	WHERE
+     		order_id=#{orderId}
+	</select>
+
+	<select id="findOrderEdbConfirmByOrderIdList" parameterType="list" resultType="map">
+		SELECT
+			order_id AS orderId,
+			is_push AS isPush
+		FROM
+			`order_edb_confirm`
+		WHERE
+			order_id IN
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="findOrderEdbSendRecordByOrderIdList" parameterType="list" resultType="map">
+		SELECT
+			order_id AS orderId,
+			is_push_success AS isPushSuccess,
+			error_content AS errorContent,
+			create_time AS createTime
+		FROM
+			order_edb_send_record
+		WHERE
+			order_id IN
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<!-- 推送成功E店宝订单 -->
+	<select id="findPushSuccessEdbOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.status,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+-- 			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			<if test="receiveStatus == null">
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 1"><!-- 接收状态 成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1 and is_receive_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 0"><!-- 接收状态 未成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1 and is_receive_success=0)
+			</if>
+			ORDER BY o.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<!-- count 推送成功E店宝订单 -->
+	<select id="countPushSuccessEdbOrder" parameterType="map" resultType="int">
+		SELECT
+			count(o.id)
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+-- 			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			<if test="receiveStatus == null">
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 1"><!-- 接收状态 成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1 and is_receive_success=1)
+			</if>
+			<if test="receiveStatus != null and receiveStatus == 0"><!-- 接收状态 未成功 -->
+				and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=1 and is_receive_success=0)
+			</if>
+	</select>
+
+	<!-- 推送失败E店宝订单 -->
+	<select id="findPushErrorEdbOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.status,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+-- 			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=0)
+		ORDER BY o.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<!-- count 推送失败E店宝订单 -->
+	<select id="countPushErrorEdbOrder" parameterType="map" resultType="int">
+		SELECT
+			count(o.id)
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+-- 			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			and EXISTS (select 1 from order_edb_send_record where order_id=o.id and is_push_success=0)
+	</select>
+
+	<!-- 等待E店宝订单 -->
+	<select id="findWaitPushEdbOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.status,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			and NOT EXISTS (select 1 from order_edb_send_record where order_id=o.id)
+		ORDER BY o.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<!-- count 等待E店宝订单 -->
+	<select id="countWaitPushEdbOrder" parameterType="map" resultType="int">
+		SELECT
+			count(o.id)
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=1)
+			and NOT EXISTS (select 1 from order_edb_send_record where order_id=o.id)
+	</select>
+
+	<!-- 不推送E店宝订单 -->
+	<select id="findNoPushEdbOrder" parameterType="map" resultType="map">
+		SELECT
+			o.id as checkId,
+			o.id as id,
+			o.number as number,
+			o.status,
+			o.pay_time as payTime,
+			o.create_time as createTime,
+			o.total_price+o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.remark,
+			o.remark2,
+			s.id AS sellerId,
+			s.real_seller_name AS realSellerName
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=0)
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		ORDER BY o.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<!-- count 不推送E店宝订单 -->
+	<select id="countNoPushEdbOrder" parameterType="map" resultType="int">
+		SELECT
+			count(o.id)
+		FROM
+			`order` o,
+			seller s
+		WHERE
+			o.seller_id=s.id
+			<if test="number != null">and o.number=#{number}</if>
+			<if test="status != null">and o.status=#{status}</if>
+			and EXISTS (select 1 from order_edb_confirm where order_id=o.id AND is_push=0)
+			and s.id in
+			<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<select id="countPushErrorEdbOrder2" resultType="int">
+		SELECT count(id) FROM order_edb_send_record WHERE is_push_success=0
+	</select>
+
+	<select id="findOrderCheckListByOrderList" parameterType="list" resultType="map">
+		SELECT
+			order_id AS orderId,
+			check_time AS checkTime
+		FROM
+			order_check
+		WHERE
+			order_id in
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+	<insert id="saveOrderCheck" parameterType="map">
+		INSERT INTO order_check (`order_id`, `check_time`, `remark`)
+		VALUES (#{orderId}, #{checkTime}, #{remark})
+	</insert>
+	
+	<select id="findLastLogisticsDetail" parameterType="map" resultType="map">
+		SELECT * FROM logistics_detail WHERE logistics_number=#{number} AND logistics_channel=#{channel} ORDER BY id DESC LIMIT 1
+	</select>
+	
+	<!-- 日退款率统计 -->
+	<select id="findRefundForEveryday" parameterType="map" resultType="map">
+		select count(id) as count,sum(real_price) as realPrice, date_format(pay_time, '%Y-%m-%d') as date 
+			from `order` 
+		where status in (2,3,4) and type = 1
+		<if test="startTime!=null"><![CDATA[ and pay_time > #{startTime} ]]> </if>
+		<if test="endTime!=null"><![CDATA[ and pay_time < #{endTime} ]]> </if>
+		group by date
+	</select>
+	
+	<!-- 用户主动提出退款。 -->
+	<select id="findCustomerRefundForEveryday" parameterType="map" resultType="map">
+		select count(1) as count, sum(real_price) as realPrice, sum(real_money) as realMoney, date from (
+			select a.real_price as real_price, sum(b.real_money) as real_money, date_format(a.pay_time, '%Y-%m-%d') as date 
+				from `order` a,order_product_refund b 
+			where a.id = b.order_id and a.status = 5 and b.`status` = 4 and a.type = 1
+			<if test="refundType!=null"> and b.type=#{refundType}</if> 
+			<if test="startTime!=null"><![CDATA[ and a.pay_time > #{startTime} ]]> </if>
+			<if test="endTime!=null"><![CDATA[ and a.pay_time < #{endTime} ]]> </if>
+		group by a.id) t group by t.date
+	</select>
+	
+	<!-- 商家退款率统计 -->
+	<select id="findRefundForSeller" parameterType="map" resultType="map">
+		select count(a.id) as count,a.seller_id as sellerId, sum(a.real_price) as realPrice,b.real_seller_name as sellerName
+			from `order` a,seller b 
+		where a.status in (2,3,4) and b.id=a.seller_id and a.type = 1 and a.seller_id in
+		<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		<if test="startTime!=null"><![CDATA[ and a.pay_time > #{startTime} ]]> </if>
+		<if test="endTime!=null"><![CDATA[ and a.pay_time < #{endTime} ]]> </if>
+		group by a.seller_id
+	</select>
+	
+	<!-- 用户主动提出退款。 -->
+	<select id="findCustomerRefundForSeller" parameterType="map" resultType="map">
+		select seller_id as sellerId, sum(real_price) as realPrice, sum(real_money) as realMoney 
+			from (
+				select a.seller_id as seller_id,a.real_price as real_price,sum(b.real_money) as real_money
+					from `order` a,order_product_refund b 
+				where b.status = 4 and a.status = 5 and a.type = 1 and a.id = b.order_id 
+				<if test="sellerIdList!=null">
+					and a.seller_id in
+					<foreach item="item" index="index" collection="sellerIdList" open="(" separator="," close=")">
+						#{item}
+					</foreach>
+				</if>
+				<if test="type!=null"> and b.type=#{type}</if>
+				<if test="startTime!=null"><![CDATA[ and a.pay_time > #{startTime} ]]> </if>
+				<if test="endTime!=null"><![CDATA[ and a.pay_time < #{endTime} ]]> </if>
+			group by a.id) t group by seller_id
+	</select>
+
+	<select id="findOrderTimeoutSettlementByOrderId" parameterType="int" resultType="map">
+		SELECT id FROM order_timeout_settlement WHERE order_id=#{orderId}
+	</select>
+
+	<insert id="saveOrderTimeoutSettlement" parameterType="map">
+		INSERT INTO order_timeout_settlement (`order_id`, `penalty_money`, `confirm_date`)
+     	VALUES (#{orderId}, #{penaltyMoney}, #{confirmDate})
+	</insert>
+
+	<delete id="deleteOrderTimeoutSettlement" parameterType="int">
+		DELETE FROM order_timeout_settlement WHERE order_id=#{orderId}
+	</delete>
+
+	<select id="findOrdersBySameBatchNumber" parameterType="string" resultMap="OrderMap">
+		SELECT * FROM  `order` WHERE  same_batch_number=#{sameBatchNumber}
+	</select>
+
+	<select id="findOrderUnionPayByOrderId" parameterType="int" resultType="OrderPayEntity">
+		SELECT
+			id,
+			order_id AS orderId,
+			pay_mark AS payMark,
+			pay_tid AS payTid,
+			is_pay AS isPay
+		FROM
+			order_union_pay
+		WHERE
+			is_pay = 1
+		AND order_id =	#{orderId}
+		ORDER  by id DESC limit 1
+	</select>
+
+
+	<select id="findOrderAliPayByOrderId" parameterType="int" resultType="OrderPayEntity">
+		SELECT
+			id,
+			order_id AS orderId,
+			pay_mark AS payMark,
+			pay_tid AS payTid,
+			is_pay AS isPay
+		FROM
+			order_ali_pay
+		WHERE
+			is_pay = 1
+		AND order_id =	#{orderId}
+		ORDER  by id DESC limit 1
+	</select>
+
+	<select id="findOrderWeixinPayByOrderId" parameterType="int" resultType="OrderPayEntity">
+		SELECT
+			id,
+			order_id AS orderId,
+			pay_mark AS payMark,
+			pay_tid AS payTid,
+			is_pay AS isPay
+		FROM
+			order_weixin_pay
+		WHERE
+			is_pay = 1
+		AND order_id =	#{orderId}
+		ORDER  by id DESC limit 1
+	</select>
+
+	<select id="findOrderIdsByUnionPayTid" parameterType="string" resultType="int">
+		SELECT DISTINCT order_id FROM order_union_pay WHERE pay_tid=#{payTid} AND is_pay=1
+	</select>
+
+	<select id="findOrderIdsByAliPayTid" parameterType="string" resultType="int">
+		SELECT DISTINCT order_id FROM order_ali_pay WHERE pay_tid=#{payTid} AND is_pay=1
+	</select>
+
+	<select id="findOrderIdsByWeixinPayTid" parameterType="string" resultType="int">
+		SELECT DISTINCT order_id FROM order_weixin_pay WHERE pay_tid=#{payTid} AND is_pay=1
+	</select>
+</mapper>  

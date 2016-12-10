@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ChannelStatisticMapper">  
+
+	<select id="getChannelStatisticInfo" parameterType="map" resultType="map">
+			select  
+			c.id as channelId,
+			c.channel_name as channelName,
+			date_format(co.order_create_time,'%Y-%m-%d') as orderTime,
+			sum(co.order_real_price) as totalPrice
+			 from `channel` c
+			inner join `channel_order` co
+			 on c.id = co.channel_id
+			 AND co.status in (2,3,4) 
+			<if test="startTime != null"> <![CDATA[AND co.order_create_time >= #{startTime}]]> </if>
+			<if test="endTime != null"> <![CDATA[AND co.order_create_time < #{endTime}]]> </if>
+			group by co.channel_id,co.order_create_time
+			order by co.order_create_time,co.id 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countChannelStatisticInfo" parameterType="map" resultType="int">
+			select  
+			count(distinct(co.order_create_time)) as count
+			from `channel_order` co
+			<if test="orderTime != null"> where co.order_create_time=#{orderTime} </if>
+	</select>
+	
+	<select id="getProductCodeListByTotalPrice" parameterType="map" resultType="map">
+			SELECT 
+			cp.code as productCode,
+			sum(count*price) as totalPrice
+			FROM 
+			channel_order_product cop , channel_product cp, channel_order co,channel c
+			WHERE cop.product_id = cp.id AND  cop.order_id = co.id AND co.channel_id = c.id  
+			<if test="startTime != null"> <![CDATA[AND co.order_create_time >= #{startTime}]]> </if>
+			<if test="endTime != null"> <![CDATA[AND co.order_create_time < #{endTime}]]> </if>
+			GROUP BY cp.code order by totalPrice desc 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="getProductCodeListByTotalNum" parameterType="map" resultType="map">
+			SELECT 
+			cp.code as productCode,
+			cp.name as productName,
+			c.channel_name as channelName,
+			c.id as channelId,
+			sum(count) as totalNum
+			FROM 
+			channel_order_product cop , channel_product cp, channel_order co,channel c
+			WHERE cop.product_id = cp.id AND  cop.order_id = co.id AND co.channel_id = c.id  
+			<if test="startTime != null"> <![CDATA[AND co.order_create_time >= #{startTime}]]> </if>
+			<if test="endTime != null"> <![CDATA[AND co.order_create_time < #{endTime}]]> </if>
+			GROUP BY cp.code order by totalNum desc 
+			<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="getChannelProStatisticInfo" parameterType="map" resultType="map">
+			SELECT 
+			cp.code as productCode,
+			cp.name as productName,
+			c.channel_name as channelName,
+			c.id as channelId,
+			sum(count*price) as productPrice,
+			sum(count) as productCount
+			FROM 
+			channel_order_product cop , channel_product cp, channel_order co,channel c
+			WHERE cop.product_id = cp.id AND  cop.order_id = co.id AND co.channel_id = c.id  
+			<if test = "productCodeList!=null">
+			AND cp.code IN 
+			<foreach collection="productCodeList" index="index" item="item" open="(" separator="," close=")">  #{item}  </foreach> 
+			</if>
+			GROUP BY cp.code,co.channel_id
+			order by cp.code;
+	</select>
+	
+	<select id="countChannelProStatisticInfo" parameterType="map" resultType="int">
+			select count(distinct(cp.code)) 
+			from  `channel_order_product` cop,`channel_product` cp,`channel_order` co
+			where cp.id = cop.product_Id AND cop.order_id = co.id
+			<if test="startTime != null"> <![CDATA[AND co.order_create_time >= #{startTime}]]> </if>
+			<if test="endTime != null"> <![CDATA[AND co.order_create_time < #{endTime}]]> </if>
+	</select>
+	
+	
+</mapper>  

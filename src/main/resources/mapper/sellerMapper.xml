@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerMapper">
+	<resultMap type="SellerEntity" id="SellerMap">
+    	<id column="id" property="id" />
+    	<result column="seller_name" property="sellerName" />
+    	<result column="real_seller_name" property="realSellerName" />
+    	<result column="seller_type" property="sellerType" />
+    	<result column="company_name" property="companyName" />
+    	<result column="company_address" property="companyAddress" />
+    	<result column="contact_person" property="fhContactPerson" />
+    	<result column="contact_mobile" property="fhContactMobile" />
+    	<result column="qq" property="fhqq" />
+    	<result column="email" property="fhEmail" />
+    	<result column="aliwang" property="fhAliwang" />
+    	<result column="fh_remark" property="fhRemark" />
+    	<result column="sh_contact_person" property="shContactPerson" />
+    	<result column="sh_contact_mobile" property="shContactMobile" />
+    	<result column="sh_qq" property="shqq" />
+    	<result column="sh_email" property="shEmail" />
+    	<result column="sh_aliwang" property="shAliwang" />
+    	<result column="sh_remark" property="shRemark" />
+    	<result column="js_contact_person" property="jsContactPerson" />
+    	<result column="js_contact_mobile" property="jsContactMobile" />
+    	<result column="js_qq" property="jsqq" />
+    	<result column="js_email" property="jsEmail" />
+    	<result column="js_aliwang" property="jsAliwang" />
+    	<result column="js_remark" property="jsRemark" />
+    	<result column="responsibility_person" property="responsibilityPerson" />
+    	<result column="warehouse" property="warehouse" />
+    	<result column="send_address" property="sendAddress" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="create_time" property="createTime" />
+    	<result column="bonded_number_type" property="bondedNumberType" />
+    	<result column="send_time_type" property="sendTimeType" />
+    	<result column="send_time_remark" property="sendTimeRemark" />
+    	<result column="is_need_idcard_number" property="isNeedIdCardNumber" />
+    	<result column="is_need_idcard_image" property="isNeedIdCardImage" />
+    	<result column="freight_type" property="freightType" />
+    	<result column="freight_money" property="freightMoney" />
+    	<result column="freight_other" property="freightOther" />
+    	<result column="send_code_type" property="sendCodeType" />
+    	<result column="send_code_remark" property="sendCodeRemark" />
+    	<result column="settlement_period" property="settlementPeriod" />
+    	<result column="settlement_day" property="settlementDay" />
+    	<result column="settlement_other" property="settlementOther" />
+    	<result column="weekend_remark" property="weekendRemark" />
+    	<result column="kuaidi" property="kuaidi" />
+    	<result column="other_kuaidi" property="otherKuaidi" />
+    	<result column="is_send_weekend" property="isSendWeekend" />
+    	<result column="expect_arrive_time" property="expectArriveTime" />
+    	<result column="deliver_area_desc" property="deliverAreaDesc" />
+    	<result column="deliver_area_type" property="deliverAreaType" />
+    	<result column="holiday_tips" property="holidayTips" />
+    	<result column="holiday_start_time" property="holidayStartTime" />
+    	<result column="holiday_end_time" property="holidayEndTime" />
+    	<result column="is_owner" property="isOwner" />
+    </resultMap>
+    
+    <resultMap type="SellerExpandEntity" id="SellerExpandMap">
+    	<id column="id" property="id" />
+    	<result column="seller_id" property="sellerId"/>
+    	<result column="audit_user_id" property="auditUserId"/>
+    	<result column="proposal_submit_type" property="proposalSubmitType"/>
+    	<result column="proposal_deduction" property="proposalDeduction"/>
+    	<result column="receive_province_code" property="receiveProvinceCode"/>
+    	<result column="receive_city_code" property="receiveCityCode"/>
+    	<result column="receive_district_code" property="receiveDistrictCode"/>
+    	<result column="receive_detail_address" property="receiveDetailAddress"/>
+    	<result column="receive_person" property="receivePerson"/>
+    	<result column="receive_telephone" property="receiveTelephone"/>
+    	<result column="rc_aliwang" property="rcAliwang"/>
+    	<result column="rc_email" property="rcEmail"/>
+    	<result column="rc_qq" property="rcqq"/>
+    	<result column="rc_contact_mobile" property="rcContactMobile"/>
+    	<result column="rc_contact_person" property="rcContactPerson"/>
+    	<result column="create_time" property="createTime"/>
+    </resultMap>
+    
+     <!-- 商家 简 略 信息 映射-->
+    <resultMap type="SellerEntity" id="SellerMapSimple">
+    	<id column="id" property="id" />
+    	<result column="seller_name" property="sellerName" />
+    	<result column="real_seller_name" property="realSellerName" />
+    	<result column="seller_type" property="sellerType" />
+    	<result column="warehouse" property="warehouse" />
+    	<result column="send_address" property="sendAddress" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="company_name" property="companyName" />
+    </resultMap>
+    
+    <!-- 品牌信息 -->
+    <resultMap type="BrandEntity" id="BrandMap">
+    	<id column="id" property="id" />
+    	<result column="name" property="name" />
+    	<result column="image" property="image" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+    	<result column="is_available" property="isAvailable" />
+    	<result column="create_time" property="createTime" />
+    </resultMap>
+    
+    <!-- 商家主帐号信息 -->
+    <resultMap type="SellerMasterEntity" id="SellerMasterMap">
+    	<id column="id" property="id"/>
+    	<result column="seller_id" property="sellerId"/>
+    	<result column="loginname" property="loginName"/>
+    	<result column="password" property="password"/>
+    	<result column="is_information" property="isInformation"/>
+    	<result column="create_time" property="createTime"/>
+    	<result column="create_user" property="createUser"/>
+    	<result column="update_time" property="updateTime"/>
+    	<result column="update_user" property="updateUser"/>
+    </resultMap>
+    
+    <!-- 插入商家信息 -->
+    <insert id="save" parameterType="SellerEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO seller 
+		(`seller_name`, `seller_type`,`real_seller_name`, `company_name`, `company_address`, `contact_person`,`contact_mobile`,  
+		 `qq`, `email`, `aliwang`, `fh_remark`,`send_address`, `is_available`, `create_time`, `responsibility_person`,
+		 `warehouse`,`bonded_number_type`,`is_need_idcard_number`,`is_need_idcard_image`,`send_time_type`,`send_time_remark`,
+		 `freight_type`,`freight_money`,`freight_other`,`send_code_type`,`send_code_remark`,`settlement_period`,`settlement_day`,`settlement_other`,
+		 `sh_contact_person`,`sh_contact_mobile`,`sh_qq`, `sh_email`, `sh_aliwang`, `sh_remark`,
+		 `js_contact_person`,`js_contact_mobile`,`js_qq`, `js_email`, `js_aliwang`, `js_remark`,`weekend_remark`,
+		 `kuaidi`,`other_kuaidi`,`is_send_weekend`,`expect_arrive_time`,`deliver_area_desc`,`deliver_area_type`,
+		 `holiday_tips`,`holiday_start_time`,`holiday_end_time`,`is_owner`) 
+		VALUES 
+		(#{sellerName},#{sellerType},#{realSellerName},#{companyName},#{companyAddress},#{fhContactPerson},#{fhContactMobile},#{fhqq}, 
+		 #{fhEmail}, #{fhAliwang}, #{fhRemark}, #{sendAddress}, #{isAvailable}, #{createTime,jdbcType=TIMESTAMP},#{responsibilityPerson},
+		 #{warehouse},#{bondedNumberType},#{isNeedIdCardNumber},#{isNeedIdCardImage},#{sendTimeType},#{sendTimeRemark},
+		 #{freightType},#{freightMoney},#{freightOther},#{sendCodeType},#{sendCodeRemark},#{settlementPeriod},#{settlementDay},#{settlementOther},
+		 #{shContactPerson},#{shContactMobile},#{shqq}, #{shEmail}, #{shAliwang}, #{shRemark}, 
+		 #{jsContactPerson},#{jsContactMobile},#{jsqq}, #{jsEmail}, #{jsAliwang}, #{jsRemark},#{weekendRemark},
+		 #{kuaidi},#{otherKuaidi},#{isSendWeekend},#{expectArriveTime},#{deliverAreaDesc},#{deliverAreaType},
+		 #{holidayTips},#{holidayStartTime},#{holidayEndTime},#{isOwner})
+    </insert>
+    
+    <!-- 更新商家信息 -->
+    <update id="updateSellerByPara" parameterType="map">
+     	UPDATE `seller` 
+     	<trim prefix="SET" suffixOverrides=",">
+          <if test="sellerName != null"> seller_name=#{sellerName}, </if>
+          <!--真实商家名称不可修改 <if test="realSellerName != null"> real_seller_name=#{realSellerName}, </if> -->
+          <if test="sellerType != null"> seller_type=#{sellerType}, </if>
+          <if test="companyName != null">company_name=#{companyName}, </if>
+          <if test="companyAddress != null">company_address=#{companyAddress}, </if>
+          <if test="fhContactPerson != null">contact_person=#{fhContactPerson}, </if>
+          <if test="fhContactMobile != null">contact_mobile=#{fhContactMobile}, </if>
+          <if test="fhqq != null">qq=#{fhqq}, </if>
+          <if test="fhEmail != null">email=#{fhEmail}, </if>
+          <if test="fhAliwang != null">aliwang=#{fhAliwang}, </if>
+          <if test="fhRemark != null">fh_remark=#{fhRemark}, </if>
+          <if test="shContactPerson != null">sh_contact_person=#{shContactPerson}, </if>
+          <if test="shContactMobile != null">sh_contact_mobile=#{shContactMobile}, </if>
+          <if test="shqq != null">sh_qq=#{shqq}, </if>
+          <if test="shEmail != null">sh_email=#{shEmail}, </if>
+          <if test="shAliwang != null">sh_aliwang=#{shAliwang}, </if>
+          <if test="shRemark != null">sh_remark=#{shRemark}, </if>          
+          <if test="jsContactPerson != null">js_contact_person=#{jsContactPerson}, </if>
+          <if test="jsContactMobile != null">js_contact_mobile=#{jsContactMobile}, </if>
+          <if test="jsqq != null">js_qq=#{jsqq}, </if>
+          <if test="jsEmail != null">js_email=#{jsEmail}, </if>
+          <if test="jsAliwang != null">js_aliwang=#{jsAliwang}, </if>
+          <if test="jsRemark != null">js_remark=#{jsRemark}, </if>          
+          <if test="sendAddress != null">send_address=#{sendAddress}, </if>
+          <if test="isAvailable != null">is_available=#{isAvailable}, </if>
+          <if test="responsibilityPerson != null">responsibility_person=#{responsibilityPerson}, </if>
+          <if test="warehouse != null">warehouse=#{warehouse}, </if>
+          <if test="bondedNumberType != null">bonded_number_type=#{bondedNumberType},</if>
+          <if test="isNeedIdCardNumber != null">is_need_idcard_number=#{isNeedIdCardNumber},</if>
+          <if test="isNeedIdCardImage != null">is_need_idcard_image=#{isNeedIdCardImage},</if>
+     	  <if test="sendTimeType != null">send_time_type=#{sendTimeType}, </if>
+          <if test="sendTimeRemark != null">send_time_remark=#{sendTimeRemark}, </if>
+          <if test="freightType != null">freight_type=#{freightType}, </if>
+          <if test="freightMoney!= null">freight_money=#{freightMoney}, </if>
+          <if test="freightOther != null">freight_other=#{freightOther}, </if>
+          <if test="sendCodeType != null">send_code_type=#{sendCodeType}, </if>
+          <if test="sendCodeRemark != null">send_code_remark=#{sendCodeRemark}, </if>
+          <if test="settlementPeriod != null">settlement_period=#{settlementPeriod}, </if>
+          <if test="settlementDay != null">settlement_day=#{settlementDay}, </if>
+          <if test="settlementOther != null">settlement_other=#{settlementOther},</if>
+          <if test="weekendRemark != null">weekend_remark=#{weekendRemark},</if>
+          <if test="kuaidi != null">kuaidi=#{kuaidi},</if>
+          <if test="otherKuaidi != null">other_kuaidi=#{otherKuaidi},</if>
+          <if test="isSendWeekend != null">is_send_weekend=#{isSendWeekend},</if>
+          <if test="expectArriveTime != null">expect_arrive_time=#{expectArriveTime},</if>
+          <if test="deliverAreaDesc != null">deliver_area_desc=#{deliverAreaDesc},</if>
+          <if test="deliverAreaType != null">deliver_area_type=#{deliverAreaType},</if>
+          <if test="holidayTips != null">holiday_tips=#{holidayTips},</if>
+          <if test="holidayStartTime != null">holiday_start_time=#{holidayStartTime},</if>
+          <if test="holidayEndTime != null">holiday_end_time=#{holidayEndTime},</if>
+          <if test="isOwner != null">is_owner=#{isOwner},</if>
+     	</trim>
+     	where id=#{id}
+     </update>
+     
+     <!-- 查询商家信息 -->
+     <select id="findAllSellerByPara" parameterType="map"  resultMap="SellerMap">
+     	SELECT * FROM `seller` s
+     	<trim prefix="WHERE" prefixOverrides="AND">
+	     	<if test="id != null"> and id=#{id} </if>
+	     	<if test="sellerName != null"> and seller_name like #{sellerName} </if>
+	     	<if test="realSellerName != null"> and real_seller_name like #{realSellerName} </if>
+	     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+	     	<if test="isBirdex != null">and is_birdex=#{isBirdex} </if>
+	     	<if test="isOwner != null">AND is_owner=#{isOwner}</if>     		
+	     	<if test="isEdbSeller != null">
+				AND EXISTS (SELECT 1 FROM seller_edb_info WHERE seller_id=s.id AND is_available=1)
+			</if>
+			<if test=" categoryIdList != null" >
+				AND	id IN
+				(
+				SELECT seller_id
+				FROM relation_category_and_seller
+				WHERE category_first_id IN
+				<foreach collection="categoryIdList" separator="," open="(" close=")" item="item">
+					#{item}
+				</foreach>
+				)
+			</if>
+			<if test="responsibilityPerson != null" >
+				AND s.responsibility_person LIKE  CONCAT('%', #{responsibilityPerson}, '%')
+			</if>
+			<if test="createTimeStart != null" >
+				<![CDATA[ AND create_time >= #{createTimeStart} ]]>
+			</if>
+			<if test="createTimeEnd != null" >
+				<![CDATA[ AND create_time < #{createTimeEnd} ]]>
+			</if>
+			<if test="depositStatus != null" >
+				AND id IN (SELECT distinct(seller_id) FROM seller_expand_1 WHERE deposit_status = #{depositStatus})
+			</if>
+     	</trim>
+     	ORDER BY id DESC
+     	<if test="start != null">
+       		LIMIT #{start},#{max}   	
+     	</if>
+     </select>
+     
+     <!-- 查询商家 简 略 信息 -->
+     <select id="findAllSellerSimpleByPara" parameterType="map"  resultMap="SellerMapSimple">
+     	SELECT 
+     		id,
+     		seller_name AS sellerName,
+     		real_seller_name AS realSellerName,
+     		seller_type AS sellerType,
+     		warehouse AS warehouse, 
+     		send_address AS sendAddress,
+     		is_available AS isAvailable,
+     		company_name AS companyName
+     	FROM `seller` 
+     	WHERE 1=1 
+     	<if test="id != null"> and id=#{id} </if>
+     	<if test="sellerName != null"> and seller_name like #{sellerName} </if>
+     	<if test="realSellerName != null"> and real_seller_name like #{realSellerName} </if>
+     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+     	<if test="isBirdex != null">and is_birdex=#{isBirdex} </if>
+     	ORDER BY seller_name, id DESC
+     	<if test="start != null">LIMIT #{start},#{max}</if>
+     </select>
+     
+     <!-- 统计商家数量 -->
+     <select id="countSellerByPara" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM seller s
+		 <trim prefix="WHERE" prefixOverrides="AND">
+			 <if test="id != null"> and id=#{id} </if>
+			 <if test="sellerName != null"> and seller_name like #{sellerName} </if>
+			 <if test="realSellerName != null"> and real_seller_name like #{realSellerName} </if>
+			 <if test="isAvailable != null">and is_available=#{isAvailable} </if>
+			 <if test="isBirdex != null">and is_birdex=#{isBirdex} </if>
+			 <if test="isOwner != null">AND is_owner=#{isOwner}</if>
+			 <if test="isEdbSeller != null">
+				 AND EXISTS (SELECT 1 FROM seller_edb_info WHERE seller_id=s.id AND is_available=1)
+			 </if>
+			 <if test=" categoryIdList != null" >
+				 AND	id IN
+				 (
+				 SELECT seller_id
+				 FROM relation_category_and_seller
+				 WHERE category_first_id IN
+				 <foreach collection="categoryIdList" separator="," open="(" close=")" item="item">
+					 #{item}
+				 </foreach>
+				 )
+			 </if>
+			 <if test="responsibilityPerson != null" >
+				 AND s.responsibility_person LIKE  CONCAT('%', #{responsibilityPerson}, '%')
+			 </if>
+			 <if test="createTimeStart != null" >
+				 <![CDATA[ AND create_time >= #{createTimeStart} ]]>
+			 </if>
+			 <if test="createTimeEnd != null" >
+				 <![CDATA[ AND create_time < #{createTimeEnd} ]]>
+			 </if>
+			 <if test="depositStatus != null" >
+				 AND id IN (SELECT distinct(seller_id) FROM seller_expand_1 WHERE deposit_status = #{depositStatus})
+			 </if>
+		 </trim>
+		 ORDER BY id DESC
+    </select>
+    
+    <!-- 根据sellerName统计商家数量 -->
+    <select id="countSellerBySellerName" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM seller WHERE 1=1 
+    	<if test="sellerName != null"> and real_seller_name=#{sellerName} </if>
+    </select>
+    
+    <!-- 根据para统计所有商家销售数据 -->
+    <select id="findAllSellerSaleInfo" parameterType="map"  resultType="map">
+    	SELECT 
+			o.id AS oId,
+			o.total_price AS totalPrice,
+			o.pay_time AS payTime,
+			s.id AS sId,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress
+		FROM 
+			`order` o,seller s 
+		WHERE 
+			o.seller_id=s.id
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+			<if test="sellerId != null"><![CDATA[AND s.id = #{sellerId}]]></if>
+			<if test="start != null">
+				LIMIT #{start},#{max}
+			</if>
+    </select>
+    
+    <!-- 根据para统计商家销售数据  记录数 -->
+    <select id="countAllSellerSaleInfo" parameterType="map"  resultType="int">
+    	SELECT 
+			count( distinct s.id)
+		FROM 
+			`order` o,seller s 
+		WHERE 
+			o.seller_id=s.id
+			<if test="payTimeBegin != null"><![CDATA[AND o.pay_time >= #{payTimeBegin}]]></if>
+			<if test="payTimeEnd != null"><![CDATA[AND o.pay_time < #{payTimeEnd}]]></if>
+			<if test="sellerId != null"><![CDATA[AND s.id = #{sellerId}]]></if>
+    </select>
+
+<!-- 根据商品ID列表查询对应的商家ID -->
+    <select id="findSellerIdByProductIdList" parameterType="map" resultType="int">
+    	SELECT 
+    		DISTINCT s.id  
+    	FROM 
+    		seller s,
+    		product p 
+    	WHERE 
+    		p.seller_id=s.id 
+    		AND p.id IN 
+    		<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+    </select>
+    
+    <select id="findSellerByProductId" parameterType="int" resultMap="SellerMap">
+    	SELECT s.* FROM
+			seller s,
+			product p
+		WHERE
+			s.id = p.seller_id
+		AND p.id = #{id}
+    </select>
+    
+    <select id="findAllSellerByActivityCommonId" parameterType="int" resultMap="SellerMap">
+    	SELECT s.* FROM 
+			seller s,
+			relation_activities_common_and_product rac,
+			product p
+		WHERE
+			s.id = p.seller_id
+		AND p.id = rac.product_id
+		AND rac.activities_common_id = #{id}
+		Order by s.id desc
+    </select>
+    
+    <select id="findSellerInfoBySellerIdList" parameterType="map" resultType="map">
+    	SELECT 
+    		id,
+    		real_seller_name AS realSellerName,
+    		send_address AS sendAddress,
+    		seller_type AS sellerType,
+    		bonded_number_type AS bondedNumberType,
+    		send_time_type AS sendTimeType,
+    		is_send_weekend AS sendWeekendType
+    	FROM 
+    		seller
+    	WHERE
+    		id in
+			<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+    </select>
+    
+	<select id="findRelationSellerDeliverAreaBySellerId" parameterType="int" resultType="RelationSellerDeliverAreaEntity">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			province_code AS provinceCode,
+			city_code AS cityCode,
+			district_code AS districtCode
+		FROM
+			relation_seller_deliver_area
+		WHERE
+			seller_id = #{id}
+		ORDER BY id DESC		
+	</select>    
+    
+
+    <insert id="insertRelationSellerDeliverArea" parameterType="RelationSellerDeliverAreaEntity" useGeneratedKeys="true" keyProperty="id">
+    	INSERT INTO relation_seller_deliver_area(seller_id,province_code,city_code,district_code)VALUES(#{sellerId},#{provinceCode},#{cityCode},#{districtCode})
+    </insert>
+    
+    <update id="updateRelationSellerDeliverArea" parameterType="RelationSellerDeliverAreaEntity">
+    	UPDATE 
+    		relation_seller_deliver_area 
+    	SET
+    		province_code=#{provinceCode},
+    		city_code=#{cityCode},
+    		district_code=#{districtCode}
+    	WHERE id=#{id}
+    </update>
+    
+    <delete id="deleteRelationSellerDeliverArea" parameterType="map">
+    	DELETE FROM relation_seller_deliver_area WHERE seller_id=#{sellerId} AND id NOT IN
+    	<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+    		#{item}
+    	</foreach>
+    </delete>
+    
+    <select id="findSellerFinancePictureBysid" parameterType="int" resultType="SellerFinanceSettlementPictureEntity">
+		SELECT id, seller_id AS sellerId,image,create_time AS createTime FROM `seller_finance_settlement_picture` WHERE seller_id = #{sellerId} ORDER BY id
+    </select>
+    
+    <insert id="saveSellerFinancePicture" parameterType="SellerFinanceSettlementPictureEntity" useGeneratedKeys="true" keyProperty="id">
+    	insert into seller_finance_settlement_picture(`seller_id`,`image`) values(#{sellerId},#{image})
+    </insert>
+    
+    <update id="updateSellerFinancePicture" parameterType="SellerFinanceSettlementPictureEntity">
+    	update seller_finance_settlement_picture set `image`=#{image} where id=#{id}
+    </update>
+    
+    <delete id="deleteSellerFinancePicture" parameterType="map">
+    	delete from seller_finance_settlement_picture where seller_id=#{sellerId} and id not in
+    	<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+    		#{item}
+    	</foreach>
+    </delete>
+    
+    <insert id="saveSellerOnlineStoreAddress" parameterType="list">
+    	insert into seller_online_store_address(`seller_id`,`url`) values
+    	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.sellerId},#{item.url})
+     	</foreach>
+    </insert>
+    
+    <update id="updateSellerOnlineStoreAddress" parameterType="SellerOnlineStoreAddressEntity">
+    	update seller_online_store_address set `url`=#{url} where id=#{id}
+    </update>
+    
+    <delete id="deleteSellerOnlineStoreAddress" parameterType="int">
+    	delete from seller_online_store_address where seller_id=#{sellerId}
+    </delete>
+    
+    <select id="findSellerOnlineStoreBysid" parameterType="int" resultType="SellerOnlineStoreAddressEntity">
+		SELECT id, seller_id AS sellerId,`url`,create_time AS createTime FROM `seller_online_store_address` WHERE seller_id = #{sellerId} ORDER BY id
+    </select>
+
+	<select id="findSellerRealNameByIds" parameterType="list" resultType="map">
+		SELECT
+			id,
+			real_seller_name AS realSellerName,
+			freight_type AS freightType,
+			freight_money AS freightMoney,
+			send_address AS sendAddress,
+			seller_type AS sellerType
+		FROM
+			seller
+		WHERE
+			id IN
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+	<select id="findSellerBrandBysid" parameterType="int" resultMap="BrandMap">
+		SELECT
+			b.*
+		FROM
+			brand b,
+			seller_product_brand_info sb
+		WHERE
+			sb.`brand_id` = b.id
+		AND sb.seller_id = #{id}
+		ORDER BY name , id DESC
+	</select>
+	
+	<delete id="deleteSellerBrand" parameterType="int">
+		DELETE FROM seller_product_brand_info WHERE seller_id=#{id}
+	</delete>
+	
+	<insert id="saveSellerBrand" parameterType="list">
+		INSERT INTO seller_product_brand_info(seller_id,brand_id) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.sellerId},#{item.brandId})
+     	</foreach>
+	</insert>
+	
+	<insert id="saveSellerMaster" parameterType="SellerMasterEntity">
+		INSERT INTO seller_master(seller_id,loginname,password,create_time,create_user,update_user)
+		VALUES(#{sellerId},#{loginName},#{password},now(),#{createUser},#{updateUser})
+	</insert>
+	
+	<update id="updateSellerMaster" parameterType="SellerMasterEntity">
+		update seller_master
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="sellerId != null">seller_id=#{sellerId},</if>
+			<if test="loginName != null">loginname=#{loginName},</if>
+			<if test="password != null">password=#{password},</if>
+			<if test="updateUser != null">update_user=#{updateUser},</if>
+		</trim>
+		where id=#{id}
+	</update>
+	
+	<select id="findSellerByRealSellerName" parameterType="string" resultMap="SellerMap">
+		SELECT * FROM seller WHERE real_seller_name=#{sellerName} ORDER BY id DESC LIMIT 1
+	</select>
+	
+	<select id="findSellerSlaveBySlaveId" parameterType="int" resultType="SellerMasterAndSlaveEntity">
+		select seller_master_id as sellerMasterId,seller_slave_id as sellerSlaveId from seller_master_and_slave where seller_slave_id=#{sellerId}
+	</select>
+	
+	<select id="findSellerSlaveListByMasterId" parameterType="int" resultType="SellerMasterAndSlaveEntity">
+		select seller_master_id as sellerMasterId,seller_slave_id as sellerSlaveId from seller_master_and_slave where seller_master_id=#{sellerId}
+	</select>
+	
+	<insert id="saveSellerMasterAndSlave" parameterType="SellerMasterAndSlaveEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO seller_master_and_slave (
+			`seller_master_id`,
+			`seller_slave_id`,
+			`create_time`,
+			`create_user`,
+			`update_user`
+		)values(
+			#{sellerMasterId},
+			#{sellerSlaveId},
+			now(),
+			#{createUser},
+			#{updateUser}
+		)		
+	</insert>
+	
+	<delete id="deleteSellerMasterAndSlave" parameterType="map">
+		delete from seller_master_and_slave where seller_master_id=#{masterId} and id not in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="synchronousSellerInfo" parameterType="map">
+		update seller
+		<trim prefix="SET" suffixOverrides=",">
+          <if test="sellerName != null"> seller_name=#{sellerName}, </if>
+          <if test="realSellerName != null"> real_seller_name=#{realSellerName}, </if>
+          <if test="companyName != null">company_name=#{companyName}, </if>
+          <if test="companyAddress != null">company_address=#{companyAddress}, </if>
+          <if test="fhContactPerson != null">contact_person=#{fhContactPerson}, </if>
+          <if test="fhContactMobile != null">contact_mobile=#{fhContactMobile}, </if>
+          <if test="fhqq != null">qq=#{fhqq}, </if>
+          <if test="fhEmail != null">email=#{fhEmail}, </if>
+          <if test="fhAliwang != null">aliwang=#{fhAliwang}, </if>
+          <if test="fhRemark != null">fh_remark=#{fhRemark}, </if>
+          <if test="shContactPerson != null">sh_contact_person=#{shContactPerson}, </if>
+          <if test="shContactMobile != null">sh_contact_mobile=#{shContactMobile}, </if>
+          <if test="shqq != null">sh_qq=#{shqq}, </if>
+          <if test="shEmail != null">sh_email=#{shEmail}, </if>
+          <if test="shAliwang != null">sh_aliwang=#{shAliwang}, </if>
+          <if test="shRemark != null">sh_remark=#{shRemark}, </if>          
+          <if test="jsContactPerson != null">js_contact_person=#{jsContactPerson}, </if>
+          <if test="jsContactMobile != null">js_contact_mobile=#{jsContactMobile}, </if>
+          <if test="jsqq != null">js_qq=#{jsqq}, </if>
+          <if test="jsEmail != null">js_email=#{jsEmail}, </if>
+          <if test="jsAliwang != null">js_aliwang=#{jsAliwang}, </if>
+          <if test="jsRemark != null">js_remark=#{jsRemark}, </if>          
+          <if test="isOwner != null">is_owner=#{isOwner},</if>
+		</trim>
+		where id in
+		<foreach collection="idList" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="finAllSlaveSeller" parameterType="string" resultType="map">
+		SELECT
+			s.id AS slaveId,
+			s.real_seller_name AS slaveName,
+			s.send_address AS sendAddress,
+			s.warehouse
+		FROM
+			seller_master_and_slave ss,
+			seller s
+		WHERE
+			ss.seller_slave_id = s.id
+		AND ss.seller_master_id = #{sellerId}
+		ORDER BY s.id
+	</select>
+	
+	<select id="countMergeSeller" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(DISTINCT(sm.seller_master_id))
+		FROM
+			seller s,
+			seller_master_and_slave sm
+		WHERE
+			sm.seller_master_id = s.id
+	</select>
+	
+	<select id="findMasterSellerByPara" parameterType="map" resultMap="SellerMap">
+		SELECT DISTINCT
+			(sm.seller_master_id) AS id,
+			s.real_seller_name,
+			s.send_address
+		FROM
+			seller s,
+			seller_master_and_slave sm
+		WHERE
+			sm.seller_master_id = s.id
+		ORDER BY s.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="findIdListBySellerType" parameterType="int" resultType="int">
+		SELECT
+			id
+		FROM
+			seller
+		WHERE
+			seller_type=#{sellerType}
+	</select>
+	
+	<update id="updateSellerOwnerStatus" parameterType="map">
+		update seller set is_owner=#{status} where id in
+		<foreach collection="idList" item="item" index="index" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="findEdbSellerIdList" resultType="int">
+		SELECT id FROM `seller` s WHERE EXISTS (SELECT 1 FROM seller_edb_info WHERE seller_id=s.id AND is_available=1)
+	</select>
+
+	<select id="findSellerIdWhereIsOwnerEqualsOne" resultType="int">
+		SELECT id FROM `seller` s WHERE is_owner=1 AND id!=75
+	</select>
+
+	<insert id="saveSellerCategoryRelation" parameterType="map" >
+		INSERT INTO relation_category_and_seller (`seller_id`, `category_first_id`)
+		 VALUES( #{sellerId}, #{categoryFirstId} )
+	</insert>
+
+	<select id="findSellerCategoryByRelation" parameterType="int" resultType="map">
+		SELECT
+			DISTINCT cf.name,
+			cf.id
+		FROM
+			seller s,
+			category_first cf,
+			relation_category_and_seller rcas
+        WHERE
+			rcas.seller_id = s.id
+			AND rcas.category_first_id = cf.id
+			AND s.id= #{id}
+		ORDER BY rcas.id
+ 	</select>
+
+	<select id="findSellerCategoryByBaseProduct" parameterType="int" resultType="map">
+		SELECT
+			DISTINCT cf.name,
+			cf.id
+		FROM
+			seller s,
+			category_first cf,
+			relation_category_and_product_base rcapb,
+			product_base pb
+        WHERE
+         	pb.seller_id = s.id
+			AND rcapb.product_base_id = pb.id
+			AND rcapb.category_first_id = cf.id
+			AND s.id= #{id}
+		ORDER BY rcapb.id
+	</select>
+
+	<delete id = "deleteAllSellerCategoryBySellerId" parameterType="int">
+		DELETE FROM relation_category_and_seller
+		WHERE seller_id = #{sellerId}
+	</delete>
+
+</mapper>

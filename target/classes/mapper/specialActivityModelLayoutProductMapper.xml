@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SpecialActivityModelLayoutProductMapper">  
+
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select id,special_activity_model_layout_id as layoutId,product_id as productId,is_display as isDisplay,sequence,`desc`
+			from special_activity_model_layout_product
+		where 1 = 1
+		<if test="layoutId!=null"> and special_activity_model_layout_id=#{layoutId}</if>
+		<if test="productId!=null"> and product_id=#{productId}</if>
+		<if test="isDisplay!=null"> and is_display=#{isDisplay}</if>
+		order by sequence desc
+		<if test="start!=null"> limit ${start},${size}</if>
+	</select>
+	
+	<select id="countByParam" resultType="int" parameterType="map">
+		select count(id)
+		from special_activity_model_layout_product
+		where 1 = 1
+		<if test="layoutId!=null"> and special_activity_model_layout_id=#{layoutId}</if>
+		<if test="productId!=null"> and product_id=#{productId}</if>
+		<if test="isDisplay!=null"> and is_display=#{isDisplay}</if>
+	</select>
+	
+	<update id="updateByParam" parameterType="map">
+		update special_activity_model_layout_product
+		<set>
+			<if test="productId!=null"> product_id=#{productId},</if>
+			<if test="desc!=null"> `desc`=#{desc},</if>
+			<if test="isDisplay!=null"> is_display=#{isDisplay},</if>
+			<if test="sequence!=null"> sequence=#{sequence}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into special_activity_model_layout_product(special_activity_model_layout_id,product_id,`desc`,is_display,sequence,create_time)
+		values(#{layoutId},#{productId},#{desc},#{isDisplay},#{sequence},now())
+	</insert>
+
+	<select id="findMaxSequence" resultType="int" parameterType="int">
+		SELECT MAX(sequence) FROM special_activity_model_layout_product
+		WHERE special_activity_model_layout_id = #{layoutId}
+		LIMIT 1;
+	</select>
+	
+</mapper>

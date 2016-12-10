@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="MenuMapper">  
+    
+<!-- 查询菜单信息 -->
+     <select id="findAllMenuByPara" parameterType="map"  resultType="map">
+     	SELECT 
+     		id,pid,`text`,url,sequence
+     	FROM 
+     		menu 
+     	WHERE 
+     		1=1 
+     		<if test="id != null"> AND id=#{id} </if>
+     		<if test="pid != null">AND pid=#{pid} </if>
+     		<if test="idList != null">
+     			AND id in
+				<foreach item="item" index="index" collection="idList" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>     		
+     		</if>
+     	ORDER BY sequence DESC ,id DESC
+     </select>
+     
+<!-- 插入菜单信息 -->
+	<insert id="createMenu" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO menu (`pid`, `text`, `url`, `sequence`) 
+		VALUES (#{pid}, #{text}, #{url}, #{sequence})
+    </insert>
+    
+<!-- 更新菜单信息 -->
+    <update id="updateMenu" parameterType="map">
+     	UPDATE `menu` 
+     	<set>
+          <if test="text != null"> text=#{text}, </if>
+          <if test="sequence != null"> sequence=#{sequence}, </if>
+          <if test="url != null">url=#{url} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+	
+<!-- 删除menu -->
+	<delete id="delete" parameterType="int">
+		DELETE FROM `menu` WHERE id=#{id}
+	</delete>
+
+</mapper>  

@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OrderQuestionMapper">
+	<select id="findOrderQuestionListByOrderId" parameterType="int" resultType="map">
+		SELECT
+			oq.id,
+			oq.customer_status AS customerStatus,
+			oq.seller_status AS sellerStatus,
+			oq.time_limit_type AS timeLimitType,
+			oq.`desc` AS questionDesc,
+			oq.create_user AS createUser,
+			oq.create_time AS createTime,
+			oqt.`name` AS questionType,
+			oq.custom_time AS customTime,
+			oq.customer_finish_time AS customerFinishTime,
+			oq.seller_finish_time AS sellerFinishTime,
+			oq.customer_deal_detail AS customerDealDetail,
+			oq.seller_deal_detail AS sellerDealDetail,
+			oq.is_push AS isPush,
+			oq.seller_feedback_detail AS sellerFeedbackDetail
+		FROM
+			order_question oq,
+			order_question_template oqt
+		WHERE
+			oq.question_template_id = oqt.id
+		AND oq.order_id = #{orderId}
+		ORDER BY oq.id DESC		
+	</select> 
+	
+	<select id="findAllQuestionTemplate" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`name`,
+			limit_hour AS limitHour,
+			is_available AS isAvailable
+		FROM
+			order_question_template
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="isAvailable != null">is_available=#{isAvailable}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countQuestionTemplate" parameterType="map" resultType="int">
+		select count(id) from order_question_template
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="isAvailable != null">is_available=#{isAvailable}</if>
+		</trim>
+	</select>
+	
+	<insert id="saveQuestionTemplate" parameterType="map">
+		insert into order_question_template(`name`,`limit_hour`) values(#{name},#{limitHour})
+	</insert>
+	
+	<update id="updateOrderQuestionTemplateStatus" parameterType="map">
+		update order_question_template set is_available=#{isAvailable} where id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	<insert id="addOrderQuestion" parameterType="OrderQuestionEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_question(order_id,question_template_id,`desc`,time_limit_type,custom_time,create_user,customer_deal_detail,create_time) 
+		VALUES(#{orderId},#{questionTemplateId},#{questionDesc},#{timeLimitType},#{customTime},#{createUser},#{customerDealDetail},now())
+	</insert>
+	
+	<insert id="insertOrderQuestionImage" parameterType="list">
+		INSERT INTO order_question_image(`order_question_id`,`image`) values
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.questionId},#{item.image})
+     	</foreach>
+	</insert>
+	
+	<select id="findOrderQuestionById" parameterType="int" resultType="OrderQuestionEntity">
+		SELECT
+			oq.id,
+			oq.order_id AS orderId,
+			oq.question_template_id AS questionTemplateId,
+			oq.customer_status AS customerStatus,
+			oq.seller_status AS sellerStatus,
+			oq.time_limit_type AS timeLimitType,
+			oq.custom_time AS customTime,
+			oq.`desc` AS questionDesc,
+			oq.create_user AS createUser,
+			oq.create_time AS createTime,
+			oq.customer_finish_time AS customerFinishTime,
+			oq.seller_finish_time AS sellerFinishTime,
+			oqt.`name` AS templateName,
+			oq.customer_deal_detail AS customerDealDetail,
+			oq.seller_deal_detail AS sellerDealDetail,
+			oq.is_push AS isPush,
+			oq.seller_feedback_detail AS sellerFeedbackDetail
+		FROM
+			order_question oq,
+			order_question_template oqt
+		WHERE
+			oq.question_template_id = oqt.id
+		AND oq.id = #{id}		
+	</select>
+	
+	<select id="countDealingOrderQuestionByOrderId" parameterType="int" resultType="int">
+		select count(id) from order_question where order_id=#{orderId} and (customer_status=1 or seller_status=1)
+	</select>
+	
+	<select id="findOrderQuestionImageListqid" parameterType="int" resultType="string">
+		select image from order_question_image where order_question_id = #{id} order by id desc
+	</select>
+	
+	<select id="findCustomerProgressListByqid" parameterType="int" resultType="map">
+		SELECT
+			id,
+			content,
+			`status`,
+			create_user AS createUser,
+			create_time AS createTime
+		FROM
+			order_question_customer_progress
+		WHERE order_question_id=#{id} 
+		ORDER BY id		
+	</select>
+	
+	<select id="findSellerProgressListByqid" parameterType="int" resultType="map">
+		SELECT
+			id,
+			content,
+			`status`,
+			create_user AS createUser,
+			create_time AS createTime
+		FROM
+			order_question_seller_progress
+		WHERE order_question_id=#{id} 
+		ORDER BY id		
+	</select>
+	
+	<insert id="insertCustomerQuestionProgress" parameterType="OrderQuestionProgressEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_question_customer_progress(order_question_id,content,`status`,has_image,create_user)
+		VALUES(#{questionId},#{content},#{status},#{hasImage},#{createUser})
+	</insert>
+	
+	<insert id="insertCustomerQuestionProgressImage" parameterType="list">
+		INSERT INTO order_question_customer_image(`customer_progress_id`,`image`) values
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.progressId},#{item.image})
+     	</foreach>
+	</insert>
+	
+	<insert id="insertSellerQuestionProgress" parameterType="OrderQuestionProgressEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO order_question_seller_progress(order_question_id,content,`status`,has_image,create_user)
+		VALUES(#{questionId},#{content},#{status},#{hasImage},#{createUser})
+	</insert>
+	
+	<insert id="insertSellerQuestionProgressImage" parameterType="list">
+		INSERT INTO order_question_seller_image(`seller_progress_id`,`image`) values
+     	<foreach collection="list" item="item" index="index" separator=",">
+     		(#{item.progressId},#{item.image})
+     	</foreach>
+	</insert>
+	
+	<update id="updateOrderQuestionStatus" parameterType="map">
+		update order_question
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="dealType == 1">customer_status=#{status},customer_deal_detail=concat(customer_deal_detail,#{dealDetail}),</if>
+			<if test="dealType == 2">seller_status=#{status},seller_deal_detail=concat(seller_deal_detail,#{dealDetail}),</if>
+			<if test="cf != null">customer_finish_time=now(),</if>
+			<if test="sf != null">seller_finish_time=now(),</if>
+			<if test="timeLimitType != null">time_limit_type=#{timeLimitType},</if>
+			<if test="customTime != null">custom_time=#{customTime},</if>
+			<if test="isMark != null">is_mark=#{isMark},</if>
+			<if test="isPush != null">is_push=#{isPush},</if>
+			<if test="pushTime != null">push_time=#{pushTime},</if>
+			<if test="sellerFeedbackEndTime != null">seller_feedback_end_time=#{sellerFeedbackEndTime},</if>
+			<if test="feedback != null">seller_feedback_detail=concat(seller_feedback_detail,#{feedback}),</if>
+		</trim>
+		where id=#{questionId}
+	</update>
+	
+	<select id="findAllOrderAndQuestionInfo" parameterType="map" resultType="map">
+		SELECT
+			oq.id AS questionId,
+			oq.question_template_id AS questionTemplateId,
+			oq.customer_status AS customerStatus,
+			oq.seller_status AS sellerStatus,
+			oq.time_limit_type AS timeLimitType,
+			oq.custom_time AS customTime,
+			oq.`desc` AS questionDesc,
+			oq.create_user AS createUser,
+			oq.create_time AS createTime,
+			oq.customer_finish_time AS customerFinishTime,
+			oq.seller_finish_time AS sellerFinishTime,
+			oq.customer_deal_detail AS customerDealDetail,
+			oq.seller_deal_detail AS sellerDealDetail,
+			oq.is_mark AS isMark,
+			oq.is_push AS isPush,
+			oq.seller_feedback_detail AS sellerFeedbackDetail,
+			oqt.`name` AS templateName,
+			o.id AS orderId,
+			o.number AS orderNo,
+			o.`status` AS oStatus,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.total_price + o.adjust_price AS totalPrice,
+			o.real_price AS realPrice,
+			o.type AS orderType,
+			ra.full_name AS raFullName,
+			ra.mobile_number AS raMobileNumber,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress
+		FROM
+			order_question oq,
+			order_question_template oqt,
+			`order` o,
+			seller s,
+			account a,
+			order_receive_address ra
+		WHERE
+			oq.order_id = o.id
+		AND oq.question_template_id = oqt.id
+		AND o.seller_id = s.id
+		AND o.account_id = a.id
+		AND o.receive_address_id = ra.id
+		<if test="orderNo != null">AND o.number = #{orderNo}</if>
+		<if test="accountId != null">AND a.id = #{accountId}</if>
+		<if test="accountName != null">AND a.`name` LIKE #{accountName}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="createUser != null">AND oq.create_user = #{createUser}</if>
+		<if test="templateId != null">AND oqt.id =  #{templateId}</if>
+		<if test="questionId != null">AND oq.id =  #{questionId}</if>
+		<if test="orderTypeList != null">
+			AND o.type IN
+			<foreach collection="orderTypeList" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="questionDesc != null">AND oq.`desc` LIKE  #{questionDesc}</if>
+		<if test="customerStatus != null">AND oq.customer_status = #{customerStatus}</if>
+		<if test="sellerStatus != null">AND oq.seller_status = #{sellerStatus}</if>
+		<if test="status == 1">AND (oq.customer_status = #{status} OR oq.seller_status = #{status})</if>
+		<if test="status == 2">AND (oq.customer_status = #{status} AND oq.seller_status = #{status})</if>
+		<if test="createTimeBegin != null"><![CDATA[AND oq.create_time>=#{createTimeBegin}]]></if>
+		<if test="createTimeEnd != null" ><![CDATA[AND oq.create_time<=#{createTimeEnd}]]></if>
+		ORDER BY oq.is_mark DESC, oq.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countOrderAndQuestionInfo" parameterType="map" resultType="int">
+		SELECT
+			COUNT(oq.id)
+		FROM
+			order_question oq,
+			order_question_template oqt,
+			`order` o,
+			seller s,
+			account a,
+			order_receive_address ra
+		WHERE
+			oq.order_id = o.id
+		AND oq.question_template_id = oqt.id
+		AND o.seller_id = s.id
+		AND o.account_id = a.id
+		AND o.receive_address_id = ra.id
+		<if test="orderNo != null">AND o.number = #{orderNo}</if>
+		<if test="accountId != null">AND a.id = #{accountId}</if>
+		<if test="accountName != null">AND a.`name` LIKE #{accountName}</if>
+		<if test="sellerId != null">AND s.id = #{sellerId}</if>
+		<if test="orderTypeList != null">
+			AND o.type IN
+			<foreach collection="orderTypeList" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="createUser != null">AND oq.create_user = #{createUser}</if>
+		<if test="templateId != null">AND oqt.id =  #{templateId}</if>
+		<if test="questionId != null">AND oq.id =  #{questionId}</if>
+		<if test="questionDesc != null">AND oq.`desc` LIKE  #{questionDesc}</if>
+		<if test="status == 1">AND (oq.customer_status = #{status} OR oq.seller_status = #{status})</if>
+		<if test="status == 2">AND (oq.customer_status = #{status} AND oq.seller_status = #{status})</if>
+		<if test="createTimeBegin != null"><![CDATA[AND oq.create_time>=#{createTimeBegin}]]></if>
+		<if test="createTimeEnd != null"><![CDATA[AND oq.create_time<=#{createTimeEnd}]]></if>	
+	</select>
+	
+	<select id="findAllOrderQuestion" resultType="OrderQuestionEntity">
+		SELECT 
+			oq.id,
+			oq.order_id AS orderId,
+			oq.question_template_id AS questionTemplateId,
+			oq.customer_status AS customerStatus,
+			oq.seller_status AS sellerStatus,
+			oq.time_limit_type AS timeLimitType,
+			oq.custom_time AS customTime,
+			oq.`desc` AS questionDesc,
+			oq.create_user AS createUser,
+			oq.create_time AS createTime,
+			oq.customer_finish_time AS customerFinishTime,
+			oq.seller_finish_time AS sellerFinishTime,
+			oq.customer_deal_detail AS customerDealDetail,
+			oq.seller_deal_detail AS sellerDealDetail
+		FROM
+			order_question oq
+		ORDER BY id
+	</select>
+	
+	<select id="findOrderQuestionTemplateById" parameterType="int" resultType="OrderQuestionTemplateEntity">
+		select id, `name`, limit_hour as limitHour from order_question_template where id=#{id} and is_available=1
+	</select>
+	
+	<select id="findOrderQuestionTemplateByPara" parameterType="map" resultType="OrderQuestionTemplateEntity">
+		select id, `name`, limit_hour as limitHour,is_available as  isAvailable from order_question_template 
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="name != null">AND `name`=#{name}</if>
+			<if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+		</trim>
+	</select>
+	
+	<update id="updateQuestionTemplate" parameterType="map">
+		update order_question_template set `name`=#{name},limit_hour=#{limitHour} where id=#{id}
+	</update>
+	
+	<select id="findCustomerProgressImagesBycid" parameterType="int" resultType="string">
+		SELECT image from order_question_customer_image WHERE customer_progress_id=#{id} AND image!=''
+	</select>
+	
+	<select id="findSellerProgressImagesBysid" parameterType="int" resultType="string">
+		SELECT image from order_question_seller_image WHERE seller_progress_id=#{id} AND image!=''
+	</select>
+
+	<select id="findOrderQuestionDescListByOrderId" parameterType="list" resultType="map">
+		SELECT
+			order_id AS orderId,
+			`desc`
+		FROM
+			order_question
+		WHERE order_id IN
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findSellerFeedbackDetailListByqid" parameterType="int" resultType="map">
+		SELECT
+			id,
+			content,
+			create_time as createTime
+		FROM
+			order_question_seller_feedback
+		WHERE order_question_id=#{id} 
+		ORDER BY id
+	</select>
+	
+	<insert id="saveOrderQuestionSellerFeedback" parameterType="map">
+		INSERT INTO order_question_seller_feedback(order_question_id,content) VALUES(#{questionId},#{content})
+	</insert>
+</mapper>

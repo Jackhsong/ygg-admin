@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerExpandMapper">
+	<resultMap type="SellerExpandEntity" id="SellerExpandMap">
+    	<id column="id" property="id" />
+    	<result column="seller_id" property="sellerId"/>
+    	<result column="audit_user_id" property="auditUserId"/>
+    	<result column="username" property="username"/>
+    	<result column="password" property="password"/>
+    	<result column="proposal_submit_type" property="proposalSubmitType"/>
+    	<result column="proposal_deduction" property="proposalDeduction"/>
+    	<result column="is_master" property="isMaster"/>
+    	<result column="receive_province_code" property="receiveProvinceCode"/>
+    	<result column="receive_city_code" property="receiveCityCode"/>
+    	<result column="receive_district_code" property="receiveDistrictCode"/>
+    	<result column="receive_detail_address" property="receiveDetailAddress"/>
+    	<result column="receive_person" property="receivePerson"/>
+    	<result column="receive_telephone" property="receiveTelephone"/>
+    	<result column="is_information" property="isInformation"/>
+    	<result column="rc_aliwang" property="rcAliwang"/>
+    	<result column="rc_email" property="rcEmail"/>
+    	<result column="rc_qq" property="rcqq"/>
+    	<result column="rc_contact_mobile" property="rcContactMobile"/>
+    	<result column="rc_contact_person" property="rcContactPerson"/>
+    	<result column="deposit_status" property="depositStatus"/>
+    	<result column="deposit_count" property="depositCount"/>
+    </resultMap>
+    
+    <!-- 插入商家信息 -->
+    <insert id="save" parameterType="SellerExpandEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO seller_expand_1 
+		(`seller_id`,`audit_user_id`,`username`,`password`,`proposal_submit_type`,`proposal_deduction`,`receive_province_code`,`receive_city_code`,`receive_district_code`,`receive_detail_address`,
+		`receive_person`,`receive_telephone`,`is_information`,`rc_aliwang`,`rc_email`,`rc_qq`,`rc_contact_mobile`,`rc_contact_person`, `deposit_status`, `deposit_count`)
+		VALUES 
+		(#{sellerId},#{auditUserId},#{username},#{password},#{proposalSubmitType},#{proposalDeduction},#{receiveProvinceCode},#{receiveCityCode},#{receiveDistrictCode},#{receiveDetailAddress},
+		#{receivePerson},#{receiveTelephone},#{isInformation},#{rcAliwang},#{rcEmail},#{rcqq},#{rcContactMobile},#{rcContactPerson},#{depositStatus}, #{depositCount})
+    </insert>
+    
+    <!-- 更新商家信息 -->
+    <update id="update" parameterType="map">
+     	UPDATE `seller_expand_1`
+     	<trim prefix="SET" suffixOverrides=",">
+			<if test="auditUserId != null">audit_user_id=#{auditUserId},</if>
+			<if test="username != null">username=#{username},</if>
+			<!-- <if test="password != null">password=#{password},</if> -->
+			<if test="proposalSubmitType != null">proposal_submit_type=#{proposalSubmitType},</if>
+			<if test="proposalDeduction != null">proposal_deduction=#{proposalDeduction},</if>
+			<if test="receiveProvinceCode != null">receive_province_code=#{receiveProvinceCode},</if>
+			<if test="receiveCityCode != null">receive_city_code=#{receiveCityCode},</if>
+			<if test="receiveDistrictCode != null">receive_district_code=#{receiveDistrictCode},</if>
+			<if test="receiveDetailAddress != null">receive_detail_address=#{receiveDetailAddress},</if>
+			<if test="receivePerson != null">receive_person=#{receivePerson},</if>
+			<if test="receiveTelephone != null">receive_telephone=#{receiveTelephone},</if>
+			<if test="isInformation != null">is_information=#{isInformation},</if>
+			<if test="rcAliwang != null">rc_aliwang=#{rcAliwang},</if>
+			<if test="rcEmail != null">rc_email=#{rcEmail},</if>
+			<if test="rcqq != null">rc_qq=#{rcqq},</if>
+			<if test="rcContactMobile != null">rc_contact_mobile=#{rcContactMobile},</if>
+			<if test="rcContactPerson != null">rc_contact_person=#{rcContactPerson},</if>
+			<if test="depositStatus != null">deposit_status=#{depositStatus},</if>
+			<if test="depositCount != null">deposit_count=#{depositCount},</if>
+     	</trim>
+     	WHERE id=#{id}
+     </update>
+
+	<select id="findSellerExpandBysid" parameterType="int" resultMap="SellerExpandMap">
+		select * from seller_expand_1 where seller_id=#{sellerId}
+	</select>
+	
+	<update id="synchronousSellerExpandInfo" parameterType="map">
+     	UPDATE `seller_expand_1`
+     	<trim prefix="SET" suffixOverrides=",">
+			<if test="auditUserId != null">audit_user_id=#{auditUserId},</if>
+			<if test="username != null">username=#{username},</if>
+			<if test="password != null">password=#{password},s_password=0,</if>
+			<if test="proposalSubmitType != null">proposal_submit_type=#{proposalSubmitType},</if>
+			<if test="proposalDeduction != null">proposal_deduction=#{proposalDeduction},</if>
+			<if test="receiveProvinceCode != null">receive_province_code=#{receiveProvinceCode},</if>
+			<if test="receiveCityCode != null">receive_city_code=#{receiveCityCode},</if>
+			<if test="receiveDistrictCode != null">receive_district_code=#{receiveDistrictCode},</if>
+			<if test="receiveDetailAddress != null">receive_detail_address=#{receiveDetailAddress},</if>
+			<if test="receivePerson != null">receive_person=#{receivePerson},</if>
+			<if test="receiveTelephone != null">receive_telephone=#{receiveTelephone},</if>
+			<if test="rcAliwang != null">rc_aliwang=#{rcAliwang},</if>
+			<if test="rcEmail != null">rc_email=#{rcEmail},</if>
+			<if test="rcqq != null">rc_qq=#{rcqq},</if>
+			<if test="rcContactMobile != null">rc_contact_mobile=#{rcContactMobile},</if>
+			<if test="rcContactPerson != null">rc_contact_person=#{rcContactPerson},</if>
+			<if test="depositStatus != null">deposit_status=#{depositStatus},</if>
+			<if test="depositCount != null">deposit_count=#{depositCount},</if>
+     	</trim>
+     	WHERE seller_id IN
+		<foreach collection="idList" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateSellerToSlave" parameterType="map">
+		update seller_expand_1 set is_master=#{status} where seller_id in
+		<foreach collection="idList" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updatePassword" parameterType="SellerExpandEntity">
+		update seller_expand_1 set password = #{password},s_password=0 where id=#{id}
+	</update>
+	
+	<update id="updateSellerToMaster" parameterType="string">
+		update seller_expand_1 set is_master=1 where seller_id=#{sellerId}
+	</update>
+	
+	<select id="findSellerExpandBysids" parameterType="list" resultMap="SellerExpandMap">
+		select * from seller_expand_1 where seller_id in
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<update id="updateEcount" parameterType="int">
+		update seller_expand_1 a,(select username from seller_expand_1 where seller_id= #{sellerId}) b set a.e_count=0 where a.username = b.username
+	</update>
+</mapper>

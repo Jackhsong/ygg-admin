@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="IndexNavigationMapper">
+
+<!-- 查询导航列表 -->
+	<select id="findNavigationList" parameterType="map" resultType="map">
+		select id,name,type,remark,sequence,is_display as isDisplay, support_area_type as supportAreaType from index_navigation where 1=1
+		<if test="id!=null and id!=0"> and id=#{id}</if>
+		<if test="name!=null and name!=''"> and name like concat(concat('%', #{name}), '%')</if>
+		<if test="isDisplay!=null and isDisplay!=-1"> and is_display=#{isDisplay}</if>
+		ORDER BY sequence DESC
+		<if test="start != null and size != null">limit #{start},#{size}</if>
+	</select>
+
+<!-- 根据导航ID查询导航 -->
+	<select id="findNavigationById" parameterType="int" resultType="map">
+		select id as customNavigationId,name,remark,type as customNavigationType,display_id as displayId, is_display as isDisplay, support_area_type as supportAreaType
+		from index_navigation where id=#{id}
+	</select>
+
+<!-- 更新导航排序值 -->
+	<update id="updateByParam" parameterType="map">
+		update index_navigation 
+		<set>
+			<if test="sequence!=null and sequence!=-1"> sequence=#{sequence} </if>
+			<if test="isDisplay!=null and isDisplay!=-1"> is_display=#{isDisplay} </if>
+			where id=#{id}
+		</set>
+	</update>
+
+<!-- 新增导航信息 -->
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into index_navigation (`type`,`display_id`,`name`,`remark`,`sequence`,`is_display`,`create_time`)
+		values (#{type},#{displayId},#{name},#{remark},0,#{isDisplay},now())
+	</insert>
+	
+<!-- 更新导航信息 -->
+	<update id="update" parameterType="map">
+		update index_navigation
+		<set>
+			<if test="type!=null"> type=#{type},</if>
+			<if test="supportAreaType!=null"> support_area_type=#{supportAreaType},</if>
+			<if test="displayId!=null"> display_id=#{displayId},</if>
+			<if test="name!=null"> name=#{name},</if>
+			<if test="remark!=null"> remark=#{remark},</if>
+			<if test="sequence!=null"> sequence=#{sequence},</if>
+			<if test="isDisplay!=null"> is_display=#{isDisplay} </if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!-- 批量插入导航和省份对应关系表 -->
+	<insert id="batchInsertRelationCustomNavigationAndProvince" parameterType="list">
+		INSERT INTO index_navigation_and_province(`custom_navigation_id`,`province_id`) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.customNavigationId},#{item.provinceId})
+		</foreach>
+	</insert>
+
+	<!-- 批量插入导航和城市对应关系表 -->
+	<insert id="batchInsertRelationCustomNavigationAndCity" parameterType="list">
+		INSERT INTO index_navigation_and_city(`custom_navigation_id`,`city_id`,`is_except`) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.customNavigationId},#{item.cityId},#{item.isExcept})
+		</foreach>
+	</insert>
+
+	<!-- 删除导航和省份对应关系 -->
+	<insert id="deleteRelationCustomNavigationAndProvinceById" parameterType="int">
+		delete from index_navigation_and_province where custom_navigation_id=#{id}
+	</insert>
+
+	<!-- 删除导航和热门城市对应关系 -->
+	<insert id="deleteRelationCustomNavigationAndCityById" parameterType="int">
+		delete from index_navigation_and_city where custom_navigation_id=#{id}
+	</insert>
+
+	<select id="findRelationProvinceIdByNavId" parameterType="int" resultType="string">
+		select
+			province_id as provinceId
+		from
+			index_navigation_and_province
+		where
+			custom_navigation_id=#{id}
+	</select>
+
+	<select id="findRelationCityIdByNavId" parameterType="int" resultType="map">
+		select
+			city_id as cityId,
+			is_except as isExcept
+		from
+			index_navigation_and_city
+		where
+			custom_navigation_id=#{id}
+	</select>
+
+	<insert id="saveHotCityInfo" parameterType="map">
+		insert into index_navigation_hot_city (`province_id`,`city_id`)
+		values (#{provinceId},#{cityId})
+	</insert>
+
+	<update id="updateHotCityInfo" parameterType="map">
+		update index_navigation_hot_city
+		<set>
+			<if test="isAvailable!=null"> is_available=#{isAvailable},</if>
+			<if test="sequence!=null"> sequence=#{sequence}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findHotCityInfo"  resultType="map">
+		select
+			id,province_id as provinceId, city_id as cityId, sequence
+		from
+			index_navigation_hot_city
+		where
+			is_available=1
+			<if test="provinceId != null"> and province_id=#{provinceId} </if>
+			<if test="cityId != null"> and city_id=#{cityId} </if>
+		order by sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+
+	<select id="countHotCityInfo"  resultType="int">
+		select
+			count(id)
+		from
+			index_navigation_hot_city
+		where
+			is_available=1
+	</select>
+
+</mapper>

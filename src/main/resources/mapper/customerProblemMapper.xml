@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="CustomerProblemMapper">  
+    <select id="findAllCustomerProblem" parameterType="map" resultType="map">
+		SELECT
+			id,
+			question,
+			answer,
+			sequence,
+			is_display AS isDisplay
+		FROM
+			question_and_answer
+		ORDER BY
+			sequence DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>    	
+    </select>
+    
+    <select id="countCustomerProblem" parameterType="map" resultType="int">
+ 		SELECT
+			COUNT(id)
+		FROM
+			question_and_answer   	
+    </select>
+    
+    <insert id="saveCustomerProblem" parameterType="map">
+    	INSERT INTO question_and_answer(question,answer,sequence,is_display,create_user,create_time,update_user) VALUES(#{question},#{answer},#{sequence},#{isDisplay},#{createUser},now(),#{createUser})
+    </insert>
+    
+    <update id="updateCustomerProblem" parameterType="map">
+    	update question_and_answer
+    	<trim prefix="SET" suffixOverrides=",">
+    		<if test="question != null">question=#{question},</if>
+    		<if test="answer != null">answer=#{answer},</if>
+    		<if test="sequence != null">sequence=#{sequence},</if>
+    		<if test="isDisplay != null">is_display=#{isDisplay},</if>
+    		<if test="updateUser != null">update_user=#{updateUser},</if>
+    	</trim>
+    	where id=#{id}
+    </update>
+</mapper>  

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    <mapper namespace="CategoryManagerMapper">
+
+	<!-- 页面信息操作  begin -->
+	<insert id="insertPage" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO page2(`name`, first_category_id,is_display) VALUES (#{name}, #{categoryFirstId},#{isDisplay})
+	</insert>
+	<insert id="insertPageModel" parameterType="map">
+		INSERT INTO page2_model(`page2_id`,type,is_display,sequence) VALUES (#{id},#{type},#{display},#{sequence})
+	</insert>
+	<update id="updatePageById" parameterType="map">
+		UPDATE page2
+		<set>
+			<if test="name != null"> `name`=#{name}, </if>
+			<if test="categoryFirstId != null"> first_category_id=#{categoryFirstId},</if>
+			<if test="isDisplay != null and isDisplay != -1"> is_display=#{isDisplay}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findAllPageByPara" parameterType="map" resultType="map">
+		SELECT
+			pg.`id`,pg.`name`,pg.first_category_id AS categoryFirstId,
+			cf.id AS fId,
+			cf.`name` AS fname,
+			pg.is_display as isDisplay 
+		FROM
+			page2 pg,category_first cf
+		WHERE
+			pg.first_category_id = cf.id 
+			<if test="name != null">AND pg.`name` like #{name}</if>
+			<if test="id != null">AND pg.id=#{id}</if>
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	<select id="countAllPageByPara" parameterType="map" resultType="int">
+		SELECT
+			count(id)
+		FROM
+			page2
+		WHERE
+			1=1
+			<if test="name != null">AND `name` like #{name}</if>
+			<if test="id != null">AND id=#{id}</if>
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+	</select>
+	<!-- 页面信息操作  end -->
+	<update id="updatePageModelById" parameterType="map">
+		UPDATE page2_model
+		<set>
+			<if test="isDisplay != null"> is_display=#{isDisplay}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="findAllPageModelByPara" parameterType="map" resultType="Page2ModelEntity">
+		SELECT
+			`id`,
+			`page2_id` AS pageId,
+			`type`,
+			`is_display` AS isDisplay,
+			`sequence`,
+			`create_time` AS createTime
+		FROM
+			page2_model
+		WHERE
+			1=1
+		<if test="id != null">AND id=#{id}</if>
+		<if test="pageId != null">AND page2_id=#{pageId}</if>
+		ORDER BY `sequence` DESC
+	</select>
+</mapper>  

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PromotionActivityMapper">
+
+   <select id="findSpecialActivityNewByPara" parameterType="map" resultType="map">
+      SELECT
+        id,title,image,is_available AS isAvailable,create_time AS createTime
+      FROM
+        special_activity_new
+      WHERE
+        1=1
+        <if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+        <if test="title != null">AND title like #{title}</if>
+      ORDER BY id DESC
+      <if test="start != null">LIMIT #{start},#{max}</if>
+   </select>
+
+    <select id="findSpecialActivityNewByid" parameterType="int" resultType="map">
+        SELECT
+        id,title,image,is_available AS isAvailable,create_time AS createTime
+      FROM
+        special_activity_new
+      WHERE
+        id=#{id}
+    </select>
+
+   <select id="countSpecialActivityNewByPara" parameterType="map" resultType="int">
+      SELECT
+        count(id)
+      FROM
+        special_activity_new
+      WHERE
+        1=1
+        <if test="isAvailable != null">AND is_available=#{isAvailable}</if>
+        <if test="title != null">AND title like #{title}</if>
+   </select>
+
+   <insert id="saveSpecialActivityNew" parameterType="map">
+      INSERT INTO `special_activity_new` (`title`, `image`, `is_available`, `create_time`)
+      VALUES (#{title}, #{image}, #{isAvailable}, #{createTime});
+   </insert>
+
+   <update id="updateSpecialActivityNew" parameterType="map">
+      UPDATE
+        `special_activity_new`
+         <set>
+            <if test="title != null"> title=#{title}, </if>
+            <if test="image != null"> image=#{image},</if>
+            <if test="isAvailable != null">is_available=#{isAvailable}</if>
+         </set>
+      WHERE
+        `id`=#{id}
+   </update>
+   
+   <select id="findSpecialActivityNewProductByPara" parameterType="map" resultType="map">
+      SELECT
+        id,special_activity_new_id AS specialActivityNewId,type,title,keyword, `desc`,product_id AS productId,is_display AS isDisplay,sequence
+      FROM
+        special_activity_new_product
+      WHERE
+        special_activity_new_id=#{specialActivityNewId}
+        <if test="type != null">AND type=#{type}</if>
+      ORDER BY sequence DESC
+      <if test="start != null">LIMIT #{start},#{max}</if>
+   </select>
+
+   <select id="countSpecialActivityNewProductByPara" parameterType="map" resultType="int">
+      SELECT
+        count(id)
+      FROM
+        special_activity_new_product
+      WHERE
+        special_activity_new_id=#{specialActivityNewId}
+        <if test="type != null">AND type=#{type}</if>
+   </select>
+
+   <update id="updateSpecialActivityNewProduct" parameterType="map">
+      UPDATE
+        `special_activity_new_product`
+      <set>
+         <if test="keyword != null"> keyword=#{keyword}, </if>
+         <if test="title != null"> title=#{title}, </if>
+         <if test="desc != null"> `desc`=#{desc},</if>
+         <if test="productId != null"> `product_id`=#{productId},</if>
+         <if test="sequence != null"> `sequence`=#{sequence},</if>
+         <if test="isDisplay != null">is_display=#{isDisplay}</if>
+      </set>
+      WHERE
+        `id`=#{id}
+   </update>
+
+   <insert id="saveSpecialActivityNewProduct" parameterType="map">
+      INSERT INTO `special_activity_new_product` (`title`,`keyword`, `special_activity_new_id`, `type`, `desc`, `product_id`, `is_display`)
+      VALUES (#{title},#{keyword}, #{specialActivityNewId}, #{type}, #{desc}, #{productId}, #{isDisplay});
+   </insert>
+   
+   <select id="findSpecialActivityNewProductByid" parameterType="int" resultType="int">
+   		SELECT product_id FROM special_activity_new_product WHERE is_display=1 AND special_activity_new_id=#{id} ORDER BY sequence DESC
+   </select>
+
+    <delete id="deleteSpecialActivityNewProductById" parameterType="int">
+        delete from special_activity_new_product where id=#{id}
+    </delete>
+
+</mapper>  

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SellerDeliverAreaMapper">
+	<select id="findSellerDeliverAreaTemplateByPara" parameterType="map" resultType="SellerDeliverAreaTemplateEntity">
+		SELECT
+			id,
+			seller_id AS sellerId,
+			`name`,
+			`desc`,
+			type
+		FROM
+			seller_deliver_area_template
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="id != null">AND id=#{id}</if>
+			<if test="sellerId != null">AND seller_id=#{sellerId}</if>
+			<if test="name != null">AND `name`=#{name}</if>
+		</trim>
+		ORDER BY id  DESC LIMIT 1
+	</select>
+	
+	<insert id="insertSellerDeliverAreaTemplate" parameterType="SellerDeliverAreaTemplateEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO seller_deliver_area_template(seller_id,`name`,`desc`,type)VALUES(#{sellerId},#{name},#{desc},#{type})
+	</insert>
+	
+	<update id="updateSellerDeliverAreaTemplate" parameterType="SellerDeliverAreaTemplateEntity">
+		update seller_deliver_area_template set seller_id=#{sellerId},`name`=#{name},`desc`=#{desc},`type`=#{type} where id=#{id}
+	</update>
+	
+	<delete id="deleteSellerDeliverAreaTemplate" parameterType="int">
+		delete from seller_deliver_area_template where id=#{id}
+	</delete>
+	
+	<select id="findSellerDeliverAreaTemplateBysid" parameterType="int" resultType="SellerDeliverAreaTemplateEntity">
+		SELECT `id`,`seller_id` as sellerId,`name`,`desc`,`type` FROM seller_deliver_area_template WHERE `seller_id`=#{sellerId} ORDER BY id DESC
+	</select>
+	
+	<select id="findAllSellerDeliverAreaTemplate" parameterType="map" resultType="map">
+		SELECT
+			sda.id,
+			s.id AS sellerId,
+			s.real_seller_name AS sellerName,
+			sda.`name` AS templateName,
+			sda.`desc` AS templateDesc,
+			sda.type AS templateType
+		FROM
+			seller_deliver_area_template sda,
+			seller s
+		WHERE
+			sda.seller_id = s.id
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="name != null">AND sda.`name` like #{name}</if>
+		<if test="desc != null">AND sda.`desc` like #{desc}</if>
+		<if test="type != null">AND sda.type=#{type}</if>
+		ORDER BY s.id DESC, sda.id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSellerDeliverAreaTemplate" parameterType="map" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			seller_deliver_area_template sda,
+			seller s
+		WHERE
+			sda.seller_id = s.id
+		<if test="sellerId != null">AND s.id=#{sellerId}</if>
+		<if test="name != null">AND sda.`name` like #{name}</if>
+		<if test="desc != null">AND sda.`desc` like #{desc}</if>
+		<if test="type != null">AND sda.type=#{type}</if>		
+	</select>
+	
+	<select id="countDeliverAreaTemplateFromProductBase" parameterType="int" resultType="int">
+		select count(id) from product_base where seller_deliver_area_template_id=#{id}
+	</select>
+	
+	<insert id="addCommonPostage" parameterType="map">
+		INSERT INTO seller_deliver_area_common_extra_postage(province_code,freight_money) VALUES(#{provinceCode},#{freightMoney});
+	</insert>
+	
+	<select id="countCommonPostage" parameterType="map" resultType="int">
+		select count(*) from seller_deliver_area_common_extra_postage
+	</select>
+	
+	<select id="findAllCommonPostage" parameterType="map" resultType="map">
+		SELECT
+			s.id,
+			p.`name` AS provinceName,
+			p.province_id AS provinceCode,
+			s.freight_money AS freightMoney
+		FROM
+			seller_deliver_area_common_extra_postage s,
+			province p
+		WHERE
+			s.province_code = p.province_id
+		ORDER BY p.province_id
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<update id="updateCommonPostage" parameterType="map">
+		UPDATE seller_deliver_area_common_extra_postage SET freight_money=#{freightMoney} WHERE id=#{id}
+	</update>
+	
+	<insert id="insertRelationTemplateDeliverAreaAndExtraPostage" parameterType="list">
+		INSERT INTO relation_template_deliver_area_and_extra_postage(seller_id,seller_deliver_area_template_id,province_code,is_extra,freight_money) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(#{item.sellerId},#{item.sellerDeliverAreaTemplateId},#{item.provinceCode},#{item.isExtra},#{item.freightMoney})
+		</foreach>
+	</insert>
+	
+	<select id="findRelationTemplateDeliverAreaProvinceCodeBytid" parameterType="int" resultType="string">
+		SELECT province_code FROM relation_template_deliver_area_and_extra_postage WHERE seller_deliver_area_template_id=#{tid}
+	</select>
+	
+	<delete id="deleteRelationTemplateDeliverAreaAndExtraPostage" parameterType="map">
+		delete from relation_template_deliver_area_and_extra_postage where seller_deliver_area_template_id=#{templateId}
+		<if test="provinceCodes != null">AND province_code in
+			<foreach collection="provinceCodes" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+		</if>
+	</delete>
+	
+	<select id="findExtraPostage" parameterType="map" resultType="map">
+		SELECT 
+			rt.id,
+			p.`name` as provinceName,
+			rt.is_extra as isExtra,
+			rt.province_code as provinceCode,
+			rt.freight_money as freightMoney
+		FROM 
+			relation_template_deliver_area_and_extra_postage rt,
+			province p 
+		WHERE 
+			rt.province_code=p.province_id 
+		AND rt.seller_deliver_area_template_id=#{templateId}
+		ORDER BY rt.province_code
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+	</select>
+	
+	<select id="countExtraPostage" parameterType="map" resultType="int">
+		SELECT 
+			COUNT(rt.id)
+		FROM 
+			relation_template_deliver_area_and_extra_postage rt,
+			province p 
+		WHERE 
+			rt.province_code=p.province_id 
+		AND rt.seller_deliver_area_template_id=#{templateId}		
+	</select>
+	
+	<update id="updateExtraPostage" parameterType="map">
+		UPDATE relation_template_deliver_area_and_extra_postage SET is_extra=#{isExtra},freight_money=#{freightMoney} WHERE id=#{id}
+	</update>
+	
+	<select id="findCommonExtraPostage" parameterType="string" resultType="int">
+		SELECT freight_money FROM seller_deliver_area_common_extra_postage WHERE province_code=#{provinceCode}
+	</select>
+	
+	<select id="findExtraPostageBytids" parameterType="list" resultType="map">
+		SELECT 
+			rt.seller_deliver_area_template_id as templateId,
+			p.`name` as provinceName
+		FROM 
+			relation_template_deliver_area_and_extra_postage rt,
+			province p 
+		WHERE 
+			rt.province_code=p.province_id 
+		AND rt.is_extra=1
+		AND rt.seller_deliver_area_template_id in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

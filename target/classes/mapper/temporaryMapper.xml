@@ -1,0 +1,925 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="TemporaryMapper">  
+	<resultMap type="ProductBaseMobileDetailEntity" id="ProductBaseMobileDetailMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="content" property="content" />
+		<result column="content_type" property="contentType" />
+		<result column="height" property="height" />
+		<result column="width" property="width" />
+		<result column="is_link" property="isLink" />
+		<result column="link" property="link" />
+		<result column="link_type" property="linkType" />
+		<result column="order" property="order" />
+	</resultMap>
+	
+	<resultMap type="ProductCountEntity" id="ProductCountMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="sell" property="sell" />
+		<result column="stock" property="stock" />
+		<result column="lock" property="lock" />
+		<result column="restriction" property="restriction" />
+		<result column="stock_algorithm" property="stockAlgorithm" />
+	</resultMap>
+
+	<resultMap type="ProductMobileDetailEntity" id="ProductMobileDetailMap">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="content" property="content" />
+		<result column="content_type" property="contentType" />
+		<result column="height" property="height" />
+		<result column="width" property="width" />
+		<result column="is_link" property="isLink" />
+		<result column="link" property="link" />
+		<result column="link_type" property="linkType" />
+		<result column="order" property="order" />
+	</resultMap>
+	
+	<resultMap type="ProductBaseEntity" id="ProductBaseMap">
+		<id column="id" property="id"/>
+		<result column="seller_id" property="sellerId"/>
+		<result column="brand_id" property="brandId"/>
+		<result column="gege_image_id" property="gegeImageId"/>
+		<result column="gege_say" property="gegeSay"/>
+		<result column="code" property="code"/>
+		<result column="barcode" property="barcode"/>
+		<result column="name" property="name"/>
+		<result column="submit_type" property="submitType"/>
+		<result column="wholesale_price" property="wholesalePrice"/>
+		<result column="deduction" property="deduction"/>
+		<result column="proposal_price" property="proposalPrice"/>
+		<result column="total_stock" property="totalStock"/>
+		<result column="sale_stock" property="saleStock"/>
+		<result column="distribution_stock" property="distributionStock"/>
+		<result column="mall_stock" property="mallStock"/>
+		<result column="available_stock" property="availableStock"/>
+		<result column="net_volume" property="netVolume"/>
+		<result column="place_of_origin" property="placeOfOrigin"/>
+		<result column="manufacturer_date" property="manufacturerDate"/>
+		<result column="storage_method" property="storageMethod"/>
+		<result column="durability_period" property="durabilityPeriod"/>
+		<result column="people_for" property="peopleFor"/>
+		<result column="food_method" property="foodMethod"/>
+		<result column="use_method" property="useMethod"/>
+		<result column="tip" property="tip"/>
+		<result column="image1" property="image1"/>
+		<result column="image2" property="image2"/>
+		<result column="image3" property="image3"/>
+		<result column="image4" property="image4"/>
+		<result column="image5" property="image5"/>
+		<result column="medium_image" property="mediumImage"/>
+		<result column="small_image" property="smallImage"/>
+		<result column="remark" property="remark"/>
+		<result column="create_time" property="createTime"/>
+		<result column="is_available" property="isAvailable"/>
+		<result column="update_time" property="updateTime"/>
+		<result column="self_purchase_price" property="selfPurchasePrice"/>
+		<result column="type" property="type"/>
+		<result column="sale_flag_id" property="saleFlagId"/>
+		<result column="quality_promise_type" property="qualityPromiseType"/>
+		<result column="deliver_area_desc" property="deliverAreaDesc"/>
+		<result column="deliver_area_type" property="deliverAreaType"/>
+		<result column="seller_deliver_area_template_id" property="sellerDeliverAreaTemplateId"/>
+		<result column="expire_date" property="expireDate"/>
+		<result column="is_automatic_adjust_stock" property="isAutomaticAdjustStock"/>
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="proposal_sales_price" property="proposalSalesPrice"/>
+		<result column="proposal_market_price" property="proposalMarketPrice"/>
+	</resultMap>
+
+	<resultMap type="ProductEntity" id="ProductMap">
+		<id column="id" property="id" />
+		<result column="type" property="type" />
+		<result column="brand_id" property="brandId" />
+		<result column="freight_template_id" property="freightTemplateId" />
+		<result column="seller_id" property="sellerId" />
+		<result column="barcode" property="barcode" />
+		<result column="code" property="code" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="name" property="name" />
+		<result column="seller_product_name" property="sellerProductName" />
+		<result column="remark" property="remark" />
+		<result column="short_name" property="shortName" />
+		<result column="desc" property="desc" />
+		<result column="market_price" property="marketPrice" />
+		<result column="sales_price" property="salesPrice" />
+		<result column="image1" property="image1" />
+		<result column="image2" property="image2" />
+		<result column="image3" property="image3" />
+		<result column="image4" property="image4" />
+		<result column="image5" property="image5" />
+		<result column="net_volume" property="netVolume" />
+		<result column="place_of_origin" property="placeOfOrigin" />
+		<result column="storage_method" property="storageMethod" />
+		<result column="manufacturer_date" property="manufacturerDate" />
+		<result column="durability_period" property="durabilityPeriod" />
+		<result column="people_for" property="peopleFor" />
+		<result column="food_method" property="foodMethod" />
+		<result column="use_method" property="useMethod" />
+		<result column="gege_image_id" property="gegeImageId"/>
+		<result column="selling_point" property="sellingPoint"/>
+		<result column="tip" property="tip" />
+		<result column="pc_detail" property="pcDetail" />
+		<result column="is_off_shelves" property="isOffShelves" />
+		<result column="is_available" property="isAvailable" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="product_base_id" property="productBaseId" />
+		<result column="partner_distribution_price" property="partnerDistributionPrice" />
+		<result column="return_distribution_proportion_type" property="returnDistributionProportionType" />
+		<result column="activities_status" property="activitiesStatus" />
+		<result column="is_show_in_mall" property="isShowInMall" />
+		<result column="is_automatic_adjust_stock" property="isAutomaticAdjustStock" />
+		<result column="bs_commision" property="bsCommision" />
+	</resultMap>
+	
+    <update id="updateTableAccountImage">
+    	UPDATE `account`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `image` is not null
+    </update>
+    
+    <update id="updateTableActivitiesCommonImage">
+    	UPDATE `activities_common`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `image` is not null
+    </update>
+    
+    <update id="updateTableBannerWindowImage">
+    	UPDATE `banner_window`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%' 
+			and `image` is not null   	
+    </update>
+    
+    <update id="updateTableBrandImage">
+    	UPDATE `brand`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `image` is not null  	
+    </update>
+   
+    <update id="updateTableGegeImageActivitiesImage">
+    	UPDATE `gege_image_activities`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `image` is not null	
+    </update>
+
+    <update id="updateTableGegeImageProductImage">
+    	UPDATE `gege_image_product`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+		WHERE
+			`image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `image` is not null
+    </update>
+
+    <update id="updateTableOrderProductImage">
+    	UPDATE `order_product`
+		SET 
+			`small_image` = REPLACE (`small_image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`small_image` = REPLACE (`small_image`,'!','@!'),
+			`small_image` = LOWER(`small_image`)
+		WHERE
+			`small_image` LIKE '%http://yangege.b0.upaiyun.com%'
+			and `small_image` is not null	
+    </update>
+
+    <update id="updateTableOrderProductRefundImage">
+    	UPDATE `order_product_refund`
+		SET 
+			`image1` = REPLACE (`image1`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image1` = REPLACE (`image1`,'!','@!'),
+			`image1` = LOWER(`image1`),
+			`image2` = REPLACE (`image2`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image2` = REPLACE (`image2`,'!','@!'),
+			`image2` = LOWER(`image2`),
+			`image3` = REPLACE (`image3`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image3` = REPLACE (`image3`,'!','@!'),
+			`image3` = LOWER(`image3`)
+    </update>
+    
+    
+
+    <update id="updateTableProductImage">
+    	UPDATE `product`
+		SET 
+			`image1` = REPLACE (`image1`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image1` = REPLACE (`image1`,'!','@!'),
+			`image1` = LOWER(`image1`),
+			`image2` = REPLACE (`image2`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image2` = REPLACE (`image2`,'!','@!'),
+			`image2` = LOWER(`image2`),
+			`image3` = REPLACE (`image3`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image3` = REPLACE (`image3`,'!','@!'),
+			`image3` = LOWER(`image3`),
+			`image4` = REPLACE (`image4`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image4` = REPLACE (`image4`,'!','@!'),
+			`image4` = LOWER(`image4`),
+			`image5` = REPLACE (`image5`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image5` = REPLACE (`image5`,'!','@!'),
+			`image5` = LOWER(`image5`)
+    </update>
+
+    <update id="updateTableProductCommonImage">
+    	UPDATE `product_common`
+		SET 
+			`medium_image` = REPLACE (`medium_image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`medium_image` = REPLACE (`medium_image`,'!','@!'),
+			`medium_image` = LOWER(`medium_image`),
+			`small_image` = REPLACE (`small_image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`small_image` = REPLACE (`small_image`,'!','@!'),
+			`small_image` = LOWER(`small_image`)
+    </update>
+
+    <update id="updateTableProductMobileDetailImage">
+    	UPDATE `product_mobile_detail`
+		SET 
+			`content` = REPLACE (`content`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`content` = REPLACE (`content`,'!','@!'),
+			`content` = LOWER(`content`)
+		where `content_type`=1 and `content` is not null
+    </update>
+    
+    <update id="updateTableSaleTagImage">
+    	UPDATE `sale_tag`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+    </update>
+    
+    <update id="updateTableSaleWindowImage">
+    	UPDATE `sale_window`
+		SET 
+			`image` = REPLACE (`image`,'http://yangege.b0.upaiyun.com','http://img.gegejia.com'),
+			`image` = REPLACE (`image`,'!','@!'),
+			`image` = LOWER(`image`)
+    </update>
+    
+    <update id="updateSellerIsNeedIdCardNumber">
+    	UPDATE `seller` SET is_need_idcard_number=1 WHERE (seller_type=2 or seller_type=3)
+    </update>
+    
+    <insert id="addSaleWindowToSellerSettlementTable">
+		INSERT INTO seller_settlement (
+			`sale_window_id`,
+			`display_id`,
+			`seller_id`,
+			`start_time`,
+			`end_time`,
+			`create_time`
+		)(
+			SELECT
+				sw.id AS id,
+				sw.display_id as displayId,
+				s.id AS sellerId,
+				sw.start_time AS startTime,
+				sw.end_time AS endTime,
+				now()
+			FROM
+				sale_window sw,
+				product p,
+				seller s
+			WHERE
+				sw.type = 1
+			AND sw.display_id = p.id
+			AND s.id = p.seller_id
+		)
+		UNION
+			(
+				SELECT
+					sw.id AS id,
+					sw.display_id as displayId,
+					s.id AS sellerId,
+					sw.start_time AS startTime,
+					sw.end_time AS endTime,
+					now()
+				FROM
+					sale_window sw,
+					product p,
+					seller s,
+					relation_activities_common_and_product racp
+				WHERE
+					sw.type = 2
+				AND sw.display_id = racp.activities_common_id
+				AND racp.product_id = p.id
+				AND p.seller_id = s.id
+			)
+    </insert>
+    
+    <select id="countStockByProductIdList" parameterType="map" resultType="int">
+		SELECT
+			SUM(sell + stock) AS amount
+		FROM
+			product_count
+		WHERE
+			product_id IN
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach> 	
+    </select>
+	
+	<update id="updateProductBaseIdForProduct" parameterType="map">
+		UPDATE product SET product_base_id=#{productBaseId} WHERE id IN
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findAllProductBaseIdAfterTime" parameterType="string" resultType="int">
+		select id from product_base where <![CDATA[create_time>#{createTime}]]> order by id
+	</select>
+	
+	<update id="updateProductMobileDetailOrderById" parameterType="map">
+		UPDATE product_base_mobile_detail SET `order`=#{order} WHERE id=#{id}
+	</update>
+	
+	<select id="findProductMobileDetailByProductBaseId" parameterType="int" resultMap="ProductBaseMobileDetailMap">
+		SELECT * FROM product_base_mobile_detail WHERE  product_id=#{id} ORDER BY `order` ASC
+	</select>
+	
+	<select id="findMallProductIdAndCode" resultType="map">
+		SELECT
+			t1.id AS productId,
+			t2.`code` AS `code`,
+			t2.barcode AS barCode
+		FROM
+			product t1,
+			product_base t2
+		WHERE
+			t1.product_base_id = t2.id
+		AND t1.type = 2		
+	</select>
+	
+	<update id="updateMallProductCode" parameterType="map">
+		UPDATE product SET `code` = #{code},barcode=#{barCode} WHERE id=#{productId}
+	</update>
+	
+	<update id="updateOrderProductCost" parameterType="map" >
+		UPDATE 
+			order_product 
+		SET 
+			cost=#{cost} 
+		WHERE 
+			product_id=#{productId}
+	</update>
+	
+	<update id="updateOrderManualProductCost" parameterType="map" >
+		UPDATE 
+			order_manual_product 
+		SET 
+			cost=#{cost} 
+		WHERE 
+			product_id=#{productId}
+	</update>
+	
+	<select id="findAllProductCostInfo" resultType="map">
+		SELECT 
+			p.id,
+			pb.wholesale_price,
+			pb.deduction,
+			pb.submit_type,
+			pb.proposal_price,
+			pb.self_purchase_price 
+		FROM 
+			product p ,
+			product_base pb 
+		WHERE 
+			p.product_base_id=pb.id
+	</select>
+	
+	<select id="findAllGameReceivedMobile" resultType="map">
+		SELECT
+			t1.game_id AS gameId,
+			t1.mobile_number AS mobileNumber,
+			t2.coupon_id AS couponId
+		FROM
+			relation_game_and_received_mobile t1,
+			game_prize t2
+		WHERE
+			t1.game_id = t2.game_id
+		ORDER BY t1.create_time DESC		
+	</select>
+	
+	<insert id="insertRelationActivityAndReceivedMobile" parameterType="map">
+		INSERT INTO relation_activity_and_received_mobile(activity_id,mobile_number,coupon_id,acitvity_type) VALUES(#{activityId},#{mobileNumber},#{couponId},#{acitvityType})
+	</insert>
+	
+	<select id="findAllGameAndAccount" resultType="map">
+		SELECT
+			game_id AS gameId,
+			account_id AS accountId
+		FROM
+			relation_game_and_account
+		ORDER BY create_time		
+	</select>
+	
+	<insert id="insertRelationActivityAndAccount" parameterType="map">
+		INSERT INTO relation_activity_and_account(activity_id,account_id,acitvity_type)VALUES(#{activityId},#{accountId},#{acitvityType})
+	</insert>
+	
+	
+	<select id="findAllChannelReceivedMobile" resultType="map">
+		SELECT
+			spread_channel_id AS channelId,
+			mobile_number AS mobileNumber,
+			coupon_id AS couponId
+		FROM
+			relation_spread_channel_and_received_mobile
+		ORDER BY create_time DESC		
+	</select>
+	
+	<select id="findAllChannelAndAccount" resultType="map">
+		SELECT
+			spread_channel_id AS channelId,
+			account_id AS accountId
+		FROM
+			relation_spread_channel_and_account
+		ORDER BY create_time		
+	</select>
+
+	<update id="updateProductBase" parameterType="map">
+		update product_base
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="saleFlagId != null">`sale_flag_id`=#{saleFlagId},</if>
+			<if test="qualityPromiseType != null">`quality_promise_type`=#{qualityPromiseType},</if>
+			<!-- <if test="groupCount != null">`group_count`=#{groupCount},</if>
+			<if test="totalSales != null">`total_sales`=#{totalSales},</if> -->
+			<if test="totalStock != null">`total_stock`=#{totalStock},</if>
+			<if test="saleStock != null">`sale_stock`=#{saleStock},</if>
+			<if test="mallStock != null">`mall_stock`=#{mallStock},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findAllProductBase"  parameterType="map" resultMap="ProductBaseMap">
+		SELECT 
+			*
+		FROM 
+			product_base 
+		ORDER BY id <if test="start != null">limit #{start},#{max}</if>
+	</select>
+	
+	<update id="updateProductBaseQualityPromiseType" parameterType="ProductBaseEntity">
+		update product_base set quality_promise_type=#{qualityPromiseType} where id=#{id}
+	</update>
+	
+	<select id="findAatherAccountIdFromAccountPartnerRelationByCurrAccountId" parameterType="int" resultType="int">
+		select father_account_id from account_partner_relation where curr_account_id=#{currAccountId} limit 1
+	</select>
+	
+	<select id="isExistPartnerRelation" parameterType="map" resultType="int">
+		select count(id) from account_partner_relation where curr_account_id=#{currAccountId} and father_account_id=#{fatherAccountId}
+	</select>
+	
+	<select id="findAllProductCommentProductId" resultType="map">
+		select id,product_id as productId from order_product_comment where product_base_id=0
+	</select>
+	
+	<update id="updateProductCommentProductBaseId" parameterType="map">
+		update order_product_comment set product_base_id=#{productBaseId} where id=#{id}
+	</update>
+	
+	<update id="updateProductDeliverAreaProvinceCode">
+		UPDATE relation_product_base_deliver_area SET province_code = 1 WHERE province_code=0;
+	</update>
+	
+	<update id="updateProductDeliverAreaCityceCode">
+		UPDATE relation_product_base_deliver_area SET `city_code` = 1 WHERE city_code=0;
+	</update>
+	
+	<update id="updateProductDeliverAreaDistrictCode">
+		UPDATE relation_product_base_deliver_area SET `district_code` = 1 WHERE district_code=0;
+	</update>
+	
+	<update id="updateSellerDeliverAreaProvinceCode">
+		UPDATE relation_seller_deliver_area SET  province_code = 1 WHERE province_code=0;
+	</update>
+	
+	<update id="updateSellerDeliverAreaCityceCode">
+		UPDATE relation_seller_deliver_area SET  `city_code` = 1 WHERE city_code=0;
+	</update>
+	
+	<update id="updateSellerDeliverAreaDistrictCode">
+		UPDATE relation_seller_deliver_area SET  `district_code` = 1 WHERE district_code=0;
+	</update>
+	
+	<update id="updateOrderQuestionDealDetail" parameterType="OrderQuestionEntity">
+		update order_question set customer_deal_detail=#{customerDealDetail},seller_deal_detail=#{sellerDealDetail} where id=#{id}
+	</update>
+	
+	<select id="findAllOrderQuestionCustomerImage" resultType="map">
+		select * from order_question_customer_image order by create_time
+	</select>
+	
+	<select id="findAllOrderQuestionCustomerProgress" resultType="OrderQuestionProgressEntity">
+		SELECT id, create_time AS createTime FROM order_question_customer_progress ORDER BY create_time
+	</select>
+	
+	<update id="updateOrderQuestionCustomerProgressNoImage" parameterType="map">
+		update order_question_customer_progress set has_image=0 where id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<delete id="deleteOrderQuestionCustomerImage" parameterType="map">
+		delete from order_question_customer_image where image ='' and id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateOrderQuestionCustomerImage" parameterType="map">
+		update order_question_customer_image set customer_progress_id=#{progressId} where id=#{id}
+	</update>
+	
+	<select id="findAllOrderQuestionSellerImage" resultType="map">
+		select * from order_question_seller_image order by create_time
+	</select>
+	
+	<select id="findAllOrderQuestionSellerProgress" resultType="OrderQuestionProgressEntity">
+		SELECT id, create_time AS createTime FROM order_question_seller_progress ORDER BY create_time
+	</select>
+	
+	<update id="updateOrderQuestionSellerProgressNoImage" parameterType="map">
+		update order_question_seller_progress set has_image=0 where id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>	
+	</update>
+	
+	<delete id="deleteOrderQuestionSellerImage" parameterType="map">
+		delete from order_question_seller_image where image ='' and id in
+		<foreach collection="idList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateOrderQuestionSellerImage" parameterType="map">
+		update order_question_seller_image set seller_progress_id=#{progressId} where id=#{id}
+	</update>
+	
+	<select id="findBaseProductSimpleInfo" resultType="map">
+		SELECT
+			pb.id,
+			pb.`name`,
+			pb.manufacturer_date AS manufactureDate,
+			pb.durability_period AS durabilityPeriod,
+			s.real_seller_name AS sellerName
+		FROM
+			product_base pb,
+			seller s
+		WHERE
+			pb.seller_id = s.id
+		ORDER BY id
+	</select>
+	
+	<update id="updateBaseProductInfo" parameterType="map">
+		UPDATE product_base 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="manufactureDate != null">manufacturer_date=#{manufactureDate},</if>
+			<if test="durabilityPeriod != null">durability_period=#{durabilityPeriod},</if>
+			<if test="expireDate != null">expire_date=#{expireDate},</if>
+		</trim>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findProductInfoBybid" parameterType="string" resultType="ProductEntity">
+		select id,type from product where product_base_id=#{id} order by id
+	</select>
+	
+	<select id="findProductCountByIdForUpdate" parameterType="string" resultMap="ProductCountMap">
+		SELECT * FROM product_count WHERE product_id=#{productId} FOR UPDATE
+	</select>
+	
+	<select id="findProductCountListByIdForUpdate" parameterType="list" resultMap="ProductCountMap">
+		SELECT * FROM product_count WHERE product_id in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		 FOR UPDATE
+	</select>
+	
+	<update id="updateProductCount" parameterType="ProductCountEntity">
+		UPDATE product_count SET stock=#{stock} WHERE id=#{id}
+	</update>
+	
+	<select id="countSellerDeliverAreaTemplate" parameterType="int" resultType="int">
+		select count(*) FROM seller_deliver_area_template where seller_id=#{sellerId}
+	</select>
+	
+	<update id="updateBaseProductDeliverAreaTemplateId" parameterType="ProductBaseEntity">
+		update product_base set `seller_deliver_area_template_id`=#{sellerDeliverAreaTemplateId},`deliver_area_type`=#{deliverAreaType} where id=#{id}
+	</update>
+	
+	<update id="updateProductBaseProposalSalesPrice">
+		update product_base set proposal_sales_price=proposal_price
+	</update>
+	
+	<update id="updateDeliverTemplateDesc" parameterType="SellerDeliverAreaTemplateEntity">
+		update seller_deliver_area_template set `desc`=#{desc} where id=#{id}
+	</update>
+	
+	<select id="findAllDistinctSellerId" resultType="int">
+		SELECT DISTINCT(seller_id) FROM seller_deliver_area_template ORDER BY seller_id
+	</select>
+	
+	<select id="findProductBaseBySidAndTid" parameterType="map" resultType="ProductBaseEntity">
+		select id,seller_deliver_area_template_id as sellerDeliverAreaTemplateId from product_base where seller_id=#{sellerId}
+		and `seller_deliver_area_template_id`=#{sellerDeliverAreaTemplateId} order by id
+	</select>
+	
+	<update id="updateBaseProductDeliverAreaTemplateBysid" parameterType="map">
+		update product_base set `seller_deliver_area_template_id`=#{templateId} where seller_id=#{sellerId}
+	</update>
+	
+	<select id="findAllSellerDeliverAreaTemplate" resultType="map">
+		SELECT id,seller_id AS sellerId,COUNT(id) AS amount FROM seller_deliver_area_template GROUP BY seller_id HAVING amount=1 ORDER BY id
+	</select>
+	
+	<update id="updateBaseProductDeliverAreaType" parameterType="ProductBaseEntity">
+		update product_base set deliver_area_type=#{deliverAreaType},deliver_area_desc=#{deliverAreaDesc},`seller_deliver_area_template_id`=#{sellerDeliverAreaTemplateId} where id=#{id}
+	</update>
+	
+	<select id="findAllSonNumber" resultType="string">
+		SELECT
+			son_number
+		FROM
+			hb_order_record
+		WHERE
+			<![CDATA[create_time > #{time} AND create_time<='2015-12-17 11:00:00']]>
+		GROUP BY
+			son_number
+		HAVING
+			<![CDATA[COUNT(son_number) > 1]]>
+		ORDER BY id desc
+	</select>
+	
+	<select id="findAllHBOrderNumber" parameterType="string" resultType="map">
+		select * from hb_order_record where son_number=#{sonNumber}
+	</select>
+
+	<select id="findSuccessOrderInfo" resultType="map">
+		SELECT
+			id,account_id,real_price
+		FROM
+			`order` o
+		where
+			status = 4
+			and real_price>0
+			and not exists (select 1 from account_success_order_record where order_id=o.id)
+		limit 3500
+	</select>
+
+	<insert id="addAccountSuccessOrderRecord" parameterType="AccountSuccessOrderRecordEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO account_success_order_record(account_id,order_id,real_price,total_real_price,operate_type)
+		VALUES(#{accountId},#{orderId},#{realPrice},#{totalRealPrice},#{operateType})
+	</insert>
+
+	<update id="updateAccountInfoById" parameterType="map">
+		UPDATE account
+		<set>
+			<if test="level != null">`level`=#{level}, </if>
+			<if test="totalSuccessPrice != null">total_success_price=#{totalSuccessPrice}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<update id="updateSellerEdbInfo" parameterType="map">
+		UPDATE seller_edb_info SET seller_id=75 where id=1
+	</update>
+
+	<select id="countTotalSalesByProductBaseId" parameterType="int" resultType="int">
+		SELECT  SUM(pc.sell) FROM product pt,product_count pc WHERE pt.id=pc.product_id AND pt.product_base_id=#{id}
+	</select>
+	
+	<select id="findAllSelfProductBase" resultType="map">
+		SELECT pb.id, pb.`code` FROM product_base pb,seller s WHERE pb.seller_id=s.id AND s.is_self_support=1
+	</select>
+	
+	<update id="updateProductBaseProviderProductId" parameterType="map">
+		update product_base set provider_product_id=#{providerProductId} where id=#{id}
+	</update>
+
+	<update id="updateRefundFinancialAffairsCardId" parameterType="map">
+		UPDATE order_product_refund SET financial_affairs_card_id=#{financialAffairsCardId} WHERE id=#{id}
+	</update>
+	
+	<select id="findIdCardByAccountId" parameterType="int" resultType="string">
+		SELECT id_card FROM receive_address  WHERE account_id=#{accountId} ORDER BY id LIMIT 1
+	</select>
+	
+	<update id="updateAccountBirthDay" parameterType="map">
+		UPDATE account SET birthday=#{birthDay} WHERE id=#{id}
+	</update>
+
+	<update id="updateAccountSecret" parameterType="map">
+		UPDATE account SET secret_key=#{secretKey} WHERE id=#{id}
+	</update>
+	
+	<select id="findOrderRefundTimeByOrderId" parameterType="int" resultType="string">
+		SELECT create_time from order_product_refund WHERE order_id=#{orderId} LIMIT 1
+	</select>
+	
+	<update id="updateAccountPetname" parameterType="map">
+		UPDATE account SET petname=#{petname} WHERE id=#{id}
+	</update>
+	
+	<select id="findOrderRefundExplain" parameterType="string" resultType="map">
+		SELECT `order`.number,order_product_refund.`explain`  from `order`,order_product_refund WHERE `order`.id=order_product_refund.order_id and <![CDATA[order_product_refund.`create_time`>#{date}]]>		
+	</select>
+	
+	<select id="findSellerOrderInfo" parameterType="map" resultType="map">
+		SELECT
+			s.id AS sellerId,
+			s.seller_type as sellerType,
+			s.bonded_number_type AS bondedType,
+			o.id AS orderId,
+			o.send_time AS sendTime,
+			ol.channel,
+			ol.number
+		FROM
+			seller s,
+			`order` o,
+			order_logistics ol
+		WHERE
+			o.seller_id = s.id
+		AND ol.order_id = o.id
+		<![CDATA[AND o.send_time>=#{sendTime}]]>
+		ORDER BY o.id		
+	</select>
+	
+	<select id="findLogisticsTime" parameterType="map" resultType="map">
+		SELECT create_time FROM logistics_detail WHERE logistics_number=#{number} AND logistics_channel=#{channel} ORDER BY id LIMIT 1
+	</select>
+	
+	<insert id="insertLogisticsTimeout" parameterType="map">
+		INSERT INTO logistics_timeout (
+			seller_id,
+			order_id,
+			send_time,
+			expire_time,
+			logistics_time,
+			logistics_number,
+			logistics_company,
+			is_timeout,
+			create_time
+		)
+		VALUES(
+			#{sellerId},
+			#{orderId},
+			#{sendTime},
+			#{expireTime},
+			#{logisticsTime},
+			#{number},
+			#{channel},
+			#{isTimeout},
+			now()
+		)
+	</insert>
+	
+	<select id="findSendTimeoutComplain" parameterType="int" resultType="int">
+		SELECT id FROM order_timeout_complain_result WHERE order_id=#{orderId}
+	</select>
+	
+	<select id="findOrderProductComment" resultType="map">
+		SELECT id,content FROM order_product_comment WHERE <![CDATA[create_time>='2016-02-15 00:00:00' and content<>'' ]]>ORDER BY id DESC
+	</select>
+	
+	<select id="updateOrderProductComment" parameterType="map">
+		UPDATE order_product_comment SET content = #{content} WHERE id=#{id}
+	</select>
+	
+	<select id="findLogisticsTimeout" parameterType="map" resultType="map">
+		select o.id as orderId,o.type as orderType from logistics_timeout lt,`order` o where lt.order_id=o.id and lt.order_type=#{orderType}
+		order by lt.id limit #{start},#{max}
+	</select>
+	
+	<update id="updateLogisticsTimeout" parameterType="map">
+		update logistics_timeout set is_timeout=#{isTimeout} where order_id=#{orderId}
+	</update>
+	
+	<select id="findOrderLogisticsTimeoutOrders" parameterType="map" resultType="map">
+		SELECT
+			lt.order_id AS orderId,
+			lt.expire_time AS expireTime,
+			lt.logistics_time AS logisticsTime
+		FROM
+			logistics_timeout lt
+		WHERE 
+			lt.is_timeout=#{isTimeout}
+		ORDER BY lt.id limit #{start},#{max}
+	</select>
+	
+	<select id="findProductSumStockByPidAndType" parameterType="map" resultType="int">
+		SELECT
+			SUM(pc.stock)
+		FROM
+			product pt,
+			product_count pc
+		WHERE
+			pt.id = pc.product_id
+		AND pt.type =#{productType}
+		AND pt.product_base_id=#{productBaseId}
+	</select>
+
+	<select id="findMaxCreateTimeGroupByAccountId" resultType="map">
+		SELECT
+			t.accountId
+		FROM
+		(
+			SELECT
+				account_id AS accountId,
+				max(pay_time) AS payTime
+			FROM
+				`order` o
+			WHERE
+				o.type = 1
+			AND o.app_channel != 29
+			AND o.`status` IN (2, 3, 4)
+			GROUP BY account_id
+			LIMIT ${start},${max}
+		) t
+		WHERE
+			<![CDATA[TIMESTAMPDIFF(DAY, t.payTime, now()) > #{minDay}]]>
+		AND <![CDATA[TIMESTAMPDIFF(DAY, t.payTime, now()) <= #{maxDay}]]>
+	</select>
+
+	<select id="findAccountIdAndTimesByaids" parameterType="list" resultType="map">
+		SELECT
+			o.account_id AS oaccountid,
+			act.type,
+			act.total_success_price AS  totalPrice
+		FROM
+			`order` o,
+			account act
+		WHERE
+		 o.account_id = act.id
+		AND o.type = 1
+		AND o.app_channel != 29
+		AND o.`status` in(2,3,4)
+		AND act.id IN<foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+		AND act.type in(1,2,3,4,5)
+	</select>
+
+	<select id="findProductBaseBySellerIds" parameterType="list" resultMap="ProductBaseMap">
+		SELECT * FROM product_base WHERE seller_id in <foreach collection="list" index="index" item="item" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+
+	<select id="findProductBaseMobileDetailsByProductId" parameterType="int" resultMap="ProductBaseMobileDetailMap">
+		SELECT * FROM product_base_mobile_detail where product_id=#{productId} ORDER BY `order` DESC
+	</select>
+
+	<select id="findProductByProductBaseId" parameterType="int" resultMap="ProductMap">
+		SELECT * FROM product WHERE  product_base_id=#{productBaseId}
+	</select>
+
+	<select id="findProductMobileDetailByProducId" parameterType="int" resultMap="ProductMobileDetailMap">
+		SELECT * FROM product_mobile_detail WHERE product_id=#{productId}
+	</select>
+
+	<select id="findLackImageProductIds" resultType="int">
+		SELECT
+		product_id
+		FROM
+		product_mobile_detail
+		GROUP BY
+		product_id
+		HAVING
+		<![CDATA[COUNT(id) < 2]]>
+	</select>
+</mapper>  

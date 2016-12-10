@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SpecialActivityModelLayoutMapper">  
+
+	<select id="findListByParam" resultType="map" parameterType="map">
+		select id,special_activity_model_id as modelId,title,image,is_display as isDisplay,sequence
+			from special_activity_model_layout
+		where 1 = 1
+		<if test="id!=null"> and id=#{id}</if>
+		<if test="activityId!=null"> and special_activity_model_id=#{activityId}</if>
+		<if test="isDisplay!=null"> and is_display=#{isDisplay}</if>
+		order by sequence desc
+		<if test="start!=null"> limit ${start},${size}</if>
+	</select>
+	
+	<select id="countByParam" resultType="int" parameterType="map">
+		select count(id) 
+			from special_activity_model_layout 
+		where 1 = 1
+		<if test="activityId!=null"> and special_activity_model_id=#{activityId}</if>
+		<if test="isDisplay!=null"> and is_display=#{isDisplay}</if>
+	</select>
+	
+	<update id="updateByParam" parameterType="map">
+		update special_activity_model_layout
+		<set>
+			<if test="title!=null"> title=#{title},</if>
+			<if test="image!=null"> image=#{image},</if>
+			<if test="imageWidth!=null"> image_width=#{imageWidth},</if>
+			<if test="imageHeight!=null"> image_height=#{imageHeight},</if>
+			<if test="isDisplay!=null"> is_display=#{isDisplay},</if>
+			<if test="sequence!=null"> sequence=#{sequence}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<insert id="save" parameterType="map" useGeneratedKeys="true">
+		insert into special_activity_model_layout(special_activity_model_id,title,image,image_width,image_height,is_display,sequence,create_time)
+		values(#{activityId},#{title},#{image},#{imageWidth},#{imageHeight},#{isDisplay},#{sequence},now())
+	</insert>
+	
+</mapper>

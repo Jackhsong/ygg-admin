@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FreightTemplateMapper">
+	<resultMap type="FreightTemplateEntity" id="FreightTemplateMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="desc" property="desc" />
+		<result column="is_available" property="isAvailable" />
+	</resultMap>
+
+<!-- 插入运费模板信息 -->
+    <insert id="save" parameterType="FreightTemplateEntity" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO freight_template(`name`,`desc`,`is_available`)
+		VALUES(#{name},#{desc},#{isAvailable})
+    </insert>
+    
+<!-- 更新运费模板信息 -->
+    <update id="update" parameterType="map">
+     	UPDATE `freight_template` 
+     	<set>
+          <if test="name != null"> name=#{name}, </if>
+          <if test="desc != null"> `desc`=#{desc}, </if>
+          <if test="isAvailable != null">is_available=#{isAvailable} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+
+<!-- 查询运费模板信息 -->
+     <select id="findAllFreightTemplateByPara" parameterType="map"  resultMap="FreightTemplateMap">
+     	SELECT * FROM `freight_template` 
+     	WHERE 1=1 
+     	<if test="id != null"> and id=#{id} </if>
+     	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+     </select>
+     
+<!-- 统计运费模板数量 -->
+     <select id="countFreightTemplateByPara" parameterType="map" resultType="int">
+    	SELECT COUNT(id) FROM freight_template WHERE 1=1 
+    	<if test="isAvailable != null">and is_available=#{isAvailable} </if>
+    </select>
+
+<!-- 插入FreightTemplate下各个省份的相关邮费数据 -->
+	<insert id="saveProvinceFreight" parameterType="map">
+		INSERT INTO relation_freight_template_and_province(`freight_template_id`,`province_id`,`freight_money`)
+		VALUES(#{templateId},#{provinceId},#{money})
+	</insert>
+
+<!-- 根据templateId查询各个省份的邮费数据 -->
+	<select id="findAllProvinceFreightByTemplateId" parameterType="int" resultType="ProvinceFreightEntity">
+		SELECT id as id ,
+		freight_template_id as freightIemplateId ,
+		province_id as provinceId ,
+		freight_money as freightMoney
+		FROM relation_freight_template_and_province
+		WHERE freight_template_id=#{templateId}
+	</select>
+
+<!-- 更新邮费数据 -->
+	<insert id="updateProvinceFreight" parameterType="map">
+		UPDATE relation_freight_template_and_province
+		SET `freight_money`=#{money} WHERE `id` in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</insert>
+
+</mapper>  

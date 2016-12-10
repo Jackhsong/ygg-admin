@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MallCountryMapper">
+
+    <insert id="create" parameterType="map" >
+        INSERT INTO mall_country (sale_flag_id,image,sequence,is_display,create_time)
+        VALUES(#{saleFlagId},#{image},#{sequence},#{isDisplay},NOW() )
+    </insert>
+
+    <select id="findAllMallCountryByPara" parameterType="map" resultType="map">
+        SELECT
+        id,
+        sale_flag_id AS saleFlagId,
+        image,
+        sequence,
+        is_display AS isDisplay
+        FROM mall_country
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test = " id != null " > AND id = #{id}</if>
+            <if test = " saleFlagId != null " > AND sale_flag_id = #{saleFlagId} </if>
+            <if test = " isDisplay != null " > AND is_display = #{isDisplay} </if>
+        </trim>
+        ORDER BY sequence DESC
+        <if test="start != null " > LIMIT #{start}, #{max}</if>
+    </select>
+
+    <select id="jsonInfo" resultType="map" parameterType="map">
+        SELECT
+            mc.id,
+            mc.sale_flag_id AS saleFlagId,
+            mc.image AS bannerImage,
+            mc.sequence,
+            mc.is_display AS isDisplay,
+            sf.id AS flagId,
+            sf.name,
+            sf.name_en AS enName,
+            sf.image AS flagImage,
+            sf.is_available AS flagIsAvailable
+        FROM  mall_country mc ,sale_flag sf
+        WHERE  mc.sale_flag_id = sf.id
+        <if test = "isDisplay != null"> AND mc.is_display = #{isDisplay}</if>
+        ORDER BY mc.sequence DESC
+        <if test="start != null " > LIMIT #{start}, #{max}</if>
+    </select>
+
+
+
+    <select id="countJsonInfo" resultType="int" parameterType="map">
+        SELECT
+          count(mc.id)
+        FROM  mall_country mc ,sale_flag sf
+        WHERE  mc.sale_flag_id = sf.id
+        <if test = "isDisplay != null"> AND mc.is_display = #{isDisplay}</if>
+        ORDER BY mc.sequence DESC
+    </select>
+
+    <select id="countCountryBrandNum" parameterType="int" resultType="int">
+        select count(id) from mall_country_brand where mall_country_id = #{id}
+    </select>
+
+    <update id="update" parameterType="map">
+        UPDATE mall_country
+        <set>
+            <if test=" saleFlagId!= null"> sale_flag_id = #{saleFlagId} ,</if>
+            <if test=" image != null"> image = #{image} ,</if>
+            <if test=" sequence != null "> sequence = #{sequence},</if>
+            <if test=" isDisplay != null "> is_display = #{isDisplay} </if>
+        </set>
+        WHERE id IN
+        <foreach collection="idList" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM mall_country WHERE id = #{id} LIMIT 1
+    </delete>
+
+
+
+</mapper>

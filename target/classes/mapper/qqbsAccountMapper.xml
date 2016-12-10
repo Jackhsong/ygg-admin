@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QqbsAccountMapper">
+	<resultMap type="QqbsAccountEntity" id="qqbsAccountResultMap">
+		<id column="id" property="id" />
+		<result column="account_id" property="accountId" />
+		<result column="open_id" property="openId" />
+		<result column="union_id" property="unionId" />
+		<result column="father_account_id" property="fatherAccountId" />
+		<result column="image" property="image" />
+		<result column="nickname" property="nickName" />
+		<result column="spokes_person" property="spokesPerson" />
+		<result column="subscribe" property="subscribe" />
+		<result column="create_time" property="createTime" />
+		<result column="has_persistent_qrcode" property="hasPersistentQRCode" />
+	</resultMap>
+	<sql id="AccountQuery">
+		id as id,
+		account_id as accountId ,
+		open_id as openId,
+		union_id as unionId,
+		father_account_id as fatherAccountId,
+		image as
+		image,
+		nickname as nickName,
+		subscribe as subscribe,
+		spokes_person as
+		spokesPerson,
+		has_persistent_qrcode as hasPersistentQRCode,
+		create_time as createTime,
+		update_time as updateTime
+	</sql>
+	<select id="findAccountByAccountId" parameterType="int"
+		resultType="QqbsAccountEntity">
+		SELECT
+		<include refid="AccountQuery"></include>
+		FROM qqbs_account WHERE account_id=#{accountId} LIMIT 1
+	</select>
+	<update id="updateAccounSpread" parameterType="map">
+		update
+		qqbs_account set father_account_id = #{fatherAccountId} where
+		id=#{id}
+	</update>
+	<update id="addPersistentQRCodeToAccount" parameterType="QqbsAccountEntity">
+		update
+		qqbs_account set has_persistent_qrcode = #{hasPersistentQRCode} where
+		id=#{id}
+	</update>
+	<select id="findAccountsByQqbsUserQueryCriteria" parameterType="QqbsAccountEntity"
+		resultMap="qqbsAccountResultMap">
+		SELECT
+		<include refid="AccountQuery"></include>
+		FROM qqbs_account
+		<where>
+			<if test="nickName!= null">
+				nickname like CONCAT('%',#{nickName},'%')
+			</if>
+			<if test="accountId != 0">
+				AND account_Id =#{accountId}
+			</if>
+		</where>
+		<if test="start != null">
+			LIMIT #{start},#{max}
+		</if>
+	</select>
+	<!-- 查询账号数量 -->
+	<select id="countQqbsAccountByQqbsUserQueryCriteria"
+		parameterType="QqbsAccountEntity" resultType="int">
+		SELECT count(id) FROM qqbs_account
+		<where>
+			<if test="nickName!= null">
+				nickname like CONCAT('%',#{nickName},'%')
+			</if>
+			<if test="accountId != 0">
+				AND account_Id =#{accountId}
+			</if>
+		</where>
+	</select>
+</mapper>  

@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="OverseasOrderMapper">
+
+<!-- 查询所有可以导出的海外购订单信息 -->
+	<select id="findAll" parameterType="map" resultType="map">
+		SELECT 
+			o.id as oId,
+			o.number as oNumber,
+			o.create_time as createTime,
+			o.pay_time as payTime,
+			o.pay_channel as payChannel,
+			o.total_price+o.adjust_price as totalPrice,
+			o.type as orderType,
+			p.`code`,
+			op.product_id as productId,
+			op.product_count + op.adjust_count as productCount,
+			op.sales_price as realSalesPrice,
+			op.product_count + op.adjust_count as realProductCount,
+			opi.export_name as exportName,
+			opi.export_price as exportPrice,
+			ora.id as addressId,
+			ora.full_name as fullName,
+			ora.mobile_number as mobileNumber,
+			ora.id_card as idCard,
+			ora.detail_address as detailAddress,
+			ora.province,
+			ora.city,
+			ora.district,
+			s.id as sellerId,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			s.warehouse as warehouse,
+			a.name as accountName
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s, 
+			order_product op,
+			product p,
+			overseas_product_info opi,
+			account a
+		WHERE 
+			o.seller_id=s.id
+			and o.check_status=2
+			and o.is_freeze!=1
+			and o.id=op.order_id 
+			and (op.product_count + op.adjust_count) > 0
+			<![CDATA[and o.pay_time <= #{lastDate}]]>
+			and op.product_id=p.id
+			and p.`code`= opi.`code`
+			and o.account_id = a.id
+			and s.real_seller_name = opi.seller_name
+			and opi.status=1
+			and o.receive_address_id=ora.id 
+			and o.status=2
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) 
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+		ORDER BY o.create_time
+	</select>
+
+	<select id="findAllByNumberList" parameterType="list" resultType="map">
+		SELECT
+			o.id as oId,
+			o.number as oNumber,
+			o.create_time as createTime,
+			o.pay_time as payTime,
+			o.pay_channel as payChannel,
+			o.total_price+o.adjust_price as totalPrice,
+			p.`code`,
+			p.seller_product_name AS sellerProductName,
+			op.product_id as productId,
+			op.product_count + op.adjust_count as productCount,
+			op.sales_price as realSalesPrice,
+			op.product_count + op.adjust_count as realProductCount,
+			ora.id as addressId,
+			ora.full_name as fullName,
+			ora.mobile_number as mobileNumber,
+			ora.id_card as idCard,
+			ora.detail_address as detailAddress,
+			ora.province,
+			ora.city,
+			ora.district,
+			s.id as sellerId,
+			s.real_seller_name as sellerName,
+			s.send_address as sendAddress,
+			s.warehouse as warehouse,
+			a.name as accountName
+		FROM
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			order_product op,
+			product p,
+			account a
+		WHERE
+			o.seller_id=s.id
+			and o.id=op.order_id
+			and op.product_id=p.id
+			and o.account_id = a.id
+			and o.receive_address_id=ora.id
+			and o.status=2
+			and o.`number` IN
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+	
+<!-- 查询没有设置导出价格和导出名称的订单信息  -->
+	<select id="findAllWithOutExportInfo" resultType="map">
+		SELECT 
+			p.`code` as pCode,
+			p.`name` as pName,
+			o.`number` as oNumber,
+			s.`real_seller_name` as sellerName,
+			s.`send_address` as sendAddress,
+			s.warehouse as warehouse 
+		FROM 
+			`order` o,
+			`seller` s,
+			`order_product` op,
+			`product` p
+		WHERE 
+			o.`seller_id`=s.id 
+			and o.`id`=op.order_id 
+			and op.`product_id`=p.id
+			and o.`status`=2
+			and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) 
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+			and NOT EXISTS (select 1 from overseas_product_info where `code` = p.`code` and `seller_name` = s.`real_seller_name` and `status` = 1)
+		GROUP BY p.`code`,s.`real_seller_name`
+	</select>
+	
+<!-- 根据身份证号&商家ID查询海外购导单记录 -->
+	<select id="findOverseasBuyerRecordByIdCard" parameterType="map" resultType="map">
+		SELECT 
+			id,
+			export_time AS exportTime,
+			id_card AS idCard,
+			price,
+			seller_id AS sellerId,
+			order_id AS orderId
+		FROM 
+			overseas_buyer_record 
+		WHERE 
+			1=1
+		<if test="idCard != null"> AND id_card=#{idCard} </if>
+		<if test="sellerId != null"> AND seller_id=#{sellerId} </if>
+		<if test="exportTime != null"> AND export_time=#{exportTime} </if>
+		<if test="orderId != null"> AND order_id=#{orderId} </if>
+	</select>
+	
+	<delete id="deleteOverseasBuyerRecord">
+		delete from overseas_buyer_record
+	</delete>
+	
+<!-- 插入用户海外购导单记录 -->
+    <insert id="insertOverseasBuyerRecord" parameterType="map">
+    	INSERT INTO overseas_buyer_record (`export_time`,`id_card`,`seller_id`,`price`,`order_id`) 
+     	VALUES (#{exportTime},#{idCard},#{sellerId},#{price},#{orderId})
+    </insert>
+     
+<!-- 根据para查询真实姓名与身份证号映射信息 -->
+    <select id="findAllIdcardRealnameMapping" parameterType="map" resultType="map">
+    	SELECT 
+    		id ,
+    		id_card as idCard ,
+    		old_name as oldName ,
+    		real_name as realName ,
+    		order_number as orderNumber ,
+    		seller_name as sellerName ,
+    		send_address as sendAddress ,
+			source,
+    		status,
+			update_time as updateTime
+    	FROM 
+    		idcard_realname_mapping
+    	WHERE 
+    		1=1 
+    	<if test="idCard != null"> AND id_card=#{idCard} </if>
+    	<if test="oldName != null"> AND old_name like #{oldName} </if>
+    	<if test="realName != null"> AND real_name like #{realName} </if>
+    	<if test="status != null"> AND status=#{status} </if>
+    	<if test="source != null"> AND source=#{source} </if>
+		<if test="startTimeBegin != null"><![CDATA[AND update_time>=#{startTimeBegin}]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND update_time<#{startTimeEnd}]]></if>
+    	ORDER BY status , id DESC
+    	<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+<!-- 根据para  count  真实姓名与身份证号映射信息  总数 -->    
+    <select id="countAllIdcardRealnameMapping" parameterType="map" resultType="int">
+    	SELECT 
+    		count(id)
+    	FROM 
+    		idcard_realname_mapping
+    	WHERE 
+    		1=1 
+    	<if test="idCard != null"> AND id_card=#{idCard} </if>
+    	<if test="oldName != null"> AND old_name like #{oldName} </if>
+    	<if test="realName != null"> AND real_name like #{realName} </if>
+    	<if test="status != null"> AND status=#{status} </if>
+		<if test="source != null"> AND source=#{source} </if>
+		<if test="startTimeBegin != null"><![CDATA[AND update_time>=#{startTimeBegin}]]></if>
+		<if test="startTimeEnd != null"><![CDATA[AND update_time<#{startTimeEnd}]]></if>
+    </select>
+    
+<!-- 插入真实姓名与身份证号映射信息 -->
+    <insert id="insertIdcardRealnameMapping" parameterType="map">
+    	INSERT INTO idcard_realname_mapping (`id_card`, `old_name`,`order_number`,`seller_name`,`send_address`,`status`) 
+     	VALUES (#{idCard}, #{fullName},#{orderNumber}, #{sellerName}, #{sendAddress},#{status})
+    </insert>
+    
+<!-- 运营 手动 删除真实姓名与身份证号映射信息记录 -->
+    <delete id="deleteIdCardMapping" parameterType="int">
+    	DELETE FROM idcard_realname_mapping WHERE id=#{id}
+	</delete>
+
+<!-- 更新真实姓名与身份证号映射信息记录 -->
+	<update id="updateIdCardMapping" parameterType="map">
+     	UPDATE `idcard_realname_mapping` 
+     	<set>
+          <if test="oldName != null">old_name=#{oldName}, </if>
+          <if test="realName != null">real_name=#{realName}, </if>
+          <if test="status != null"> status=#{status} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+    
+<!-- 插入导出订单合并记录 -->
+    <insert id="insertHBOrderRecord" parameterType="map">
+    	INSERT INTO hb_order_record (`hb_number`, `son_number`) 
+     	VALUES (#{hbNumber}, #{sonNumber})
+	</insert>
+	
+<!-- 删除订单合并记录 -->
+    <delete id="deleteHBOrderRecord" parameterType="int">
+    	DELETE FROM hb_order_record WHERE id=#{id}
+	</delete>
+	
+<!-- 根据para查询导出订单合并记录信息 -->
+    <select id="findAllHBOrderRecord" parameterType="map" resultType="map">
+    	SELECT 
+    		id ,
+    		hb_number AS hbNumber,
+    		son_number AS sonNumber,
+    		create_time AS createTime
+    	FROM 
+    		hb_order_record
+    	WHERE 
+    		1=1 
+    	<if test="hbNumber != null"> AND hb_number=#{hbNumber} </if>
+    	<if test="sonNumber != null"> AND son_number like #{sonNumber} </if>
+    	<if test="createTimeBegin != null"><![CDATA[AND create_time>=#{createTimeBegin}]]></if>
+    	<if test="createTimeEnd != null"><![CDATA[AND create_time<#{createTimeEnd}]]></if>
+    	ORDER BY create_time DESC
+    	<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+    
+<!-- 根据para count 导出订单合并记录数量 -->
+    <select id="countAllHBOrderRecord" parameterType="map" resultType="int">
+    	SELECT 
+    		count(id)
+    	FROM 
+    		hb_order_record
+    	WHERE 
+    		1=1 
+    	<if test="hbNumber != null"> AND hb_number=#{hbNumber} </if>
+    	<if test="sonNumber != null"> AND son_number like #{sonNumber} </if>
+		<if test="createTimeBegin != null"><![CDATA[AND create_time>=#{createTimeBegin}]]></if>
+		<if test="createTimeEnd != null"><![CDATA[AND create_time<#{createTimeEnd}]]></if>
+    </select>	
+     
+<!-- 插入海外购商品编码对应导单信息记录 -->
+    <insert id="insertOverseasProInfo" parameterType="map">
+    	INSERT INTO overseas_product_info (`code`, `name`,`export_name`, `export_price`, `status`,`remark`,`order_number`,`seller_name`,`send_address`) 
+     	VALUES (#{code}, #{name}, #{exportName}, #{exportPrice}, #{status}, #{remark}, #{orderNumber}, #{sellerName},#{sendAddress})
+    </insert>
+	
+<!-- 运营 手动 删除海外购商品信息表记录 -->
+    <delete id="deleteOverseasPro" parameterType="int">
+    	DELETE FROM overseas_product_info WHERE id=#{id}
+	</delete>
+	
+<!-- 程序自动删除 带添加的 海外购商品信息表记录   -->
+    <delete id="deleteOverseasProByStatusEqualsZero">
+    	DELETE FROM overseas_product_info WHERE status=0
+	</delete>
+	
+<!-- 程序自动删除 带添加的 真实姓名与身份证号映射信息   -->
+    <delete id="deleteIdcardRealnameMappingByStatusEqualsZero">
+    	DELETE FROM idcard_realname_mapping WHERE status=0
+	</delete>
+	
+<!-- 更新海外购商品信息 -->
+	<update id="updateOverseasProductInfo" parameterType="map">
+     	UPDATE `overseas_product_info` 
+     	<set>
+          <if test="name != null"> name=#{name}, </if>
+          <if test="code != null"> code=#{code}, </if>
+          <if test="exportName != null">export_name=#{exportName}, </if>
+          <if test="exportPrice != null">export_price=#{exportPrice}, </if>
+          <if test="remark != null">remark=#{remark}, </if>
+          <if test="sellerName != null">seller_name=#{sellerName}, </if>
+          <if test="sendAddress != null">send_address=#{sendAddress}, </if>
+          <if test="status != null">status=#{status} </if>
+     	</set>
+     	where id=#{id}
+     </update>
+     
+<!-- 查询商品ID对应海外购商品导出信息 的 所有记录 -->
+	<select id="findAllProductExportInfo" parameterType="map" resultType="map">
+		SELECT 
+			p.id,
+			p.`code`,
+			opi.export_name exportName,
+			opi.export_price exportPrice
+		FROM 
+			product p,overseas_product_info opi 
+		WHERE 
+			p.`code` = opi.`code`
+			<if test="id != null">AND p.id=#{id} </if>
+	</select>
+	
+<!-- 根据para查询海外购商品导出所需要的信息 -->
+    <select id="findAllOverseasProductInfo" parameterType="map" resultType="map">
+    	SELECT 
+    		id ,
+    		code ,
+    		name ,
+    		export_name as exportName ,
+    		export_price as exportPrice ,
+    		order_number as orderNumber ,
+    		seller_name as sellerName ,
+    		send_address as sendAddress ,
+    		status ,
+    		remark 
+    	FROM 
+    		overseas_product_info
+    	WHERE 
+    		1=1 
+    	<if test="code != null"> AND code=#{code} </if>
+    	<if test="sellerName != null"> AND seller_name=#{sellerName} </if>
+    	<if test="status != null"> AND status=#{status} </if>
+    	<if test="code != null"> AND code=#{code} </if>
+    	<if test="exportName != null"> AND export_name like #{exportName} </if>
+    	ORDER BY status ASC,update_time DESC
+    	<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+    
+<!-- 根据para统计海外购商品信息数量 -->
+    <select id="countAllOverseasProductInfo" parameterType="map" resultType="int">
+    	SELECT 
+    		count(id) 
+    	FROM 
+    		overseas_product_info
+    	WHERE 
+    		1=1 
+    	<if test="code != null"> AND code=#{code} </if>
+    	<if test="status != null"> AND status=#{status} </if>
+    	<if test="code != null"> AND code=#{code} </if>
+    	<if test="exportName != null"> AND export_name like #{exportName} </if>
+    </select>
+    
+<!-- 运营 手动 插入真实姓名与身份证号映射信息 -->
+    <insert id="insertIdcardRealnameMappingForYY" parameterType="map">
+    	INSERT INTO idcard_realname_mapping (`id_card`, `old_name`, `real_name`,`status`) 
+     	VALUES (#{idCard}, #{oldName}, #{realName},1)
+	</insert>
+    
+<!-- 订单 列表  已导出 -->
+    <select id="findAllOverseasOrderWithExport" parameterType="map" resultType="OverseasOrderInfoForManage">
+    	SELECT 
+			o.id AS id,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.number AS number,
+			o.`status` AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			ora.full_name AS fullName,
+			ora.mobile_number AS mobileNumber,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse,
+			ooer.export_time AS exportTime,
+			ooer.status AS exportStatus
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			overseas_order_export_record ooer,
+			account a
+		WHERE 
+			o.seller_id=s.id
+			and o.check_status=2
+			and o.account_id=a.id
+			and o.receive_address_id=ora.id 
+			and ooer.number=o.number
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+			<if test="minimumTotalPrice != null "> AND o.total_price+o.adjust_price  >= #{minimumTotalPrice}</if>
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<=#{startTimeEnd} ]]></if>
+			<if test="exportTimeBegin != null"><![CDATA[and ooer.export_time>=#{exportTimeBegin} ]]></if>
+			<if test="exportTimeEnd != null"><![CDATA[and ooer.export_time<=#{exportTimeEnd} ]]></if>
+			<if test="accountName != null"> and a.name like #{accountName} </if>
+			<if test="fullName != null"> and ora.full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> and ora.mobile_number=#{mobileNumber} </if>
+		ORDER BY o.create_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+    
+    <!-- count 订单 列表  已导出 -->
+    <select id="countAllOverseasOrderWithExport" parameterType="map" resultType="int">
+    	SELECT 
+			count(o.id)
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			overseas_order_export_record ooer,
+			account a
+		WHERE 
+			o.seller_id=s.id
+			and o.check_status=2
+			and o.account_id=a.id
+			and o.receive_address_id=ora.id 
+			and ooer.number=o.number
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+			<if test="minimumTotalPrice != null "> AND o.total_price+o.adjust_price  >= #{minimumTotalPrice}</if>
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="isVirtual != null"> AND is_virtual=#{isVirtual} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<=#{startTimeEnd} ]]></if>
+			<if test="exportTimeBegin != null"><![CDATA[and ooer.export_time>=#{exportTimeBegin} ]]></if>
+			<if test="exportTimeEnd != null"><![CDATA[and ooer.export_time<=#{exportTimeEnd} ]]></if>
+			<if test="accountName != null"> and a.name like #{accountName} </if>
+			<if test="fullName != null"> and ora.full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> and ora.mobile_number=#{mobileNumber} </if>
+    </select>
+    
+<!-- 订单 列表  未导出 or 全部 -->
+    <select id="findAllOverseasOrder" parameterType="map" resultType="OverseasOrderInfoForManage">
+    	SELECT 
+			o.id AS id,
+			o.create_time AS createTime,
+			o.pay_time AS payTime,
+			o.send_time AS sendTime,
+			o.number AS number,
+			o.`status` AS status,
+			o.total_price+o.adjust_price AS totalPrice,
+			ora.full_name AS fullName,
+			ora.mobile_number AS mobileNumber,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			s.warehouse AS warehouse
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			account a
+		WHERE 
+			o.seller_id=s.id
+			and o.check_status=2
+			and o.account_id=a.id
+			and o.receive_address_id=ora.id 
+			and o.status in (2,3,4)
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+			<if test="minimumTotalPrice != null "> AND o.total_price+o.adjust_price  >= #{minimumTotalPrice}</if>
+			<if test="notExport != null"> and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) </if>
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="isVirtual != null"> AND is_virtual=#{isVirtual} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<=#{startTimeEnd} ]]></if>
+			<if test="accountName != null"> and a.name like #{accountName} </if>
+			<if test="fullName != null"> and ora.full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> and ora.mobile_number=#{mobileNumber} </if>
+		ORDER BY o.pay_time DESC
+		<if test="start != null"> LIMIT #{start},#{max} </if>
+    </select>
+    
+    <!-- count 订单 列表  未导出 or 全部 -->
+    <select id="countAllOverseasOrder" parameterType="map" resultType="int">
+    	SELECT 
+			count(o.id)
+		FROM 
+			`order` o,
+			order_receive_address ora,
+			seller s,
+			account a
+		WHERE 
+			o.seller_id=s.id
+			and o.check_status=2
+			and o.account_id=a.id
+			and o.receive_address_id=ora.id 
+			and o.status in (2,3,4)
+			and s.id in (select id from seller where seller_type!=1 and is_birdex=0)
+			<if test="minimumTotalPrice != null "> AND o.total_price+o.adjust_price  >= #{minimumTotalPrice}</if>
+			<if test="notExport != null"> and NOT EXISTS (select 1 from overseas_order_export_record where number = o.number) </if>
+			<if test="orderNumber != null"> and o.number=#{orderNumber} </if>
+			<if test="orderStatus != null"> and o.status=#{orderStatus} </if>
+			<if test="isVirtual != null"> AND is_virtual=#{isVirtual} </if>
+			<if test="startTimeBegin != null"><![CDATA[and o.pay_time>=#{startTimeBegin} ]]></if>
+			<if test="startTimeEnd != null"><![CDATA[and o.pay_time<=#{startTimeEnd} ]]></if>
+			<if test="accountName != null"> and a.name like #{accountName} </if>
+			<if test="fullName != null"> and ora.full_name like #{fullName} </if>
+			<if test="mobileNumber != null"> and ora.mobile_number=#{mobileNumber} </if>
+    </select>
+    
+    <select id="findOverseasOrderExportRecordByNumber" parameterType="string" resultType="int">
+    	SELECT id FROM overseas_order_export_record r WHERE r.number=#{number}
+    </select>
+    
+    <insert id="insertOverseasOrderExportRecord" parameterType="map" >
+    	INSERT INTO overseas_order_export_record (`number`, `export_time`) 
+     	VALUES (#{number}, #{exportTime})
+    </insert>
+    
+    <delete id="deleteOverseasOrderExportRecord" parameterType="long" >
+    	DELETE FROM overseas_order_export_record WHERE number=#{number}
+    </delete>
+    
+    <select id="findOrderAliPay" parameterType="map" resultType="map">
+    	SELECT order_id AS orderId, pay_tid AS payTid, pay_mark as payMark FROM order_ali_pay WHERE is_pay=1 AND order_id IN
+    	<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		GROUP BY order_id
+    </select>
+    
+    <select id="findOrderUnionPay" parameterType="map" resultType="map">
+    	SELECT order_id AS orderId, pay_tid AS payTid, pay_mark as payMark FROM order_union_pay WHERE  is_pay=1 AND order_id IN
+    	<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		GROUP BY order_id
+    </select>
+    
+    <select id="findOrderWeixinPay" parameterType="map" resultType="map">
+    	SELECT order_id AS orderId, pay_tid AS payTid, pay_mark as payMark FROM order_weixin_pay WHERE  is_pay=1 AND order_id IN
+    	<foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		GROUP BY order_id
+    </select>
+
+	<insert id="addHbOrderSendRecord" parameterType="map">
+		INSERT INTO hb_order_send_record (`hb_number`,`number`,`logistics_channel`,`logistics_number`)
+     	VALUES (#{hbNumber}, #{number}, #{logisticsChannel}, #{logisticsNumber})
+	</insert>
+    
+    <select id="findOverseasOrderList" parameterType="map" resultType="map">
+		SELECT
+			id,
+			number,
+			`status`,
+			push_status AS pushStatus,
+			push_result_remark AS pushResultRemark,
+			update_time AS updateTime
+		FROM
+			overseas_order_send_record
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="number != null">AND `number`=#{number}</if>
+			<if test="logisticsStatus != null">AND `status`=#{logisticsStatus}</if>
+			<if test="pushStatus != null">AND push_status=#{pushStatus}</if>
+			<if test="pushRemark != null">AND push_result_remark like #{pushRemark}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>	
+    </select>
+    
+    <select id="countOverseasOrderList" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			overseas_order_send_record
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="number != null">AND number=#{number}</if>
+			<if test="logisticsStatus != null">AND `status`=#{logisticsStatus}</if>
+			<if test="pushStatus != null">AND push_status=#{pushStatus}</if>
+			<if test="pushRemark != null">AND push_result_remark like #{pushRemark}</if>
+		</trim>    	
+    </select>
+    
+    <select id="findAllBirdexOrderChange" parameterType="map" resultType="map">
+		SELECT
+			id,
+			number,
+			`name`,
+			mobile,
+			identity_number AS identityNumber,
+			province,
+			city,
+			district,
+			address_detail AS addressDetail,
+			deal_status AS dealStatus,
+			deal_remark AS dealRemark,
+			deal_type AS dealType
+		FROM
+			overseas_order_change_record
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="number != null">AND number=#{number}</if>
+			<if test="type != null">AND deal_type=#{type}</if>
+			<if test="status != null">AND deal_status=#{status}</if>
+		</trim>
+		ORDER BY id DESC
+		<if test="start != null">LIMIT #{start},#{max}</if>   	
+    </select>
+    
+    <select id="countBirdexOrderChange" parameterType="map" resultType="int">
+		SELECT
+			COUNT(id)
+		FROM
+			overseas_order_change_record
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="number != null">AND number=#{number}</if>
+			<if test="type != null">AND deal_type=#{type}</if>
+			<if test="status != null">AND deal_status=#{status}</if>
+		</trim>    	
+    </select>
+</mapper>  

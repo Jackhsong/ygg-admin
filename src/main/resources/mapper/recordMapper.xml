@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RecordMapper">
+
+<!--######################## begin ################ 短信内容监控记录 ################-->
+
+	<!-- 插入短信内容监控记录 -->
+	<insert id="insertSmsContentRecord" parameterType="map">
+		INSERT INTO sms_content_record (`content`, `type`, `mobile_number`, `send_time`,`service_type`) 
+     	VALUES (#{content},#{type},#{mobileNumber}, now(),#{serviceType})
+	</insert>
+	
+	<!-- 根据para查询短信内容监控记录 -->
+	<select id="findSmsContentRecordByPara" parameterType="map" resultType="map">
+	    SELECT 
+			content,
+			type,
+			mobile_number AS mobileNumber,
+			send_time AS sendTime,
+			service_type AS serviceType
+		FROM 
+			sms_content_record
+		WHERE 
+			1=1
+		<if test="type != null">AND type=#{type}</if>
+		<if test="sendTimeBegin != null"><![CDATA[and send_time>=#{sendTimeBegin} ]]></if>
+		<if test="sendTimeEnd != null"><![CDATA[and send_time<=#{sendTimeEnd} ]]></if>
+		<if test="mobileNumber != null">AND mobile_number=#{mobileNumber}</if>
+		<if test="serviceType != null">AND service_type=#{serviceType}</if>
+		ORDER BY send_time DESC
+		<if test="start != null">
+			LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}			
+		</if>
+     </select>
+     
+     <!-- 根据para  统计   短信内容监控记录  总数 -->
+	<select id="countSmsContentRecordByPara" parameterType="map" resultType="int">
+	    SELECT 
+			count(id)
+		FROM 
+			sms_content_record
+		WHERE 
+			1=1
+		<if test="type != null">AND type=#{type}</if>
+		<if test="sendTimeBegin != null"><![CDATA[and send_time>=#{sendTimeBegin} ]]></if>
+		<if test="sendTimeEnd != null"><![CDATA[and send_time<=#{sendTimeEnd} ]]></if>
+		<if test="mobileNumber != null">AND mobile_number=#{mobileNumber}</if>
+     </select>
+
+<!--################## end ################# 短信内容监控记录 ##################-->
+
+     
+</mapper>  

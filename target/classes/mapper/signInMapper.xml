@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="SignInMapper">  
+	<select id="getBeginYearMonth"  resultType="int">
+		SELECT MIN(`year_month`) FROM signin_reward;
+	</select>
+	
+	<select id="findAllSignSetting" parameterType="map" resultType="map">
+		SELECT
+			id,
+			`year_month` AS yearMonth,
+			`day` AS `day`,
+			type,
+			point,
+			coupon_id AS couponId,
+			style
+		FROM
+			signin_reward
+		WHERE `year_month`=#{yearMonth}
+		ORDER BY `day`		
+		<if test="start != null">LIMIT #{start},#{max}</if>
+	</select>
+	
+	<select id="countSignSetting" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM signin_reward WHERE `year_month`=#{yearMonth}
+	</select>
+	
+	<select id="findCurrentDayByYearMonth" parameterType="int" resultType="int">
+		SELECT MAX(`day`) FROM signin_reward WHERE `year_month`=#{yearMonth}
+	</select>
+	
+	<insert id="insert" parameterType="map">
+		INSERT INTO signin_reward(`year_month`,`day`,type,point,coupon_id,style) VALUES (#{yearMonth},#{day},#{type},#{point},#{couponId},#{style})
+	</insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE signin_reward
+		<set>
+			<if test="type != null">`type`=#{type},</if>
+			<if test="point != null">`point`=#{point},</if>
+			<if test="couponId != null">`coupon_id`=#{couponId},</if>
+			<if test="style != null">`style`=#{style}</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="map">
+		delete from signin_reward where `year_month`=#{yearMonth}
+	</delete>
+	
+	<select id="findAccountSignCount" parameterType="int" resultType="map">
+		SELECT
+			month_total_count AS times,
+			COUNT(account_id) AS total
+		FROM
+			account_signin
+		WHERE
+			`year_month` = #{currentYearMonth}
+		GROUP BY
+			month_total_count
+		ORDER BY
+			month_total_count		
+	</select>
+	
+	<select id="findAllSigninProduct" parameterType="map" resultType="map">
+		SELECT
+			sp.id,
+			sp.is_display AS isDisplay,
+			sp.sequence,
+			pt.id AS productId,
+			pt.`name` AS productName,
+			pt.`code` AS productCode,
+			pt.short_name AS shortName,
+			pt.remark,
+			pt.is_off_shelves AS isOffShelves,
+			pt.is_available AS isAvailable,
+			pt.sales_price AS salesPrice,
+			pt.start_time AS startTime,
+			pt.end_time AS endTime,
+			pt.type,
+			s.real_seller_name AS sellerName,
+			s.send_address AS sendAddress,
+			pc.stock
+		FROM
+			signin_product sp,
+			product pt,
+			seller s,
+			product_count pc
+		WHERE
+			sp.product_id = pt.id
+		AND pt.seller_id = s.id
+		AND pt.id = pc.product_id
+		<if test="productId != null">AND pt.id=#{productId}</if>	
+		<if test="productCode != null">AND pt.`code`=#{productCode}</if>	
+		<if test="productName != null">AND pt.`name`=#{productName}</if>	
+		<if test="isDisplay != null">AND sp.is_display=#{isDisplay}</if>
+		ORDER BY sp.sequence DESC
+		<if test="start != null">limit #{start},#{max}</if>
+	</select>
+	
+	<select id="countSigninProduct" parameterType="map" resultType="int">
+		SELECT
+			COUNT(sp.id)
+		FROM
+			signin_product sp,
+			product pt,
+			seller s
+		WHERE
+			sp.product_id = pt.id
+		AND pt.seller_id = s.id
+		<if test="productId != null">AND pt.id=#{productId}</if>	
+		<if test="productCode != null">AND pt.`code`=#{productCode}</if>	
+		<if test="productName != null">AND pt.`name`=#{productName}</if>	
+		<if test="isDisplay != null">AND sp.is_display=#{isDisplay}</if>		
+	</select>
+	
+	<insert id="addSigninProduct" parameterType="map">
+		INSERT INTO signin_product(product_id,sequence) VALUES(#{productId},#{sequence})
+	</insert>
+	
+	<delete id="deleteSigninProduct" parameterType="list">
+		delete from signin_product where id in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<update id="updateSigninProductDisplayStatus" parameterType="map">
+		update signin_product set is_display=#{isDisplay} where id in
+		<foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateSigninProductSequence" parameterType="map">
+		update signin_product set sequence = #{sequence} where id=#{id}
+	</update>
+</mapper>  

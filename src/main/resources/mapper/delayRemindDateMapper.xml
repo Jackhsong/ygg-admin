@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="DelayRemindDateMapper">
+	<delete id="delete" parameterType="map">
+		DELETE from overseas_delay_remind_date
+		where id in
+		<foreach item="item" index="index" collection="idList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<insert id="save" parameterType="map">
+		INSERT into overseas_delay_remind_date(`day`, start_hour, end_hour) VALUES(#{day}, #{startHour}, #{endHour})
+	</insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE overseas_delay_remind_date 
+		SET 
+		<if test="day != null ">`day`=#{day},</if>
+		<if test="startHour != null">start_hour=#{startHour},</if>
+		<if test="endHour !=  null">end_hour=#{endHour}</if>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="findOverseasDelayDateInfo" resultType="map">
+		select 
+			id, 
+			`day`, 
+			start_hour as startHour, 
+			end_hour as endHour, 
+			create_time as createTime 
+		from overseas_delay_remind_date
+		ORDER BY `day` 
+     	LIMIT #{start,jdbcType=INTEGER},#{max,jdbcType=INTEGER}
+	</select>
+	
+	<select id="countOverseasDelayDateInfo" resultType="int">
+		select 
+			count(id)
+		from overseas_delay_remind_date
+	</select>
+	
+	<delete id="deleteByYear" parameterType="string">
+		<![CDATA[
+			DELETE FROM overseas_delay_remind_date where left(`day`,4) <=#{year}
+		]]>
+	</delete>
+	
+	<select id="findDelayDateByDay" parameterType="string" resultType="OverseasDelayRemindDateEntity">
+		SELECT 
+			id, 
+			`day`, 
+			start_hour as startHour, 
+			end_hour as endHour, 
+			create_time as createTime 
+		FROM overseas_delay_remind_date
+		where `day`=#{day}
+	</select>
+	
+	<select id="isExist" parameterType="map" resultType="int">
+		select 
+			count(id)
+		from overseas_delay_remind_date
+		WHERE `day`=${day}
+		<if test="id != null">and id!=${id}</if>
+	</select>
+	
+</mapper>

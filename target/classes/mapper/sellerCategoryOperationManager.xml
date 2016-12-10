@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SellerCategoryOperationManager">
+        <insert id="save" parameterType="map">
+                INSERT INTO seller_category_operation_manager
+                    (`category_first_id`,`name`,`qq_number`,`mobile_number`,`is_available`)
+                VALUES( #{categoryFirstId},#{name},#{qqNumber},#{mobileNumber},#{isAvailable})
+        </insert>
+
+        <update id="update" parameterType="map">
+                UPDATE seller_category_operation_manager
+                <trim prefix="SET" suffixOverrides=",">
+                        <if test="categoryFirstId != null">category_first_id=#{categoryFirstId},</if>
+                        <if test="name != null">name=#{name},</if>
+                        <if test="qqNumber != null">qq_number=#{qqNumber},</if>
+                        <if test="mobileNumber != null">mobile_number=#{mobileNumber},</if>
+                        <if test="isAvailable != null">is_available=#{isAvailable},</if>
+                </trim>
+                WHERE id in
+                <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+        </update>
+
+        <select id="findByPara" parameterType="map" resultType="map">
+              SELECT
+                id,
+                category_first_id AS categoryFirstId,
+                name,
+                qq_number AS qqNumber,
+                mobile_number AS mobileNumber,
+                is_available AS isAvailable
+              FROM seller_category_operation_manager
+                <trim prefix="WHERE" prefixOverrides="AND">
+                        <if test="id != null">AND id=#{id}</if>
+                        <if test="idList != null">AND id in
+                            <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+                        </if>
+                        <if test="name != null">AND name LIKE CONCAT('%', #{name}, '%')</if>
+                        <if test="qqNumber != null">AND qq_number = #{qqNumber}</if>
+                        <if test="mobileNumber != null">AND mobile_number = #{mobileNumber} </if>
+                        <if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+                        <if test="categoryFirstId != null">AND category_first_id = #{categoryFirstId}</if>
+                        <if test="categoryFirstIdList != null">AND category_first_id IN
+                            <foreach collection="categoryFirstIdList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+                        </if>
+                </trim>
+        </select>
+
+        <select id="countByPara" parameterType="map" resultType="int">
+            SELECT
+            count(1)
+            FROM seller_category_operation_manager
+            <trim prefix="WHERE" prefixOverrides="AND">
+                <if test="id != null">AND id=#{id}</if>
+                <if test="idList != null">AND id in
+                    <foreach collection="idList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+                </if>
+                <if test="name != null">AND name LIKE CONCAT('%', #{name}, '%')</if>
+                <if test="qqNumber != null">AND qq_number = #{qqNumber}</if>
+                <if test="mobileNumber != null">AND mobile_number = #{mobileNumber} </if>
+                <if test="isAvailable != null">AND is_available = #{isAvailable}</if>
+                <if test="categoryFirstId != null">AND category_first_id = #{categoryFirstId}</if>
+                <if test="categoryFirstIdList != null">AND category_first_id IN
+                    <foreach collection="categoryFirstIdList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+                </if>
+            </trim>
+        </select>
+
+</mapper>  
